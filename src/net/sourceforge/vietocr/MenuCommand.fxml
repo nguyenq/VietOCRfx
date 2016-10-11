@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.input.KeyCodeCombination?>
+
+<Menu text="_Command" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.MenuCommandController">
+    <items>
+        <MenuItem fx:id="miOCR" onAction="#handleAction" text="_OCR">
+            <accelerator>
+                <KeyCodeCombination alt="UP" code="D" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator>
+        </MenuItem>
+        <MenuItem fx:id="miOCRAll" onAction="#handleAction" text="OCR _All Pages" />
+        <SeparatorMenuItem />
+        <MenuItem fx:id="miBulkOCR" onAction="#handleAction" text="_Bulk OCR..." />
+        <SeparatorMenuItem />
+        <MenuItem fx:id="miPostProcess" onAction="#handleAction" text="_Post-process">
+            <accelerator>
+                <KeyCodeCombination alt="UP" code="P" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator>
+        </MenuItem>
+    </items>
+</Menu>

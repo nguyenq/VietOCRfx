@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.input.KeyCodeCombination?>
+
+<Menu text="F_ormat" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.MenuFormatController">
+    <items>
+        <CheckMenuItem fx:id="chmiWordWrap" onAction="#handleAction" text="_Word Wrap" />
+        <MenuItem fx:id="miFont" onAction="#handleAction" text="_Font...">
+            <accelerator>
+                <KeyCodeCombination alt="UP" code="T" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator>
+        </MenuItem>
+        <SeparatorMenuItem />
+        <MenuItem fx:id="miChangeCase" onAction="#handleAction" text="_Change Case..." />
+        <MenuItem fx:id="miRemoveLineBreaks" onAction="#handleAction" text="_Remove Line Breaks">
+            <accelerator>
+                <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator>
+        </MenuItem>
+    </items>
+</Menu>

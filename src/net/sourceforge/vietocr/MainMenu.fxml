@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.input.*?>
+
+<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.MainMenuController">
+    <menus>
+        <fx:include fx:id="menuFile" source="MenuFile.fxml" />
+        <fx:include fx:id="menuCommand" source="MenuCommand.fxml" />
+        <fx:include fx:id="menuImage" source="MenuImage.fxml" />
+        <fx:include fx:id="menuFormat" source="MenuFormat.fxml" />
+        <fx:include fx:id="menuSettings" source="MenuSettings.fxml" />
+        <fx:include fx:id="menuTools" source="MenuTools.fxml" />
+        <fx:include fx:id="menuHelp" source="MenuHelp.fxml" />
+    </menus>
+</MenuBar>

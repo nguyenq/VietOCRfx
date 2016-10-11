@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="155.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.ChangeCaseDialogController">
+   <children>
+      <VBox spacing="12.0">
+         <children>
+            <RadioButton fx:id="rbS" mnemonicParsing="false" text="Sentence case">
+               <toggleGroup>
+                  <ToggleGroup fx:id="radioGroup" />
+               </toggleGroup></RadioButton>
+            <RadioButton fx:id="rbL" mnemonicParsing="false" text="lower case" toggleGroup="$radioGroup" />
+            <RadioButton fx:id="rbU" mnemonicParsing="false" text="UPPER CASE" toggleGroup="$radioGroup" />
+            <RadioButton fx:id="rbT" mnemonicParsing="false" text="Title Case" toggleGroup="$radioGroup" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
+      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="5.0">
+         <children>
+            <Button fx:id="btnChange" defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleAction" text="Change" />
+            <Button fx:id="btnClose" cancelButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleAction" text="Close" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
+   </children>
+</HBox>

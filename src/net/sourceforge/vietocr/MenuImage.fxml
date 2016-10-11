@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.input.KeyCodeCombination?>
+
+<Menu text="_Image" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.MenuImageController">
+    <items>
+        <MenuItem fx:id="miMetadata" onAction="#handleAction" text="_Properties..." />
+        <SeparatorMenuItem />
+        <Menu fx:id="mnFilter" text="_Filters">
+            <items>
+                <MenuItem fx:id="miBrightness" onAction="#handleAction" text="_Brightness..." />
+                <MenuItem fx:id="miContrast" onAction="#handleAction" text="_Contrast..." /> 
+                <MenuItem fx:id="miGrayscale" onAction="#handleAction" text="_Grayscale" />
+                <MenuItem fx:id="miMonochrome" onAction="#handleAction" text="_Monochrome" />
+                <MenuItem fx:id="miInvert" onAction="#handleAction" text="_Invert" />
+                <MenuItem fx:id="miSharpen" onAction="#handleAction" text="_Sharpen" />
+                <MenuItem fx:id="miSmooth" onAction="#handleAction" text="Sm_ooth" />
+            </items>
+        </Menu>
+        <MenuItem fx:id="miDeskew" onAction="#handleAction" text="_Deskew">
+            <accelerator>
+                <KeyCodeCombination alt="UP" code="D" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+            </accelerator>
+        </MenuItem>
+        <MenuItem fx:id="miAutocrop" onAction="#handleAction" text="Auto _Crop">
+            <accelerator>
+                <KeyCodeCombination alt="UP" code="X" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+            </accelerator>
+        </MenuItem>
+        <SeparatorMenuItem />
+        <MenuItem fx:id="miUndo" onAction="#handleAction" text="_Undo">
+            <accelerator>
+                <KeyCodeCombination alt="UP" code="Z" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+            </accelerator>
+        </MenuItem>
+        <SeparatorMenuItem />
+      <CheckMenuItem fx:id="chmiScreenshotMode" onAction="#handleAction" text="_Screenshot" />
+        <SeparatorMenuItem />
+      <CheckMenuItem fx:id="chmiSegmentedRegions" onAction="#handleAction" text="Segmented _Regions" />              
+    </items>
+</Menu>
