@@ -1,6 +1,6 @@
 ## VietOCRfx
 
-A JavaFX GUI frontend for Tesseract OCR engine. Supports optical character recognition for Vietnamese and other languages supported by Tesseract.
+A JavaFX GUI frontend prototype for Tesseract OCR engine. Supports optical character recognition for Vietnamese and other languages supported by Tesseract.
 
 VietOCR is released and distributed under the [Apache License, v2.0](http://www.apache.org/licenses/LICENSE-2.0).
 

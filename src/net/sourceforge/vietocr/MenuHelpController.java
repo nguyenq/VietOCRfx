@@ -141,6 +141,7 @@ public class MenuHelpController implements Initializable {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
                 String msg = VietOCR.APP_NAME + " " + version + " \u00a9 2007\n"
 //                        + bundle.getString("program_desc") + "\n"
+                        + String.format("JavaFX GUI Frontend for Tesseract %s OCR Engine", config.getProperty("TessVersion")) + "\n"
                         + releaseDate.format(formatter)
                         + "\nhttp://vietocr.sourceforge.net";
                 new Alert(Alert.AlertType.INFORMATION, msg).show();
