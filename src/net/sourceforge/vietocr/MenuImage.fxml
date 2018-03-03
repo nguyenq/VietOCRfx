@@ -6,7 +6,7 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.input.KeyCodeCombination?>
 
-<Menu text="_Image" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.MenuImageController">
+<Menu text="_Image" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.MenuImageController">
     <items>
         <MenuItem fx:id="miMetadata" onAction="#handleAction" text="_Properties..." />
         <SeparatorMenuItem />
@@ -31,6 +31,30 @@
                 <KeyCodeCombination alt="UP" code="X" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
             </accelerator>
         </MenuItem>
+      <MenuItem fx:id="miCrop" mnemonicParsing="false" onAction="#handleAction" text="Crop">
+         <accelerator>
+            <KeyCodeCombination alt="UP" code="P" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+         </accelerator>
+      </MenuItem>
+      <MenuItem fx:id="miRemoveLines" mnemonicParsing="false" onAction="#handleAction" text="Remove Lines">
+         <accelerator>
+            <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+         </accelerator>
+      </MenuItem>
+      <Menu fx:id="menuRemoveSpeckles" mnemonicParsing="false" text="Remove Speckles">
+        <items>
+          <MenuItem fx:id="mi2x2" mnemonicParsing="false" onAction="#handleAction" text="Up to 2x2">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="DIGIT2" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+               </accelerator>
+            </MenuItem>
+            <MenuItem fx:id="mi3x3" mnemonicParsing="false" onAction="#handleAction" text="Up to 3x3">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="DIGIT3" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
+               </accelerator>
+            </MenuItem>
+        </items>
+      </Menu>
         <SeparatorMenuItem />
         <MenuItem fx:id="miUndo" onAction="#handleAction" text="_Undo">
             <accelerator>

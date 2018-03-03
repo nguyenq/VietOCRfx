@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane prefHeight="200.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.OptionsDialogController">
+<BorderPane prefHeight="200.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.OptionsDialogController">
     <center>
         <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
@@ -60,8 +60,9 @@
                         <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
                         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <ChoiceBox prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <CheckBox mnemonicParsing="false" text="Enable" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <ChoiceBox fx:id="cbOutputFormat" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="chbEnable" mnemonicParsing="false" text="Enable" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="chbDeskew" mnemonicParsing="false" text="Deskew" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                      </children>
                      <padding>
                         <Insets top="5.0" />

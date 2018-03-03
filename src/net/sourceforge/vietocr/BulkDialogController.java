@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 public class BulkDialogController implements Initializable {
@@ -28,13 +28,17 @@ public class BulkDialogController implements Initializable {
     private Button btnRun;
     @FXML
     private Button btnCancel;
+    @FXML
+    private ComboBox cbOutputFormat;
+    @FXML
+    private CheckBox chbDeskew;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        cbOutputFormat.getItems().addAll("Text", "HTML", "PDF");
     }
 
     @FXML

@@ -56,6 +56,12 @@ public class MenuImageController implements Initializable {
     @FXML
     private MenuItem miAutocrop;
     @FXML
+    private MenuItem miCrop;
+    @FXML
+    private MenuItem mi2x2;
+    @FXML
+    private MenuItem mi3x3;
+    @FXML
     private MenuItem miBrightness;
     @FXML
     private MenuItem miContrast;
@@ -144,6 +150,12 @@ public class MenuImageController implements Initializable {
             }
 
             menuBar.getScene().setCursor(Cursor.DEFAULT);
+        } else if (event.getSource() == miCrop) {
+            
+        } else if (event.getSource() == mi2x2) {
+            
+        } else if (event.getSource() == mi3x3) {
+            
         } else if (event.getSource() == miBrightness) {
 
         } else if (event.getSource() == miContrast) {
