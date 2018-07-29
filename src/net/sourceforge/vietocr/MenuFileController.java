@@ -23,6 +23,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class MenuFileController implements Initializable {
 
@@ -64,7 +66,8 @@ public class MenuFileController implements Initializable {
         } else if (event.getSource() == miScan) {
 
         } else if (event.getSource() == miExit) {
-            GuiController.getInstance().quit();
+            Stage stage = (Stage) menuBar.getScene().getWindow();
+            stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
         }
     }
 

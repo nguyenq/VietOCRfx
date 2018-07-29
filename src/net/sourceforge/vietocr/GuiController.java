@@ -324,7 +324,8 @@ public class GuiController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, VietOCR.APP_NAME, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         alert.setTitle(VietOCR.APP_NAME);
         alert.setHeaderText(null);
-        alert.setContentText(bundle.getString("Do_you_want_to_save_the_changes_to_") + "?");
+        alert.setContentText(bundle.getString("Do_you_want_to_save_the_changes_to_")
+                + (textFile == null ? bundle.getString("Untitled") : textFile.getName()) + "?");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.YES) {
@@ -380,11 +381,17 @@ public class GuiController implements Initializable {
     /**
      * Quits the application.
      */
-    void quit() {
+    boolean quit() {
         if (!promptToSave()) {
-            return;
+            return false;
         }
 
+        savePrefs();
+
+        return true;
+    }
+
+    public void savePrefs() {
         this.menuBarController.savePrefs();
 
 //            prefs.put("currentDirectory", chooser.getCurrentDirectory().getPath());
@@ -405,9 +412,6 @@ public class GuiController implements Initializable {
             prefs.putDouble("frameX", stage.getX());
             prefs.putDouble("frameY", stage.getY());
         }
-
-        stage.close();
-        Platform.exit();
     }
 
     void setStageState(Stage stage) {
@@ -425,7 +429,13 @@ public class GuiController implements Initializable {
         });
 
         stage.setOnCloseRequest(we -> {
-            quit();
+            if (!quit()) {
+                we.consume();
+            } else {
+                stage.close();
+                Platform.exit();
+                System.exit(0);
+            }
         });
     }
 }
