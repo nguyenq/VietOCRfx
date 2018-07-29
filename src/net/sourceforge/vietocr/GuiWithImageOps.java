@@ -43,8 +43,6 @@ public class GuiWithImageOps extends GuiWithScan {
     private Button btnActualSize;
     @FXML
     private Button btnFitImage;
-    @FXML
-    private ChoiceBox cbPageNum;
 
     private final float ZOOM_FACTOR = 1.25f;
 
@@ -78,27 +76,15 @@ public class GuiWithImageOps extends GuiWithScan {
     }
 
     void btnPrevPageActionPerformed(ActionEvent evt) {
-//        canvasImage.deselect();
-        imageIndex--;
-        if (imageIndex < 0) {
-            imageIndex = 0;
-        } else {
-            this.labelStatus.setText(null);
-            progressBar.setVisible(false);
-            cbPageNum.getSelectionModel().selectPrevious();
-        }
+//        this.labelStatus.setText(null);
+        progressBar.setVisible(false);
+        cbPageNum.getSelectionModel().selectPrevious();
     }
 
     void btnNextPageActionPerformed(ActionEvent evt) {
-//        canvasImage.deselect();
-        imageIndex++;
-        if (imageIndex > imageTotal - 1) {
-            imageIndex = (short) (imageTotal - 1);
-        } else {
-            this.labelStatus.setText(null);
-            progressBar.setVisible(false);
-            cbPageNum.getSelectionModel().selectNext();
-        }
+//        this.labelStatus.setText(null);
+        progressBar.setVisible(false);
+        cbPageNum.getSelectionModel().selectNext();
     }
 
     /**

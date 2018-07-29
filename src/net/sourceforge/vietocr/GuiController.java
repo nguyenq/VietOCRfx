@@ -34,6 +34,9 @@ import java.util.prefs.Preferences;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
@@ -45,6 +48,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ProgressBar;
@@ -113,14 +117,16 @@ public class GuiController implements Initializable {
     protected ProgressBar progressBar;
     @FXML
     private HBox segmentedRegionsBox;
+    @FXML
+    protected ChoiceBox cbPageNum;
 
     static GuiController instance;
 
     private static final String IMAGE_PATTERN = "([^\\s]+(\\.(?i)(png|tif|tiff|jpg|jpeg|bmp|gif|pdf|pbm|pgm|ppm|pnm|jp2|j2k|jpf|jpx|jpm))$)";
 
     private String currentDirectory, outputDirectory;
-    protected short imageIndex;
-    protected short imageTotal;
+    protected int imageIndex;
+    protected int imageTotal;
     private int filterIndex;
     ObservableList<FileChooser.ExtensionFilter> fileFilters;
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
@@ -197,6 +203,15 @@ public class GuiController implements Initializable {
 
                 event.setDropCompleted(success);
                 event.consume();
+            }
+        });
+
+        cbPageNum.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue ov,
+                    Number value, Number new_value) {
+                imageIndex = new_value.intValue();
+                loadImage();
             }
         });
     }
@@ -291,12 +306,21 @@ public class GuiController implements Initializable {
             }
 
             imageIndex = 0;
+            imageTotal = imageList.size();
+
+            ObservableList pageNumbers = FXCollections.observableArrayList();
+            for (int i = 0; i < imageTotal; i++) {
+                pageNumbers.add(String.valueOf(i + 1));
+            }
+            cbPageNum.setItems(pageNumbers);
+
             ArrayList<BufferedImage> al = new ArrayList<BufferedImage>();
             al.addAll(imageList);
             entity = new OCRImageEntity(al, selectedFile.getName(), imageIndex, null, "eng");
             menuBar.setUserData(entity);
 
             Platform.runLater(() -> {
+                cbPageNum.getSelectionModel().selectFirst();
                 loadImage();
                 this.scrollPaneImage.setVvalue(0); // scroll to top
                 this.scrollPaneImage.setHvalue(0); // scroll to left
@@ -416,10 +440,10 @@ public class GuiController implements Initializable {
     public void savePrefs() {
         this.menuBarController.savePrefs();
 
-//            prefs.put("currentDirectory", chooser.getCurrentDirectory().getPath());
-//            if (getInputContext().getLocale() != null) {
-//                prefs.put("inputMethodLocale", getInputContext().getLocale().toString());
-//            }
+        prefs.put("currentDirectory", currentDirectory);
+//        if (getInputContext().getLocale() != null) {
+//            prefs.put("inputMethodLocale", getInputContext().getLocale().toString());
+//        }
         Font font = textarea.getFont();
         prefs.put("fontName", font.getName());
         prefs.putDouble("fontSize", font.getSize());

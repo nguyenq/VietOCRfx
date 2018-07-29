@@ -36,6 +36,7 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
@@ -46,6 +47,8 @@ public class GuiWithOCR extends GuiWithImageOps {
 
     @FXML
     private Button btnOCR;
+    @FXML
+    private Button btnOCRAll;
     @FXML
     private Button btnCancelOCR;
     @FXML
@@ -68,8 +71,6 @@ public class GuiWithOCR extends GuiWithImageOps {
     private final String DATAFILE_SUFFIX = ".traineddata";
     protected final File baseDir = Utils.getBaseDir(GuiWithOCR.this);
     protected String datapath;
-    private String currentDirectory;
-    private String outputDirectory;
     protected String tessPath;
     protected Properties lookupISO639;
     protected Properties lookupISO_3_1_Codes;
@@ -92,7 +93,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         btnCancelOCR.managedProperty().bind(btnCancelOCR.visibleProperty());
         getInstalledLanguagePacks();
         populateOCRLanguageBox();
-
+        cbOCRLanguage.getSelectionModel().select(prefs.get(strLangCode, null));
     }
 
     /**
@@ -107,8 +108,8 @@ public class GuiWithOCR extends GuiWithImageOps {
     @FXML
     protected void handleAction(javafx.event.ActionEvent event) {
         if (event.getSource() == btnOCR) {
-            if (imageView == null) {
-                //JOptionPane.showMessageDialog(this, bundle.getString("Please_load_an_image."), APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+            if (this.imageView.getImage() == null) {
+                new Alert(Alert.AlertType.INFORMATION, bundle.getString("Please_load_an_image.")).show();
                 return;
             }
 
@@ -143,6 +144,15 @@ public class GuiWithOCR extends GuiWithImageOps {
             } else {
                 performOCR(iioImageList, inputfilename, imageIndex, null);
             }
+        } else if (event.getSource() == btnOCRAll) {
+            if (this.imageView.getImage() == null) {
+                new Alert(Alert.AlertType.INFORMATION, bundle.getString("Please_load_an_image.")).show();
+                return;
+            }
+            this.btnOCR.setVisible(false);
+            this.btnCancelOCR.setVisible(true);
+            this.btnCancelOCR.setDisable(false);
+            performOCR(iioImageList, inputfilename, -1, null);
         } else if (event.getSource() == btnCancelOCR) {
             if (ocrWorker != null && !ocrWorker.isDone()) {
                 // Cancel current OCR op to begin a new one. You want only one OCR op at a time.
@@ -174,7 +184,7 @@ public class GuiWithOCR extends GuiWithImageOps {
      */
     void performOCR(final List<IIOImage> iioImageList, String inputfilename, final int index, Rectangle rect) {
         if (curLangCode.trim().length() == 0) {
-            //JOptionPane.showMessageDialog(this, bundle.getString("Please_select_a_language."), APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+            new Alert(Alert.AlertType.INFORMATION, bundle.getString("Please_select_a_language.")).show();
             return;
         }
 
@@ -269,7 +279,7 @@ public class GuiWithOCR extends GuiWithImageOps {
     @SuppressWarnings("unchecked")
     private void populateOCRLanguageBox() {
         if (installedLanguageCodes == null) {
-            //JOptionPane.showMessageDialog(Gui.this, bundle.getString("Tesseract_is_not_found._Please_specify_its_path_in_Settings_menu."), APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+            new Alert(Alert.AlertType.INFORMATION, bundle.getString("Tesseract_is_not_found._Please_specify_its_path_in_Settings_menu.")).show();
             return;
         }
 
@@ -277,13 +287,6 @@ public class GuiWithOCR extends GuiWithImageOps {
         cbOCRLanguage.getSelectionModel().select(prefs.get(strLangCode, null));
 
         cbOCRLanguage.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-//            public void onChanged(ListChangeListener.Change<? extends String> c) {
-//                System.out.println(cbOCRLanguage.getCheckModel().getCheckedItems());
-//                
-//                
-//                curLangCode = "vie";
-//            }
-
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 
@@ -293,11 +296,15 @@ public class GuiWithOCR extends GuiWithImageOps {
                         break;
                     }
                 }
-                entity.setLanguage(curLangCode);
             }
         });
 
 //        entity.languageProperty().bind(cbOCRLanguage.valueProperty());
+    }
+    
+    public void savePrefs() {
+        prefs.put(strLangCode, cbOCRLanguage.getSelectionModel().getSelectedItem().toString());
+        super.savePrefs();
     }
 
     /**

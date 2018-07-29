@@ -48,6 +48,8 @@ public class GuiWithScan extends GuiController implements ScannerListener {
     protected void handleAction(javafx.event.ActionEvent event) {
         if (event.getSource() == btnScan) {
             scanAction();
+        } else {
+            super.handleAction(event);
         }
     }
 

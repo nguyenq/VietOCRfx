@@ -41,7 +41,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -83,6 +82,9 @@ public class MenuCommandController implements Initializable {
 
     /**
      * Initializes the controller class.
+     *
+     * @param url
+     * @param rb
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -110,7 +112,7 @@ public class MenuCommandController implements Initializable {
         if (event.getSource() == miOCR) {
             ((Button) menuBar.getScene().lookup("#btnOCR")).fire();
         } else if (event.getSource() == miOCRAll) {
-            miOCRAllActionPerformed(event);
+            ((Button) menuBar.getScene().lookup("#btnOCRAll")).fire();
         } else if (event.getSource() == miPostProcess) {
             ((Button) menuBar.getScene().lookup("#btnPostProcess")).fire();
         } else if (event.getSource() == miBulkOCR) {
@@ -133,18 +135,6 @@ public class MenuCommandController implements Initializable {
 
             }
         }
-    }
-    
-    void miOCRAllActionPerformed(ActionEvent evt) {
-        if (this.imageView.getImage() == null) {
-            new Alert(Alert.AlertType.NONE, bundle.getString("Please_load_an_image."), ButtonType.OK).showAndWait();
-            return;
-        }
-
-        this.btnOCR.setVisible(false);
-        this.btnCancelOCR.setVisible(true);
-        this.btnCancelOCR.setDisable(false);
-        performOCR(iioImageList, inputfilename, -1, null);
     }
 
     /**

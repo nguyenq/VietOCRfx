@@ -184,6 +184,7 @@
                                         </ImageView>
                                     </graphic>
                                 </Button>                                
+                                <Button fx:id="btnOCRAll" onAction="#handleAction" visible="false" />
                                 <Button fx:id="btnCancelOCR" onAction="#handleAction" visible="false">
                                     <graphic>
                                         <ImageView pickOnBounds="true" preserveRatio="true">
