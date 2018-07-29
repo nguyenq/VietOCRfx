@@ -208,10 +208,10 @@ public class GuiWithOCR extends GuiWithImageOps {
     private void getInstalledLanguagePacks() {
         if (WINDOWS) {
             tessPath = baseDir.getPath();
-            datapath = tessPath;
+            datapath = tessPath + "/tessdata";
         } else {
             tessPath = prefs.get(strTessDir, "/usr/bin");
-            datapath = "/usr/share/tesseract-ocr/";
+            datapath = "/usr/share/tesseract-ocr/4.00/tessdata";
         }
 
         lookupISO639 = new Properties();

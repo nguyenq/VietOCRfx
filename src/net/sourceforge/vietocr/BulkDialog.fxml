@@ -8,13 +8,14 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.BulkDialogController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="304.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.BulkDialogController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="50.0" />
     </columnConstraints>
     <rowConstraints>
         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -29,11 +30,15 @@
         <TextField GridPane.columnIndex="1" />
         <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
         <ComboBox fx:id="cbOutputFormat" maxWidth="-Infinity" prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <CheckBox fx:id="chbDeskew" text="Deskew" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+        <CheckBox fx:id="chbDeskew" text="Deskew" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-        <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#handleAction" text="Cancel" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-        <Button fx:id="btnRun" mnemonicParsing="false" onAction="#handleAction" text="Run" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
+         <children>
+              <Button fx:id="btnRun" mnemonicParsing="false" onAction="#handleAction" text="Run" />
+              <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#handleAction" text="Cancel" />
+         </children>
+      </HBox>
     </children>
     <padding>
         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
