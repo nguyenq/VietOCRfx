@@ -25,6 +25,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -85,12 +86,11 @@ public class MenuFormatController implements Initializable {
 
     @FXML
     private void handleAction(ActionEvent event) {
-        TextArea textarea = (TextArea) menuBar.getScene().lookup("#textarea");
+        textarea = (TextArea) menuBar.getScene().lookup("#textarea");
 
         if (event.getSource() == chmiWordWrap) {
             wordWrapOn = chmiWordWrap.isSelected();
             textarea.setWrapText(wordWrapOn);
-
         } else if (event.getSource() == miChangeCase) {
             try {
                 if (changeCaseDialog == null) {
@@ -115,19 +115,7 @@ public class MenuFormatController implements Initializable {
 
             }
         } else if (event.getSource() == miRemoveLineBreaks) {
-            if (textarea.getSelectedText().length() == 0) {
-                textarea.selectAll();
-
-                if (textarea.getSelectedText().length() == 0) {
-                    return;
-                }
-            }
-
-            String result = TextUtilities.removeLineBreaks(textarea.getSelectedText());
-
-            int start = textarea.getSelection().getStart();
-            textarea.replaceSelection(result);
-            textarea.selectRange(start, start + result.length());
+            ((Button) menuBar.getScene().lookup("#btnRemoveLineBreaks")).fire();
         } else if (event.getSource() == miFont) {
             Font font = textarea.getFont();
             FontSelectorDialog dialog = new FontSelectorDialog(font);

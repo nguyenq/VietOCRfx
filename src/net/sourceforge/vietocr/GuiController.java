@@ -261,8 +261,6 @@ public class GuiController implements Initializable {
 //
 //        } else if (event.getSource() == btnClear) {
 //
-//        } else if (event.getSource() == btnRemoveLineBreaks) {
-//
 //        } else if (event.getSource() == btnSpellCheck) {
 //
 //        } else if (event.getSource() == btnPostProcess) {

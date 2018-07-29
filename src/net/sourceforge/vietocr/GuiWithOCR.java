@@ -42,6 +42,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javax.imageio.IIOImage;
 import net.sourceforge.vietocr.util.Utils;
+import net.sourceforge.vietpad.utilities.TextUtilities;
 
 public class GuiWithOCR extends GuiWithImageOps {
 
@@ -93,7 +94,6 @@ public class GuiWithOCR extends GuiWithImageOps {
         btnCancelOCR.managedProperty().bind(btnCancelOCR.visibleProperty());
         getInstalledLanguagePacks();
         populateOCRLanguageBox();
-        cbOCRLanguage.getSelectionModel().select(prefs.get(strLangCode, null));
     }
 
     /**
@@ -164,7 +164,19 @@ public class GuiWithOCR extends GuiWithImageOps {
         } else if (event.getSource() == btnClear) {
             textarea.clear();
         } else if (event.getSource() == btnRemoveLineBreaks) {
+            if (textarea.getSelectedText().length() == 0) {
+                textarea.selectAll();
 
+                if (textarea.getSelectedText().length() == 0) {
+                    return;
+                }
+            }
+
+            String result = TextUtilities.removeLineBreaks(textarea.getSelectedText());
+
+            int start = textarea.getSelection().getStart();
+            textarea.replaceSelection(result);
+            textarea.selectRange(start, start + result.length());
         } else if (event.getSource() == btnPostProcess) {
 
         } else if (event.getSource() == cbOCRLanguage) {
@@ -284,8 +296,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         }
 
         cbOCRLanguage.getItems().addAll(FXCollections.observableArrayList(installedLanguages));
-        cbOCRLanguage.getSelectionModel().select(prefs.get(strLangCode, null));
-
+        
         cbOCRLanguage.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -298,8 +309,8 @@ public class GuiWithOCR extends GuiWithImageOps {
                 }
             }
         });
-
-//        entity.languageProperty().bind(cbOCRLanguage.valueProperty());
+        
+        cbOCRLanguage.getSelectionModel().select(prefs.get(strLangCode, null));
     }
     
     public void savePrefs() {
