@@ -17,6 +17,8 @@ package net.sourceforge.vietocr;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -57,6 +59,8 @@ public class MenuToolsController implements Initializable {
     private MenuItem miMergePDF;
     @FXML
     private MenuItem miSplitPDF;
+    @FXML
+    private MenuItem miConvertPDF;
     private MenuBar menuBar;
 
     protected ResourceBundle bundle;
@@ -84,11 +88,12 @@ public class MenuToolsController implements Initializable {
         Label labelStatus = (Label) menuBar.getScene().lookup("#labelStatus");
         ProgressBar progressBar = (ProgressBar) menuBar.getScene().lookup("#progressBar");
 
+        FileChooser.ExtensionFilter tiffFilter = new FileChooser.ExtensionFilter("TIFF", "*.tif", "*.tiff");
         if (event.getSource() == miMergeTIFF) {
             FileChooser fc = new FileChooser();
             fc.setTitle(bundle.getString("Select_Input_Images"));
             fc.setInitialDirectory(imageFolder);
-            FileChooser.ExtensionFilter tiffFilter = new FileChooser.ExtensionFilter("TIFF", "*.tif", "*.tiff");
+
             FileChooser.ExtensionFilter jpegFilter = new FileChooser.ExtensionFilter("JPEG", "*.jpg", "*.jpeg");
             FileChooser.ExtensionFilter gifFilter = new FileChooser.ExtensionFilter("GIF", "*.gif");
             FileChooser.ExtensionFilter pngFilter = new FileChooser.ExtensionFilter("PNG", "*.png");
@@ -106,13 +111,8 @@ public class MenuToolsController implements Initializable {
                 fc.getExtensionFilters().clear();
                 fc.getExtensionFilters().add(tiffFilter);
 
-                File selectedFile = fc.showSaveDialog(menuBar.getScene().getWindow());
-                if (selectedFile != null) {
-                    if (!(selectedFile.getName().endsWith(".tif") || selectedFile.getName().endsWith(".tiff"))) {
-                        selectedFile = new File(selectedFile.getParent(), selectedFile.getName() + ".tif");
-                    }
-
-                    final File outputTiff = selectedFile;
+                File outputTiff = fc.showSaveDialog(menuBar.getScene().getWindow());
+                if (outputTiff != null) {
                     if (outputTiff.exists()) {
                         outputTiff.delete();
                     }
@@ -164,7 +164,6 @@ public class MenuToolsController implements Initializable {
             FileChooser fc = new FileChooser();
             fc.setTitle(bundle.getString("Select_Input_TIFF"));
             fc.setInitialDirectory(imageFolder);
-            FileChooser.ExtensionFilter tiffFilter = new FileChooser.ExtensionFilter("TIFF", "*.tif", "*.tiff");
             fc.getExtensionFilters().add(tiffFilter);
 
             if (selectedFilter != null) {
@@ -237,14 +236,8 @@ public class MenuToolsController implements Initializable {
                 imageFolder = inputPdfs.get(0).getParentFile();
                 fc.setTitle(bundle.getString("Save_Merged_PDF"));
                 fc.setInitialDirectory(imageFolder);
-                File selectedFile = fc.showSaveDialog(menuBar.getScene().getWindow());
-                if (selectedFile != null) {
-                    if (!(selectedFile.getName().endsWith(".pdf"))) {
-                        selectedFile = new File(selectedFile.getParent(), selectedFile.getName() + ".pdf");
-                    }
-
-                    final File outputPdf = selectedFile;
-
+                File outputPdf = fc.showSaveDialog(menuBar.getScene().getWindow());
+                if (outputPdf != null) {
                     progressBar.setVisible(true);
                     labelStatus.setVisible(true);
                     labelStatus.getScene().setCursor(Cursor.WAIT);
@@ -384,6 +377,69 @@ public class MenuToolsController implements Initializable {
 //
 //                worker.execute();
 //            }
+        } else if (event.getSource() == miConvertPDF) {
+            FileChooser fc = new FileChooser();
+            fc.setTitle(bundle.getString("Select_Input_PDF"));
+            fc.setInitialDirectory(imageFolder);
+            FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF", "*.pdf");
+            fc.getExtensionFilters().add(pdfFilter);
+            File inputPdf = fc.showOpenDialog(menuBar.getScene().getWindow());
+
+            if (inputPdf != null) {
+                imageFolder = inputPdf.getParentFile();
+                fc.setTitle(bundle.getString("Save_Multi-page_TIFF_Image"));
+                fc.setInitialDirectory(imageFolder);
+                fc.getExtensionFilters().clear();
+                fc.getExtensionFilters().add(tiffFilter);
+
+                File targetFile = fc.showSaveDialog(menuBar.getScene().getWindow());
+                if (targetFile != null) {
+                    progressBar.setVisible(true);
+                    labelStatus.setVisible(true);
+                    labelStatus.getScene().setCursor(Cursor.WAIT);
+
+                    Task<String> worker = new Task<String>() {
+
+                        @Override
+                        protected String call() throws Exception {
+                            updateMessage(bundle.getString("ConvertPDF_running..."));
+                            File outputTiffFile = PdfUtilities.convertPdf2Tiff(inputPdf);
+                            Files.move(outputTiffFile.toPath(), targetFile.toPath(), REPLACE_EXISTING);
+                            return targetFile.getName();
+                        }
+
+                        @Override
+                        protected void succeeded() {
+                            super.succeeded();
+                            updateMessage(bundle.getString("ConvertPDF_completed"));
+                            updateProgress(1, 1);
+                            String msg = bundle.getString("ConvertPDF_completed") + getValue() + bundle.getString("created");
+                            new Alert(Alert.AlertType.NONE, msg, ButtonType.OK).showAndWait();
+                            progressBar.setVisible(false);
+                            labelStatus.setVisible(false);
+                            labelStatus.getScene().setCursor(Cursor.DEFAULT);
+                        }
+
+                        @Override
+                        protected void failed() {
+                            super.failed();
+                            updateMessage(null);
+                            Throwable ex = getException();
+                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                            new Alert(Alert.AlertType.NONE, ex.getMessage(), ButtonType.OK).showAndWait();
+                            progressBar.setVisible(false);
+                            labelStatus.setVisible(false);
+                            labelStatus.getScene().setCursor(Cursor.DEFAULT);
+                        }
+                    };
+
+                    labelStatus.textProperty().bind(worker.messageProperty());
+                    progressBar.progressProperty().unbind();
+                    progressBar.progressProperty().bind(worker.progressProperty());
+
+                    new Thread(worker).start();
+                }
+            }
         }
     }
 

@@ -16,5 +16,6 @@
       <SeparatorMenuItem mnemonicParsing="false" />
         <MenuItem fx:id="miMergePDF" onAction="#handleAction" text="Merge _PDF..." />
         <MenuItem fx:id="miSplitPDF" onAction="#handleAction" text="_Split PDF..." />
+        <MenuItem fx:id="miConvertPDF" onAction="#handleAction" text="_Convert PDF to TIFF..." />
     </items>
 </Menu>
