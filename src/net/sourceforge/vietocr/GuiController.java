@@ -15,6 +15,7 @@
  */
 package net.sourceforge.vietocr;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -63,6 +64,8 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import net.sourceforge.tess4j.util.ImageHelper;
 import net.sourceforge.tess4j.util.ImageIOHelper;
 import net.sourceforge.vietocr.util.Utils;
 
@@ -78,6 +81,8 @@ public class GuiController implements Initializable {
     private Button btnSave;
     @FXML
     protected Button btnScan;
+    @FXML
+    protected Button btnPaste;
     @FXML
     private Button btnCollapseExpand;
     @FXML
@@ -235,8 +240,8 @@ public class GuiController implements Initializable {
             boolean collapsed = this.btnCollapseExpand.getText().equals("»");
             this.splitPaneImage.setDividerPositions(collapsed ? 0 : 0.25);
 //            this.splitPaneImage.setDividerSize(collapsed ? 0 : 5);
-//        } else if (event.getSource() == btnOCR) {
-//
+        } else if (event.getSource() == btnPaste) {
+            pasteImage();
 //        } else if (event.getSource() == btnCancel) {
 //
 //        } else if (event.getSource() == btnClear) {
@@ -375,6 +380,23 @@ public class GuiController implements Initializable {
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return false;
+        }
+    }
+
+    /**
+     * Pastes image from clipboard.
+     */
+    void pasteImage() {
+        try {
+            Image image = ImageHelper.getClipboardImage();
+            if (image != null) {
+                File tempFile = File.createTempFile("tmp", ".png");
+                ImageIO.write((BufferedImage) image, "png", tempFile);
+                openFile(tempFile);
+                tempFile.deleteOnExit();
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
         }
     }
 
