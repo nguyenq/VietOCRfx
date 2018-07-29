@@ -21,8 +21,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.fxml.FXML;
 import javafx.scene.Cursor;
-import javax.swing.JOptionPane;
+import javafx.scene.control.Alert;
 
 import net.sourceforge.tess4j.util.ImageIOHelper;
 import net.sourceforge.vietocr.util.Utils;
@@ -33,20 +34,28 @@ import uk.co.mmscomputing.device.scanner.*;
 import uk.co.mmscomputing.device.sane.*;
 
 public class GuiWithScan extends GuiController implements ScannerListener {
+
     public static final String TO_BE_IMPLEMENTED = "To be implemented in subclass";
     static final boolean MAC_OS_X = System.getProperty("os.name").startsWith("Mac");
     static final boolean WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("windows");
     static final boolean LINUX = System.getProperty("os.name").equals("Linux");
-    
+
     Scanner scanner;
 
     private final static Logger logger = Logger.getLogger(GuiWithScan.class.getName());
+
+    @FXML
+    protected void handleAction(javafx.event.ActionEvent event) {
+        if (event.getSource() == btnScan) {
+            scanAction();
+        }
+    }
 
     /**
      * Access scanner and scan documents via Windows WIA or Linux Sane.
      *
      */
-    void jMenuItemScanActionPerformed(java.awt.event.ActionEvent evt) {
+    void scanAction() {
         scaleX = scaleY = 1f;
 
         labelStatus.setText(bundle.getString("Scanning..."));
@@ -61,16 +70,15 @@ public class GuiWithScan extends GuiController implements ScannerListener {
             public void run() {
                 try {
                     if (WINDOWS) {
-                        File tempImageFile = File.createTempFile("tmp", WINDOWS ? ".bmp" : ".png");
+                        File scannedImageFile = File.createTempFile("tmp", ".png");
 
-                        if (tempImageFile.exists()) {
-                            tempImageFile.delete();
+                        if (scannedImageFile.exists()) {
+                            scannedImageFile.delete();
                         }
                         WiaScannerAdapter adapter = new WiaScannerAdapter(); // with MS WIA
-                        // The reason for not using PNG format is that jai-imageio library would throw an "I/O error reading PNG header" error.
-                        tempImageFile = adapter.ScanImage(FormatID.wiaFormatBMP, tempImageFile.getCanonicalPath());
-                        openFile(tempImageFile);
-                        tempImageFile.deleteOnExit();
+                        scannedImageFile = adapter.ScanImage(FormatID.wiaFormatPNG, scannedImageFile.getCanonicalPath());
+                        openFile(scannedImageFile);
+                        scannedImageFile.deleteOnExit();
                     } else { // Linux
                         scanner = Scanner.getDevice();
                         scanner.addListener(GuiWithScan.this);
@@ -78,23 +86,23 @@ public class GuiWithScan extends GuiController implements ScannerListener {
                     }
                 } catch (ScannerIOException e) {
                     logger.log(Level.SEVERE, e.getMessage(), e);
-                    JOptionPane.showMessageDialog(null, e.getMessage(), "Error Scanning Image", JOptionPane.ERROR_MESSAGE);
+                    new Alert(Alert.AlertType.ERROR, "Error Scanning Image").show();
                 } catch (IOException e) {
                     logger.log(Level.SEVERE, e.getMessage(), e);
-                    JOptionPane.showMessageDialog(null, e.getMessage(), "I/O Error", JOptionPane.ERROR_MESSAGE);
+                    new Alert(Alert.AlertType.ERROR, "I/O Error").show();
                 } catch (WiaOperationException e) {
                     logger.log(Level.SEVERE, e.getMessage(), e);
-                    JOptionPane.showMessageDialog(null, e.getWIAMessage(), e.getMessage(), JOptionPane.WARNING_MESSAGE);
+                    new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
                 } catch (Exception e) {
                     String msg = e.getMessage();
                     if (msg == null || msg.equals("")) {
                         msg = "Scanner Operation Error.";
                     }
                     logger.log(Level.SEVERE, e.getMessage(), e);
-                    JOptionPane.showMessageDialog(null, msg, "Scanner Operation Error", JOptionPane.ERROR_MESSAGE);
+                    new Alert(Alert.AlertType.ERROR, msg).show();
                 } finally {
 //                    if (WINDOWS) {
-                        scanCompleted();
+                    scanCompleted();
 //                    }
                 }
             }
@@ -103,9 +111,9 @@ public class GuiWithScan extends GuiController implements ScannerListener {
 
     /**
      * Sane scanning.
-     * 
+     *
      * @param type
-     * @param metadata 
+     * @param metadata
      */
     @Override
     public void update(ScannerIOMetadata.Type type, ScannerIOMetadata metadata) {
@@ -119,7 +127,7 @@ public class GuiWithScan extends GuiController implements ScannerListener {
 //                setTitle("Scanned image - " + VietOCR.APP_NAME);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, e.getMessage(), e);
-                JOptionPane.showMessageDialog(null, e.getMessage(), "I/O Error", JOptionPane.ERROR_MESSAGE);
+                new Alert(Alert.AlertType.ERROR, "I/O Error").show();
             } finally {
                 scanCompleted();
             }
