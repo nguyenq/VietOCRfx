@@ -108,8 +108,7 @@ public class MenuCommandController implements Initializable {
 //        chmiScreenshotMode = (CheckMenuItem) menuBar.getMenus()(2).lookup("#chmiScreenshotMode");
 
         if (event.getSource() == miOCR) {
-//            ((Button) menuBar.getScene().lookup("#btnOCR")).fire();
-            miOCRActionPerformed(event);
+            ((Button) menuBar.getScene().lookup("#btnOCR")).fire();
         } else if (event.getSource() == miOCRAll) {
             miOCRAllActionPerformed(event);
         } else if (event.getSource() == miPostProcess) {
@@ -135,46 +134,7 @@ public class MenuCommandController implements Initializable {
             }
         }
     }
-
-    void miOCRActionPerformed(ActionEvent evt) {
-        if (this.imageView.getImage() == null) {
-            new Alert(Alert.AlertType.NONE, bundle.getString("Please_load_an_image."), ButtonType.OK).showAndWait();
-            return;
-        }
-
-        Rectangle rect = null; //((JImageLabel) jImageLabel).getRect();
-
-        if (rect != null) {
-            try {
-                Image image = this.imageView.getImage();
-                double offsetX = 0;
-                double offsetY = 0;
-                if (image.getWidth() < this.imageView.getViewport().getWidth()) {
-                    offsetX = (this.imageView.getViewport().getWidth() - image.getWidth()) / 2;
-                }
-                if (image.getHeight() < this.imageView.getViewport().getHeight()) {
-                    offsetY = (this.imageView.getViewport().getHeight() - image.getHeight()) / 2;
-                }
-//                BufferedImage bi = ((BufferedImage) ii.getImage()).getSubimage((int) ((rect.x - offsetX) * scaleX), (int) ((rect.y - offsetY) * scaleY), (int) (rect.width * scaleX), (int) (rect.height * scaleY));
-
-//                // create a new rectangle with scale factors and offets factored in
-                rect = new Rectangle((int) ((rect.x - offsetX) * scaleX), (int) ((rect.y - offsetY) * scaleY), (int) (rect.width * scaleX), (int) (rect.height * scaleY));
-
-                //move this part to the image entity
-//                ArrayList<IIOImage> tempList = new ArrayList<IIOImage>();
-//                tempList.add(new IIOImage(bi, null, null));
-                performOCR(iioImageList, inputfilename, imageIndex, rect);
-            } catch (RasterFormatException rfe) {
-                logger.log(Level.SEVERE, rfe.getMessage(), rfe);
-//                JOptionPane.showMessageDialog(this, rfe.getMessage(), VietOCR.APP_NAME, JOptionPane.ERROR_MESSAGE);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, e.getMessage(), e);
-            }
-        } else {
-            performOCR(iioImageList, inputfilename, imageIndex, null);
-        }
-    }
-
+    
     void miOCRAllActionPerformed(ActionEvent evt) {
         if (this.imageView.getImage() == null) {
             new Alert(Alert.AlertType.NONE, bundle.getString("Please_load_an_image."), ButtonType.OK).showAndWait();

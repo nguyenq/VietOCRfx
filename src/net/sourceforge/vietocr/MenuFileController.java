@@ -60,7 +60,7 @@ public class MenuFileController implements Initializable {
         } else if (event.getSource() == miSave) {
             ((Button) menuBar.getScene().lookup("#btnSave")).fire();
         } else if (event.getSource() == miSaveAs) {
-            //MainController.getInstance().saveFileDlg();
+            GuiController.getInstance().saveFileDlg();
         } else if (event.getSource() == miScan) {
 
         } else if (event.getSource() == miExit) {

@@ -16,9 +16,13 @@
 package net.sourceforge.vietocr;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -124,6 +128,7 @@ public class GuiController implements Initializable {
     protected float scaleX = 1f;
     protected float scaleY = 1f;
     private boolean textChanged;
+    private File textFile;
 
     private final static Logger logger = Logger.getLogger(GuiController.class.getName());
 
@@ -223,6 +228,7 @@ public class GuiController implements Initializable {
                 openFile(file);
             }
         } else if (event.getSource() == btnSave) {
+            saveAction();
             textChanged = false;
         } else if (event.getSource() == btnCollapseExpand) {
             this.btnCollapseExpand.setText(this.btnCollapseExpand.getText().equals("»") ? "«" : "»");
@@ -331,7 +337,44 @@ public class GuiController implements Initializable {
     }
 
     boolean saveAction() {
-        return true;
+        if (textFile == null || !textFile.exists()) {
+            return saveFileDlg();
+        } else {
+            return saveTextFile(textFile);
+        }
+    }
+
+    boolean saveFileDlg() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle(bundle.getString("Save_As"));
+        fc.setInitialDirectory(new File(outputDirectory));
+        FileChooser.ExtensionFilter textFilter = new FileChooser.ExtensionFilter("Text Files", "*.txt");
+        fc.getExtensionFilters().addAll(textFilter);
+
+        if (textFile != null) {
+            fc.setInitialDirectory(textFile.getParentFile());
+            fc.setInitialFileName(textFile.getName());
+        }
+
+        File f = fc.showSaveDialog(btnSave.getScene().getWindow());
+        if (f != null) {
+            outputDirectory = f.getParent();
+            textFile = f;
+            return saveTextFile(textFile);
+        } else {
+            return false;
+        }
+    }
+
+    boolean saveTextFile(File file) {
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            out.write(textarea.getText());
+//            textChangedProp.set(false);
+            return true;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
     }
 
     /**
