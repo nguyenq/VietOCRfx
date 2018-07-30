@@ -44,7 +44,6 @@ public class BulkDialogController implements Initializable {
     @FXML
     private void handleAction(ActionEvent event) {
         if (event.getSource() == btnRun) {
-
             ((Stage) btnRun.getScene().getWindow()).close();
         } else if (event.getSource() == btnCancel) {
             ((Stage) btnCancel.getScene().getWindow()).close();

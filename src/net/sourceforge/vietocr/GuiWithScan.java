@@ -45,6 +45,7 @@ public class GuiWithScan extends GuiController implements ScannerListener {
     private final static Logger logger = Logger.getLogger(GuiWithScan.class.getName());
 
     @FXML
+    @Override
     protected void handleAction(javafx.event.ActionEvent event) {
         if (event.getSource() == btnScan) {
             scanAction();

@@ -84,6 +84,7 @@ public class MenuHelpController implements Initializable {
                 URL url = getClass().getResource("/readme.html");
                 WebEngine webEngine = webView.getEngine();
                 webEngine.getLoadWorker().stateProperty().addListener(new ChangeListener<Worker.State>() {
+                    @Override
                     public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldState, Worker.State newState) {
                         if (newState == Worker.State.SUCCEEDED) {
                             EventListener listener = (Event ev) -> {

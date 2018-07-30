@@ -105,7 +105,12 @@ public class GuiWithOCR extends GuiWithImageOps {
         return instance;
     }
 
+    /**
+     *
+     * @param event
+     */
     @FXML
+    @Override
     protected void handleAction(javafx.event.ActionEvent event) {
         if (event.getSource() == btnOCR) {
             if (this.imageView.getImage() == null) {
@@ -313,8 +318,9 @@ public class GuiWithOCR extends GuiWithImageOps {
         cbOCRLanguage.getSelectionModel().select(prefs.get(strLangCode, null));
     }
     
+    @Override
     public void savePrefs() {
-        prefs.put(strLangCode, cbOCRLanguage.getSelectionModel().getSelectedItem().toString());
+        prefs.put(strLangCode, curLangCode);
         super.savePrefs();
     }
 

@@ -37,6 +37,7 @@ public class GuiWithSpellCheck extends GuiWithOCR {
     private final static Logger logger = Logger.getLogger(GuiWithOCR.class.getName());
 
     @FXML
+    @Override
     protected void handleAction(javafx.event.ActionEvent event) {
         if (event.getSource() == btnSpellCheck) {
             spellCheck(event);

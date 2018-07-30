@@ -27,12 +27,12 @@ import javax.imageio.IIOImage;
 public class Utils {
 
     private static final String EOL = "\n";
-    
+
     private final static Logger logger = Logger.getLogger(Utils.class.getName());
 
     /**
      * Gets the directory of the executing JAR.
-     * 
+     *
      * @param aType
      * @return the directory of the running jar
      */
@@ -82,36 +82,34 @@ public class Utils {
 
     /**
      * Reads a text file.
-     * 
+     *
      * @param tempTessOutputFile
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     public static String readTextFile(File tempTessOutputFile) throws Exception {
-        StringBuilder result = new StringBuilder();
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(tempTessOutputFile), "UTF-8"));
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(tempTessOutputFile), "UTF-8"))) {
+            StringBuilder result = new StringBuilder();
+            String str;
 
-        String str;
+            while ((str = in.readLine()) != null) {
+                result.append(str).append(EOL);
+            }
 
-        while ((str = in.readLine()) != null) {
-            result.append(str).append(EOL);
+            int length = result.length();
+            if (length >= EOL.length()) {
+                result.setLength(length - EOL.length()); // remove last EOL
+            }
+
+            return result.toString();
         }
-
-        int length = result.length();
-        if (length >= EOL.length()) {
-            result.setLength(length - EOL.length()); // remove last EOL
-        }
-        in.close();
-
-        return result.toString();
     }
-    
-     
+
     /**
      * Lists image files recursively in a given directory.
-     * 
+     *
      * @param list
-     * @param directory 
+     * @param directory
      */
     public static void listImageFiles(List<File> list, File directory) {
         // list image files and subdir
@@ -123,7 +121,7 @@ public class Utils {
         });
 
         List<File> dirs = new ArrayList<File>();
-        
+
         // process files first
         for (File file : files) {
             if (file.isFile()) {
@@ -132,17 +130,17 @@ public class Utils {
                 dirs.add(file);
             }
         }
-        
+
         // then process directories
         for (File dir : dirs) {
             listImageFiles(list, dir);
         }
     }
-    
+
     public static List<BufferedImage> getImageList(List<IIOImage> iioImageList) {
         List<BufferedImage> imageList = new ArrayList<BufferedImage>();
         for (IIOImage image : iioImageList) {
-            imageList.add((BufferedImage)image.getRenderedImage());
+            imageList.add((BufferedImage) image.getRenderedImage());
         }
         return imageList;
     }

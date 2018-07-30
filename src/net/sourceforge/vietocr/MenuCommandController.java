@@ -16,7 +16,6 @@
 package net.sourceforge.vietocr;
 
 import java.awt.Rectangle;
-import java.awt.image.RasterFormatException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,7 +40,6 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javax.imageio.IIOImage;
@@ -59,7 +57,6 @@ public class MenuCommandController implements Initializable {
     @FXML
     private MenuItem miBulkOCR;
 
-    private ImageView imageView;
     private TextArea textarea;
     private ProgressBar progressBar1;
     private Label labelStatus;
@@ -102,8 +99,6 @@ public class MenuCommandController implements Initializable {
 
         textarea = (TextArea) scene.lookup("#textarea");
         progressBar1 = (ProgressBar) scene.lookup("#progressBar1");
-        imageView = (ImageView) scene.lookup("#imageView");
-
         labelStatus = (Label) scene.lookup("#labelStatus");
         btnCancelOCR = (Button) scene.lookup("#btnCancelOCR");
         btnOCR = (Button) scene.lookup("#btnOCR");

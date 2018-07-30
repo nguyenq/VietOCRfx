@@ -57,7 +57,6 @@ public class ImageInfoDialogController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("net/sourceforge/vietocr/ImageInfoDialog"); // NOI18N
         cbWidth.getSelectionModel().selectFirst();
         cbWidth.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
