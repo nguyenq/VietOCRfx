@@ -114,6 +114,10 @@ public class GuiController implements Initializable {
     @FXML
     protected Label labelPSMValue;
     @FXML
+    private Label labelDimensionValue;
+    @FXML
+    private Label labelPageNbr;
+    @FXML
     protected ProgressBar progressBar;
     @FXML
     private HBox segmentedRegionsBox;
@@ -131,7 +135,6 @@ public class GuiController implements Initializable {
     ObservableList<FileChooser.ExtensionFilter> fileFilters;
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
     protected ResourceBundle bundle;
-    Font font;
     protected List<BufferedImage> imageList;
     protected List<IIOImage> iioImageList;
     protected String inputfilename;
@@ -151,7 +154,7 @@ public class GuiController implements Initializable {
         filterIndex = prefs.getInt("filterIndex", 0);
 
         String style = prefs.get("fontStyle", "");
-        font = Font.font(
+        Font font = Font.font(
                 prefs.get("fontName", Font.getDefault().getFamily()),
                 style.contains("Bold") ? FontWeight.BOLD : FontWeight.NORMAL,
                 style.contains("Italic") ? FontPosture.ITALIC : FontPosture.REGULAR,
@@ -208,10 +211,11 @@ public class GuiController implements Initializable {
 
         cbPageNum.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue ov,
-                    Number value, Number new_value) {
+            public void changed(ObservableValue ov, Number value, Number new_value) {
                 imageIndex = new_value.intValue();
-                loadImage();
+                if (imageIndex >= 0) {
+                    loadImage();
+                }
             }
         });
     }
@@ -305,12 +309,11 @@ public class GuiController implements Initializable {
 
             imageIndex = 0;
             imageTotal = imageList.size();
-
+            
             ObservableList pageNumbers = FXCollections.observableArrayList();
             for (int i = 0; i < imageTotal; i++) {
                 pageNumbers.add(String.valueOf(i + 1));
             }
-            cbPageNum.setItems(pageNumbers);
 
             ArrayList<BufferedImage> al = new ArrayList<BufferedImage>();
             al.addAll(imageList);
@@ -318,8 +321,9 @@ public class GuiController implements Initializable {
             menuBar.setUserData(entity);
 
             Platform.runLater(() -> {
+                labelPageNbr.setText("/ " + imageTotal);
+                cbPageNum.setItems(pageNumbers);
                 cbPageNum.getSelectionModel().selectFirst();
-                loadImage();
                 this.scrollPaneImage.setVvalue(0); // scroll to top
                 this.scrollPaneImage.setHvalue(0); // scroll to left
                 ((Stage) imageView.getScene().getWindow()).setTitle(VietOCR.APP_NAME + " - " + selectedFile.getName());
@@ -335,8 +339,9 @@ public class GuiController implements Initializable {
     }
 
     void loadImage() {
-        imageView.setImage(SwingFXUtils.toFXImage(imageList.get(imageIndex), null));
-//        labelPageNbr.setText(String.format("Page: %d of %d", imageIndex + 1, imageList.size()));
+        BufferedImage bi = imageList.get(imageIndex);
+        imageView.setImage(SwingFXUtils.toFXImage(bi, null));
+        labelDimensionValue.setText(String.format("%s × %spx  %sbpp", bi.getWidth(), bi.getHeight(), bi.getColorModel().getPixelSize()));
     }
 
     /**
@@ -417,7 +422,7 @@ public class GuiController implements Initializable {
                 openFile(tempFile);
                 tempFile.deleteOnExit();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
     }

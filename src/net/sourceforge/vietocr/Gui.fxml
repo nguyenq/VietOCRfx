@@ -85,7 +85,7 @@
                                     </graphic>
                                 </Button>
                                 <ChoiceBox fx:id="cbPageNum" prefWidth="50.0" />
-                                <Label text="Page" />
+                                <Label fx:id="labelPageNbr" text="/ 0" />
                                 <Separator orientation="VERTICAL" />
                                 <Button fx:id="btnFitImage" onAction="#handleAction">
                                     <graphic>
@@ -253,7 +253,7 @@
                 <Separator orientation="VERTICAL" />
                 <Region fx:id="rgn2" prefWidth="100.0" />
                 <Label text="Image:" />
-                <Label text="w x h" />
+                <Label fx:id="labelDimensionValue" text="w x h" />
                 <Separator orientation="VERTICAL" />
                 <Region fx:id="rgn3" />
                 <HBox fx:id="segmentedRegionsBox" spacing="5.0" visible="false">
