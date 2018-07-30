@@ -315,7 +315,7 @@ public class GuiWithOCR extends GuiWithImageOps {
             }
         });
         
-        cbOCRLanguage.getSelectionModel().select(prefs.get(strLangCode, null));
+        cbOCRLanguage.getSelectionModel().select(lookupISO639.getProperty(prefs.get(strLangCode, null)));
     }
     
     @Override
