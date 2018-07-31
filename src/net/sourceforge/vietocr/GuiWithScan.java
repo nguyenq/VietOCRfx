@@ -33,7 +33,7 @@ import net.sourceforge.vietocr.wia.*;
 import uk.co.mmscomputing.device.scanner.*;
 import uk.co.mmscomputing.device.sane.*;
 
-public class GuiWithScan extends GuiController implements ScannerListener {
+public class GuiWithScan extends GuiWithThumbnail implements ScannerListener {
 
     public static final String TO_BE_IMPLEMENTED = "To be implemented in subclass";
     static final boolean MAC_OS_X = System.getProperty("os.name").startsWith("Mac");

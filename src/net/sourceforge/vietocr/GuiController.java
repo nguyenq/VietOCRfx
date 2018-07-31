@@ -309,7 +309,7 @@ public class GuiController implements Initializable {
 
             imageIndex = 0;
             imageTotal = imageList.size();
-            
+
             ObservableList pageNumbers = FXCollections.observableArrayList();
             for (int i = 0; i < imageTotal; i++) {
                 pageNumbers.add(String.valueOf(i + 1));
@@ -324,6 +324,7 @@ public class GuiController implements Initializable {
                 labelPageNbr.setText("/ " + imageTotal);
                 cbPageNum.setItems(pageNumbers);
                 cbPageNum.getSelectionModel().selectFirst();
+                loadThumbnails();
                 this.scrollPaneImage.setVvalue(0); // scroll to top
                 this.scrollPaneImage.setHvalue(0); // scroll to left
                 ((Stage) imageView.getScene().getWindow()).setTitle(VietOCR.APP_NAME + " - " + selectedFile.getName());
@@ -338,10 +339,20 @@ public class GuiController implements Initializable {
         }
     }
 
+    /**
+     * Loads image into view.
+     */
     void loadImage() {
         BufferedImage bi = imageList.get(imageIndex);
         imageView.setImage(SwingFXUtils.toFXImage(bi, null));
         labelDimensionValue.setText(String.format("%s × %spx  %sbpp", bi.getWidth(), bi.getHeight(), bi.getColorModel().getPixelSize()));
+    }
+
+    /**
+     * Loads thumbnails.
+     */
+    void loadThumbnails() {
+        // to be implemented in subclass
     }
 
     /**

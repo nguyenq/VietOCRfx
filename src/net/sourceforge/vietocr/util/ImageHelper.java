@@ -17,6 +17,8 @@ package net.sourceforge.vietocr.util;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Common image processing routines.
@@ -219,5 +221,41 @@ public class ImageHelper {
         BufferedImageOp op = new ConvolveOp(kernel);
 
         return op.filter(image, null);
+    }
+    
+    /**
+     * https://github.com/redwarp/9-Patch-Resizer/blob/develop/src/net/redwarp/tool/resizer/worker/ImageScaler.java
+     *
+     * @param image
+     * @param targetWidth
+     * @param targetHeight
+     * @return
+     */
+    public static BufferedImage rescaleImage(BufferedImage image, int targetWidth, int targetHeight) {
+        if (targetWidth == 0) {
+            targetWidth = 1;
+        }
+        if (targetHeight == 0) {
+            targetHeight = 1;
+        }
+        if (targetWidth * 2 < image.getWidth() - 1) {
+            BufferedImage tempImage = rescaleImage(image, image.getWidth() / 2, image.getHeight() / 2);
+            return rescaleImage(tempImage, targetWidth, targetHeight);
+        } else {
+            BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = outputImage.createGraphics();
+
+            Map<RenderingHints.Key, Object> hints = new HashMap<RenderingHints.Key, Object>();
+            hints.put(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+            hints.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+            g2d.setRenderingHints(hints);
+            g2d.drawImage(image, 0, 0, outputImage.getWidth(), outputImage.getHeight(), null);
+            g2d.dispose();
+
+            return outputImage;
+        }
     }
 }
