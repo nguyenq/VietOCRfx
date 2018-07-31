@@ -92,6 +92,8 @@ public class GuiController implements Initializable {
     @FXML
     private SplitPane splitPaneImage;
     @FXML
+    private SplitPane splitPane;
+    @FXML
     protected ImageView imageView;
     @FXML
     protected Canvas canvasImage;
@@ -176,13 +178,13 @@ public class GuiController implements Initializable {
             }
         });
 
-        scrollPaneImage.setOnDragOver(new EventHandler<DragEvent>() {
+        splitPane.setOnDragOver(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
                 Dragboard db = event.getDragboard();
                 if (db.hasFiles()) {
                     File file = db.getFiles().get(0);
-                    boolean isAccepted = file.getName().matches(IMAGE_PATTERN);
+                    boolean isAccepted = file.getName().matches(IMAGE_PATTERN) || file.getName().endsWith(".txt");
                     if (isAccepted) {
                         event.acceptTransferModes(TransferMode.COPY);
                     } else {
@@ -194,7 +196,7 @@ public class GuiController implements Initializable {
             }
         });
 
-        scrollPaneImage.setOnDragDropped(new EventHandler<DragEvent>() {
+        splitPane.setOnDragDropped(new EventHandler<DragEvent>() {
             @Override
             public void handle(DragEvent event) {
                 Dragboard db = event.getDragboard();
@@ -279,7 +281,18 @@ public class GuiController implements Initializable {
             alert.show();
             return;
         }
-        if (!promptToSave()) {
+        // if text file, load it into textarea
+        if (selectedFile.getName().endsWith(".txt")) {
+            if (!promptToSave()) {
+                return;
+            }
+            try {
+                this.textarea.setText(Utils.readTextFile(selectedFile));
+                this.textarea.requestFocus();
+                textFile = selectedFile;
+            } catch (Exception e) {
+                // ignore
+            }
             return;
         }
 
