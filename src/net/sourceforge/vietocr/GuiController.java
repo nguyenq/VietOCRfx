@@ -44,6 +44,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -168,7 +169,7 @@ public class GuiController implements Initializable {
         HBox.setHgrow(rgn4, Priority.ALWAYS);
         Platform.runLater(() -> {
             splitPaneImage.setDividerPositions(0);
-        });
+        });     
 
         this.textarea.lengthProperty().addListener(new InvalidationListener() {
 
@@ -298,15 +299,38 @@ public class GuiController implements Initializable {
 
         this.menuBarController.menuFileController.menuRecentFilesController.updateMRUList(selectedFile.getPath());
 
+        progressBar.setVisible(true);
+        splitPane.setCursor(Cursor.WAIT);
+        
         Task loadWorker = new Task<Void>() {
 
             @Override
             public Void call() throws Exception {
+                updateMessage(bundle.getString("Loading_image..."));
                 readImageFile(selectedFile);
                 return null;
             }
+
+            @Override
+            protected void succeeded() {
+                super.succeeded();
+                updateMessage(bundle.getString("Loading_completed"));
+                updateProgress(1, 1);
+
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.progressProperty().unbind();
+//                        progressBar.setDisable(true);
+//                        progressBar.setVisible(false);
+                        splitPane.setCursor(Cursor.DEFAULT);
+                    }
+                });
+            }
         };
 
+        progressBar.progressProperty().bind(loadWorker.progressProperty());
+        labelStatus.textProperty().bind(loadWorker.messageProperty());
         new Thread(loadWorker).start();
     }
 

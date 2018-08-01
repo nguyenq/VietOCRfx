@@ -16,10 +16,18 @@
 package net.sourceforge.vietocr;
 
 import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
@@ -33,21 +41,33 @@ public class GuiWithThumbnail extends GuiController {
 
     @FXML
     private VBox thumbnailBox;
+    @FXML
+    private ScrollPane thumbnailScrollpane;
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        super.initialize(url, rb);
+        thumbnailBox.prefWidthProperty().bind(thumbnailScrollpane.widthProperty());
+        thumbnailBox.prefHeightProperty().bind(thumbnailScrollpane.heightProperty());
+    }
 
     @Override
     void loadThumbnails() {
         thumbnailBox.getChildren().clear();
-        int i = 0;
-        for (final BufferedImage bi : imageList) {
-            thumbnailBox.getChildren().addAll(createImageView(bi), new Label(String.valueOf(++i)));
-        }
+        LoadThumbnailWorker worker = new LoadThumbnailWorker(imageList);
+        worker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                thumbnailBox.getChildren().addAll(newValue);
+            }
+        });
+        new Thread(worker).start();
     }
 
     private ImageView createImageView(final BufferedImage bi) {
         Image image = SwingFXUtils.toFXImage(ImageHelper.rescaleImage(bi, 85, 110), null);
         ImageView thumbnail = new ImageView(image);
         DropShadow shadow = new DropShadow();
-        shadow.setColor(Color.GRAY);
+        shadow.setColor(Color.GREEN);
         Glow glow = new Glow();
         glow.setInput(shadow);
 
@@ -57,11 +77,36 @@ public class GuiWithThumbnail extends GuiController {
                 thumbnailBox.getChildren().forEach(n -> n.setEffect(null)); // clear effect on all
                 thumbnail.setEffect(glow); // apply effect
                 final Object selectedNode = mouseEvent.getSource();
-                final int selectedIndex = thumbnailBox.getChildren().indexOf(selectedNode);
-                cbPageNum.getSelectionModel().select(selectedIndex / 2); // take labels into account
+                int selectedIndex = thumbnailBox.getChildren().stream()
+                        .filter(ImageView.class::isInstance)
+                        .collect(Collectors.toList())
+                        .indexOf(selectedNode);
+                cbPageNum.getSelectionModel().select(selectedIndex); // take labels into account
             }
         });
 
         return thumbnail;
+    }
+
+    /**
+     * A worker class for loading thumbnails.
+     */
+    class LoadThumbnailWorker extends Task<List<Node>> {
+
+        List<BufferedImage> imageList;
+        int i;
+
+        LoadThumbnailWorker(List<BufferedImage> imageList) {
+            this.imageList = imageList;
+        }
+
+        @Override
+        protected List<Node> call() throws Exception {
+            for (final BufferedImage bi : imageList) {
+                updateValue(Arrays.asList(createImageView(bi), new Label(String.valueOf(++i))));
+            }
+
+            return null;
+        }
     }
 }
