@@ -93,7 +93,7 @@ public class GuiController implements Initializable {
     @FXML
     private SplitPane splitPaneImage;
     @FXML
-    private SplitPane splitPane;
+    protected SplitPane splitPane;
     @FXML
     protected ImageView imageView;
     @FXML
@@ -124,6 +124,8 @@ public class GuiController implements Initializable {
     protected ProgressBar progressBar;
     @FXML
     private HBox segmentedRegionsBox;
+    @FXML
+    protected HBox statusBar;
     @FXML
     protected ChoiceBox cbPageNum;
 
@@ -301,6 +303,7 @@ public class GuiController implements Initializable {
 
         progressBar.setVisible(true);
         splitPane.setCursor(Cursor.WAIT);
+        statusBar.setCursor(Cursor.WAIT);
         
         Task loadWorker = new Task<Void>() {
 
@@ -324,6 +327,7 @@ public class GuiController implements Initializable {
 //                        progressBar.setDisable(true);
 //                        progressBar.setVisible(false);
                         splitPane.setCursor(Cursor.DEFAULT);
+                        statusBar.setCursor(Cursor.DEFAULT);
                     }
                 });
             }

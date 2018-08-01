@@ -206,7 +206,8 @@ public class GuiWithOCR extends GuiWithImageOps {
         }
 
         progressBar.setVisible(true);
-        labelStatus.getScene().setCursor(Cursor.WAIT);
+        splitPane.setCursor(Cursor.WAIT);
+        statusBar.setCursor(Cursor.WAIT);
         this.btnOCR.setDisable(true);
 //        this.miOCR.setDisable(true);
 //        this.miOCRAll.setDisable(true);
@@ -402,8 +403,8 @@ public class GuiWithOCR extends GuiWithImageOps {
 //                miOCRAll.setDisable(false);
             btnCancelOCR.setVisible(false);
             progressBar.setDisable(true);
-            labelStatus.getScene().setCursor(Cursor.DEFAULT);
-            textarea.setCursor(Cursor.DEFAULT);
+            splitPane.setCursor(Cursor.DEFAULT);
+            statusBar.setCursor(Cursor.DEFAULT);
 
             // clean up temporary image files
             if (workingFiles != null) {

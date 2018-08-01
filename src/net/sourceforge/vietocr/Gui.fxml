@@ -254,7 +254,7 @@
         </SplitPane>
     </center>
     <bottom>
-        <HBox prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
+        <HBox fx:id="statusBar" prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
             <children>
                 <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" visible="false" />
                 <Label fx:id="labelStatus" text="" />
