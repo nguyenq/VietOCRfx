@@ -154,6 +154,11 @@ public class GuiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         instance = this;
+        final String os = System.getProperty("os.name");
+        if (os != null && os.startsWith("Mac")) {
+            menuBar.useSystemMenuBarProperty().set(true);
+        }
+
         currentDirectory = prefs.get("currentDirectory", System.getProperty("user.home"));
         outputDirectory = prefs.get("outputDirectory", System.getProperty("user.home"));
         filterIndex = prefs.getInt("filterIndex", 0);
@@ -171,7 +176,7 @@ public class GuiController implements Initializable {
         HBox.setHgrow(rgn4, Priority.ALWAYS);
         Platform.runLater(() -> {
             splitPaneImage.setDividerPositions(0);
-        });     
+        });
 
         this.textarea.lengthProperty().addListener(new InvalidationListener() {
 
@@ -304,7 +309,7 @@ public class GuiController implements Initializable {
         progressBar.setVisible(true);
         splitPane.setCursor(Cursor.WAIT);
         statusBar.setCursor(Cursor.WAIT);
-        
+
         Task loadWorker = new Task<Void>() {
 
             @Override

@@ -108,7 +108,7 @@
                 <version>2.5.2</version>
                 <executions>
                     <execution>
-                        <id>install-external</id>
+                        <id>install-external1</id>
                         <phase>clean</phase>
                         <configuration>
                             <file>${basedir}/lib/uk.co.mmscomputing.device.sane.jar</file>
@@ -116,6 +116,54 @@
                             <groupId>uk.co.mmscomputing</groupId>
                             <artifactId>sane</artifactId>
                             <version>1.0.0</version>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>install-external2</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <file>${basedir}/lib/tar.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>com.ice</groupId>
+                            <artifactId>tar</artifactId>
+                            <version>1.0</version>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>install-external3</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <file>${basedir}/lib/VietKeyInput.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>net.sourceforge.vietpad</groupId>
+                            <artifactId>VietKeyInput</artifactId>
+                            <version>1.0.0</version>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>install-external4</id>
+                        <phase>clean</phase>
+                        <configuration>
+                            <file>${basedir}/lib/jacob.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <groupId>net.sourceforge.jacob-project</groupId>
+                            <artifactId>jacob</artifactId>
+                            <version>1.19.0</version>
                             <packaging>jar</packaging>
                             <generatePom>true</generatePom>
                         </configuration>
