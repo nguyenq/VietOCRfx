@@ -17,8 +17,10 @@ package net.sourceforge.vietocr;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -37,6 +39,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import net.sourceforge.vietocr.util.FormLocalizer;
 import net.sourceforge.vietpad.inputmethod.InputMethods;
 import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 
@@ -52,11 +55,15 @@ public class MenuSettingsController implements Initializable {
     private Menu menuPSM;
     @FXML
     private Menu menuIM;
+    @FXML
+    private Menu miUILanguage;
 
     private final String strPSM = "PageSegMode";
     private final String strInputMethod = "inputMethod";
+    private final String strUILanguage = "UILanguage";
     protected String selectedPSM = "3"; // 3 - Fully automatic page segmentation, but no OSD (default)
     private String selectedInputMethod;
+    private String selectedUILang = "en";
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr3");
 
     /**
@@ -65,9 +72,9 @@ public class MenuSettingsController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         selectedPSM = prefs.get(strPSM, "3");
+
 //        Label labelPSMValue = (Label) menuBar.getScene().lookup("#labelPSMValue");
 //        labelPSMValue.setText(enumOf(selectedPSM));
-
         // build PageSegMode submenu
         ToggleGroup groupPSM = new ToggleGroup();
         for (PageSegMode mode : PageSegMode.values()) {
@@ -93,15 +100,6 @@ public class MenuSettingsController implements Initializable {
 
         // build Input Method submenu
         ToggleGroup groupIM = new ToggleGroup();
-        for (InputMethods im : InputMethods.values()) {
-            String inputMethod = im.name();
-            RadioMenuItem radioItem = new RadioMenuItem(inputMethod);
-            radioItem.setSelected(inputMethod.equals(selectedInputMethod));
-            radioItem.setUserData(selectedInputMethod);
-            radioItem.setToggleGroup(groupIM);
-            menuIM.getItems().add(radioItem);
-        }
-
         groupIM.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
             @Override
             public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
@@ -111,17 +109,77 @@ public class MenuSettingsController implements Initializable {
                 }
             }
         });
+
+        for (InputMethods im : InputMethods.values()) {
+            String inputMethod = im.name();
+            RadioMenuItem radioItem = new RadioMenuItem(inputMethod);
+            radioItem.setUserData(inputMethod);
+            radioItem.setSelected(inputMethod.equals(selectedInputMethod));
+            radioItem.setToggleGroup(groupIM);
+            menuIM.getItems().add(radioItem);
+        }
+
+        VietKeyListener.setSmartMark(true);
+        VietKeyListener.consumeRepeatKey(true);
+
+        selectedUILang = prefs.get(strUILanguage, "en");
+        Locale.setDefault(getLocale(selectedUILang));
+
+        // build UI Language submenu
+        ToggleGroup groupUILang = new ToggleGroup();
+        groupUILang.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
+            public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
+                if (newToggle != null) {
+                    selectedUILang = newToggle.getUserData().toString();
+//                    changeUILanguage(getLocale(selectedUILang));
+                }
+            }
+        });
+
+        String[] uiLangs = getInstalledUILangs();
+        for (String uiLang : uiLangs) {
+            Locale locale = new Locale(uiLang);
+            RadioMenuItem radioItem = new RadioMenuItem(locale.getDisplayLanguage());
+            radioItem.setUserData(locale.getLanguage());
+            radioItem.setSelected(selectedUILang.equals(locale.getLanguage()));
+            radioItem.setToggleGroup(groupUILang);
+            miUILanguage.getItems().add(radioItem);
+        }
     }
 
     void setMenuBar(MenuBar menuBar) {
         this.menuBar = menuBar;
-//        TextArea textarea = (TextArea) menuBar.getScene().lookup("#textarea");
-//        new VietKeyListener(textarea);
-//        VietKeyListener.setInputMethod(InputMethods.valueOf(selectedInputMethod));
-//        VietKeyListener.setSmartMark(true);
-//        VietKeyListener.consumeRepeatKey(true);
-////        boolean vie = curLangCode.startsWith("vie");
-////        VietKeyListener.setVietModeEnabled(vie);
+    }
+
+    private String[] getInstalledUILangs() {
+        String[] locales = {"bn", "ca", "cs", "en", "de", "fa", "hi", "it", "ja", "lt", "ne", "nl", "pl", "ru", "sk", "tr", "vi"};
+        return locales;
+    }
+
+    private Locale getLocale(String selectedUILang) {
+        return new Locale(selectedUILang);
+    }
+
+    /**
+     * Changes locale of UI elements.
+     *
+     * @param locale
+     */
+    void changeUILanguage(final Locale locale) {
+        if (locale.equals(Locale.getDefault())) {
+            return; // no change in locale
+        }
+        Locale.setDefault(locale);
+        ResourceBundle bundle = java.util.ResourceBundle.getBundle("net.sourceforge.vietocr.Gui");
+        Platform.runLater(new Runnable() {
+
+            @Override
+            public void run() {
+                FormLocalizer localizer = new FormLocalizer((Stage) menuBar.getScene().getWindow(), GuiController.class);
+                localizer.ApplyCulture(bundle);
+            }
+        });
     }
 
     @FXML
@@ -186,5 +244,6 @@ public class MenuSettingsController implements Initializable {
 
     void savePrefs() {
         prefs.put(strPSM, selectedPSM);
+        prefs.put(strUILanguage, selectedUILang);
     }
 }

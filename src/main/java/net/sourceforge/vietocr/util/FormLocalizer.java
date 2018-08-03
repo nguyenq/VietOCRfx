@@ -17,14 +17,13 @@ package net.sourceforge.vietocr.util;
 
 import java.lang.reflect.*;
 import java.util.ResourceBundle;
-import java.awt.Window;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.*;
+import javafx.stage.Stage;
 
 public class FormLocalizer {
 
-    private final Window window;
+    private final Stage window;
     private final Class windowType;
     
     private final static Logger logger = Logger.getLogger(FormLocalizer.class.getName());
@@ -34,7 +33,7 @@ public class FormLocalizer {
      * @param window
      * @param windowType
      */
-    public FormLocalizer(Window window, Class windowType) {
+    public FormLocalizer(Stage window, Class windowType) {
         this.window = window;
         this.windowType = windowType;
     }
@@ -54,10 +53,8 @@ public class FormLocalizer {
         String propertyName = "this.Title";
         if (resources.containsKey(propertyName)) {
             text = resources.getString(propertyName);
-            if (window instanceof JFrame) {
-                ((JFrame) window).setTitle(text);
-            } else if (window instanceof JDialog) {
-                ((JDialog) window).setTitle(text);
+            if (window instanceof Stage) {
+                ((Stage) window).setTitle(text);
             }
         }
 
@@ -67,8 +64,8 @@ public class FormLocalizer {
         for (Field fieldInfo : windowType.getDeclaredFields()) {
             Class fieldType = fieldInfo.getType();
             try {
-                // apply only to non-text Swing components
-                if (!isSubclass(fieldType, Class.forName("javax.swing.JComponent")) || isSubclass(fieldType, Class.forName("javax.swing.text.JTextComponent"))) {
+                // apply only to non-text JavaFX controls
+                if (!isSubclass(fieldType, Class.forName("javafx.scene.control.Control")) || isSubclass(fieldType, Class.forName("javafx.scene.control.TextInputControl"))) {
                     continue;
                 }
             } catch (Exception e) {
@@ -83,14 +80,14 @@ public class FormLocalizer {
                         setFieldValue(resources, propertyName, fieldInfo, method);
                     }
 
-                    // setToolTipText for JButton, JToggleButton, JLabel
-                    if ((isSubclass(fieldType, Class.forName("javax.swing.JButton")) || isSubclass(fieldType, Class.forName("javax.swing.JToggleButton")) || isSubclass(fieldType, Class.forName("javax.swing.JLabel"))) && method.getName().equals("setToolTipText") && method.getReturnType() == void.class) {
+                    // setToolTipText for Button, ToggleButton, Label
+                    if ((isSubclass(fieldType, Class.forName("javafx.scene.control.Button")) || isSubclass(fieldType, Class.forName("javafx.scene.control.ToggleButton")) || isSubclass(fieldType, Class.forName("javafx.scene.control.Label"))) && method.getName().equals("setToolTipText") && method.getReturnType() == void.class) {
                         propertyName = fieldInfo.getName() + ".ToolTipText";
                         setFieldValue(resources, propertyName, fieldInfo, method);
                     }
 
                     // setMnemonic for AbstractButton
-                    if (isSubclass(fieldType, Class.forName("javax.swing.AbstractButton")) && method.getName().equals("setMnemonic") && method.getReturnType() == void.class) {
+                    if (isSubclass(fieldType, Class.forName("javafx.scene.control.ButtonBase")) && method.getName().equals("setMnemonic") && method.getReturnType() == void.class) {
                         propertyName = fieldInfo.getName() + ".Mnemonic";
                         setFieldValue(resources, propertyName, fieldInfo, method);
                     }
@@ -101,7 +98,7 @@ public class FormLocalizer {
             }
         }
 
-        window.validate();
+//        window.validate();
     }
 
     void setFieldValue(ResourceBundle resources, String propertyName, Field fieldInfo, Method method) throws Exception {

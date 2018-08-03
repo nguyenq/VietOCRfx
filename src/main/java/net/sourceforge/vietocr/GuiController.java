@@ -73,11 +73,12 @@ import javax.imageio.ImageIO;
 import net.sourceforge.tess4j.util.ImageHelper;
 import net.sourceforge.tess4j.util.ImageIOHelper;
 import net.sourceforge.vietocr.util.Utils;
+import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 
 public class GuiController implements Initializable {
 
     @FXML
-    private MenuBar menuBar;
+    protected MenuBar menuBar;
     @FXML
     private MainMenuController menuBarController;
     @FXML
@@ -170,6 +171,8 @@ public class GuiController implements Initializable {
                 style.contains("Italic") ? FontPosture.ITALIC : FontPosture.REGULAR,
                 prefs.getDouble("fontSize", 12));
         textarea.setFont(font);
+        new VietKeyListener(textarea);
+        
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
         HBox.setHgrow(rgn1, Priority.ALWAYS);
         HBox.setHgrow(rgn3, Priority.ALWAYS);
@@ -271,15 +274,6 @@ public class GuiController implements Initializable {
 //            this.splitPaneImage.setDividerSize(collapsed ? 0 : 5);
         } else if (event.getSource() == btnPaste) {
             pasteImage();
-//        } else if (event.getSource() == btnCancel) {
-//
-//        } else if (event.getSource() == btnClear) {
-//
-//        } else if (event.getSource() == btnSpellCheck) {
-//
-//        } else if (event.getSource() == btnPostProcess) {
-//
-//        } else if (event.getSource() == cbOCRLanguage) {
         }
     }
 

@@ -9,11 +9,7 @@
         <Menu fx:id="menuIM" text="Viet Input _Method">
         </Menu>
         <SeparatorMenuItem mnemonicParsing="false" />
-        <Menu fx:id="miUILanguage" onAction="#handleAction" text="_User Interface Language">
-            <items>
-                <MenuItem mnemonicParsing="false" text="English" />
-                <MenuItem mnemonicParsing="false" text="Vietnamese" />
-            </items>
+        <Menu fx:id="miUILanguage" text="_User Interface Language">
         </Menu>
         <SeparatorMenuItem mnemonicParsing="false" />
         <MenuItem fx:id="miDownloadLangData" onAction="#handleAction" text="_Download Language Data..." />

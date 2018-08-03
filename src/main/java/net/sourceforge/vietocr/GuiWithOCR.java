@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
+import static java.rmi.Naming.lookup;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.List;
@@ -39,9 +40,11 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Menu;
 import javafx.scene.image.Image;
 import javax.imageio.IIOImage;
 import net.sourceforge.vietocr.util.Utils;
+import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 import net.sourceforge.vietpad.utilities.TextUtilities;
 
 public class GuiWithOCR extends GuiWithImageOps {
@@ -302,7 +305,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         }
 
         cbOCRLanguage.getItems().addAll(FXCollections.observableArrayList(installedLanguages));
-        
+
         cbOCRLanguage.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -310,15 +313,20 @@ public class GuiWithOCR extends GuiWithImageOps {
                 for (Object key : lookupISO639.keySet()) {
                     if (lookupISO639.getProperty(key.toString()).equals(newValue)) {
                         curLangCode = key.toString();
+                        boolean vie = curLangCode.startsWith("vie");
+                        VietKeyListener.setVietModeEnabled(vie);
+                        Menu settingsMenu = (Menu) menuBar.getMenus().get(4);
+                        settingsMenu.getItems().get(0).setVisible(vie);
+                        settingsMenu.getItems().get(1).setVisible(vie);
                         break;
                     }
                 }
             }
         });
-        
+
         cbOCRLanguage.getSelectionModel().select(lookupISO639.getProperty(prefs.get(strLangCode, null)));
     }
-    
+
     @Override
     public void savePrefs() {
         prefs.put(strLangCode, curLangCode);
