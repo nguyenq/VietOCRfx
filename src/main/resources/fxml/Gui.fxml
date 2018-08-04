@@ -150,7 +150,7 @@
                     <center>
                         <SplitPane fx:id="splitPaneImage" dividerPositions="0.0" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                             <items>
-                                <ScrollPane fx:id="thumbnailScrollpane" hbarPolicy="NEVER">
+                                <ScrollPane fx:id="thumbnailScrollpane" hbarPolicy="NEVER" minWidth="0.0">
                                     <content>
                                         <VBox fx:id="thumbnailBox" alignment="TOP_CENTER" prefHeight="200.0">
                                           <padding>

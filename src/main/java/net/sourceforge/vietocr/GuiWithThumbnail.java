@@ -28,22 +28,16 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import net.sourceforge.vietocr.util.*;
 
 public class GuiWithThumbnail extends GuiController {
 
     @FXML
-    private VBox thumbnailBox;
-    @FXML
     private ScrollPane thumbnailScrollpane;
-
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         super.initialize(url, rb);
@@ -53,7 +47,6 @@ public class GuiWithThumbnail extends GuiController {
 
     @Override
     void loadThumbnails() {
-        thumbnailBox.getChildren().clear();
         LoadThumbnailWorker worker = new LoadThumbnailWorker(imageList);
         worker.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -66,10 +59,6 @@ public class GuiWithThumbnail extends GuiController {
     private ImageView createImageView(final BufferedImage bi) {
         Image image = SwingFXUtils.toFXImage(ImageHelper.rescaleImage(bi, 85, 110), null);
         ImageView thumbnail = new ImageView(image);
-        DropShadow shadow = new DropShadow();
-        shadow.setColor(Color.GREEN);
-        Glow glow = new Glow();
-        glow.setInput(shadow);
 
         thumbnail.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
@@ -94,7 +83,6 @@ public class GuiWithThumbnail extends GuiController {
     class LoadThumbnailWorker extends Task<List<Node>> {
 
         List<BufferedImage> imageList;
-        int i;
 
         LoadThumbnailWorker(List<BufferedImage> imageList) {
             this.imageList = imageList;
@@ -102,8 +90,14 @@ public class GuiWithThumbnail extends GuiController {
 
         @Override
         protected List<Node> call() throws Exception {
+            int i = 0;
             for (final BufferedImage bi : imageList) {
-                updateValue(Arrays.asList(createImageView(bi), new Label(String.valueOf(++i))));
+                ImageView iv = createImageView(bi);
+                if (i == 0) {
+                    iv.setEffect(glow);
+                }
+                updateValue(Arrays.asList(iv, new Label(String.valueOf(i + 1))));
+                i++;
             }
 
             return null;

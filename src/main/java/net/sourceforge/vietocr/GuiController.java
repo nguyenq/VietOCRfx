@@ -31,6 +31,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -41,28 +42,37 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -101,6 +111,8 @@ public class GuiController implements Initializable {
     protected Canvas canvasImage;
     @FXML
     protected ScrollPane scrollPaneImage;
+    @FXML
+    protected VBox thumbnailBox;
     @FXML
     private Region rgn1;
     @FXML
@@ -150,6 +162,10 @@ public class GuiController implements Initializable {
     private boolean textChanged;
     private File textFile;
 
+    private Node thumbnailPane;
+    double prevDividerPosition;
+    Glow glow;
+
     private final static Logger logger = Logger.getLogger(GuiController.class.getName());
 
     @Override
@@ -172,13 +188,15 @@ public class GuiController implements Initializable {
                 prefs.getDouble("fontSize", 12));
         textarea.setFont(font);
         new VietKeyListener(textarea);
-        
+
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
         HBox.setHgrow(rgn1, Priority.ALWAYS);
         HBox.setHgrow(rgn3, Priority.ALWAYS);
         HBox.setHgrow(rgn4, Priority.ALWAYS);
         Platform.runLater(() -> {
+            thumbnailPane = this.splitPaneImage.getItems().remove(0);
             splitPaneImage.setDividerPositions(0);
+            prevDividerPosition = ((Control) thumbnailPane).getWidth() / this.splitPaneImage.getWidth();
         });
 
         this.textarea.lengthProperty().addListener(new InvalidationListener() {
@@ -222,12 +240,29 @@ public class GuiController implements Initializable {
             }
         });
 
+        DropShadow shadow = new DropShadow();
+        shadow.setColor(Color.GREEN);
+        glow = new Glow();
+        glow.setInput(shadow);
+
         cbPageNum.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue ov, Number value, Number new_value) {
                 imageIndex = new_value.intValue();
                 if (imageIndex >= 0) {
                     loadImage();
+
+                    List<Node> thumbnails = thumbnailBox.getChildren().stream()
+                            .filter(ImageView.class::isInstance)
+                            .collect(Collectors.toList());
+
+                    thumbnails.forEach(node -> {
+                        node.setEffect(null);
+                    });
+
+                    if (thumbnails.size() > 0) {
+                        thumbnails.get(imageIndex).setEffect(glow);
+                    }
                 }
             }
         });
@@ -270,8 +305,14 @@ public class GuiController implements Initializable {
         } else if (event.getSource() == btnCollapseExpand) {
             this.btnCollapseExpand.setText(this.btnCollapseExpand.getText().equals("»") ? "«" : "»");
             boolean collapsed = this.btnCollapseExpand.getText().equals("»");
-            this.splitPaneImage.setDividerPositions(collapsed ? 0 : 0.25);
-//            this.splitPaneImage.setDividerSize(collapsed ? 0 : 5);
+            if (collapsed) {
+                prevDividerPosition = this.splitPaneImage.getDividerPositions()[0];
+                thumbnailPane = this.splitPaneImage.getItems().remove(0);
+                this.splitPaneImage.setDividerPositions(0);
+            } else {
+                this.splitPaneImage.setDividerPositions(prevDividerPosition);
+                this.splitPaneImage.getItems().add(0, thumbnailPane);
+            }
         } else if (event.getSource() == btnPaste) {
             pasteImage();
         }
@@ -303,6 +344,7 @@ public class GuiController implements Initializable {
         progressBar.setVisible(true);
         splitPane.setCursor(Cursor.WAIT);
         statusBar.setCursor(Cursor.WAIT);
+        thumbnailBox.getChildren().clear();
 
         Task loadWorker = new Task<Void>() {
 
@@ -359,12 +401,12 @@ public class GuiController implements Initializable {
             al.addAll(imageList);
             entity = new OCRImageEntity(al, selectedFile.getName(), imageIndex, null, "eng");
             menuBar.setUserData(entity);
-
+            loadThumbnails();            
+                
             Platform.runLater(() -> {
                 labelPageNbr.setText("/ " + imageTotal);
                 cbPageNum.setItems(pageNumbers);
                 cbPageNum.getSelectionModel().selectFirst();
-                loadThumbnails();
                 this.scrollPaneImage.setVvalue(0); // scroll to top
                 this.scrollPaneImage.setHvalue(0); // scroll to left
                 ((Stage) imageView.getScene().getWindow()).setTitle(VietOCR.APP_NAME + " - " + selectedFile.getName());
