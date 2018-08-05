@@ -42,36 +42,21 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -82,6 +67,7 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import net.sourceforge.tess4j.util.ImageHelper;
 import net.sourceforge.tess4j.util.ImageIOHelper;
+import net.sourceforge.vietocr.util.SelectionBox;
 import net.sourceforge.vietocr.util.Utils;
 import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 
@@ -105,6 +91,8 @@ public class GuiController implements Initializable {
     private SplitPane splitPaneImage;
     @FXML
     protected SplitPane splitPane;
+    @FXML
+    protected Group imagePane;
     @FXML
     protected ImageView imageView;
     @FXML
@@ -165,6 +153,7 @@ public class GuiController implements Initializable {
     private Node thumbnailPane;
     double prevDividerPosition;
     Glow glow;
+    SelectionBox selectionBox;
 
     private final static Logger logger = Logger.getLogger(GuiController.class.getName());
 
@@ -188,6 +177,9 @@ public class GuiController implements Initializable {
                 prefs.getDouble("fontSize", 12));
         textarea.setFont(font);
         new VietKeyListener(textarea);
+        selectionBox = new SelectionBox(imagePane);
+        
+        btnSave.disableProperty().bind(textarea.textProperty().length().isEqualTo(0));
 
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
         HBox.setHgrow(rgn1, Priority.ALWAYS);
@@ -401,14 +393,18 @@ public class GuiController implements Initializable {
             al.addAll(imageList);
             entity = new OCRImageEntity(al, selectedFile.getName(), imageIndex, null, "eng");
             menuBar.setUserData(entity);
-            loadThumbnails();            
-                
+            imageView.setScaleX(1);
+            imageView.setScaleY(1);
+            imageView.setRotate(0);
+            loadThumbnails();
+
             Platform.runLater(() -> {
                 labelPageNbr.setText("/ " + imageTotal);
                 cbPageNum.setItems(pageNumbers);
                 cbPageNum.getSelectionModel().selectFirst();
                 this.scrollPaneImage.setVvalue(0); // scroll to top
                 this.scrollPaneImage.setHvalue(0); // scroll to left
+                setButtons();
                 ((Stage) imageView.getScene().getWindow()).setTitle(VietOCR.APP_NAME + " - " + selectedFile.getName());
             });
         } catch (OutOfMemoryError oome) {
@@ -428,6 +424,10 @@ public class GuiController implements Initializable {
         BufferedImage bi = imageList.get(imageIndex);
         imageView.setImage(SwingFXUtils.toFXImage(bi, null));
         labelDimensionValue.setText(String.format("%s × %spx  %sbpp", bi.getWidth(), bi.getHeight(), bi.getColorModel().getPixelSize()));
+    }
+
+    void setButtons() {
+        // to be implemented in subclass
     }
 
     /**

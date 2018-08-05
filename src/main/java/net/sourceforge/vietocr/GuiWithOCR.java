@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
-import static java.rmi.Naming.lookup;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.List;
@@ -121,9 +120,10 @@ public class GuiWithOCR extends GuiWithImageOps {
                 return;
             }
 
-            Rectangle rect = null; //((JImageLabel) imageView).getRect();
+            javafx.scene.shape.Rectangle roi = selectionBox.getRect();
+            Rectangle rect = new Rectangle((int)roi.getX(), (int)roi.getY(), (int)roi.getWidth(), (int)roi.getHeight());
 
-            if (rect != null) {
+            if (!rect.isEmpty()) {
                 try {
                     Image ii = (Image) this.imageView.getImage();
                     int offsetX = 0;

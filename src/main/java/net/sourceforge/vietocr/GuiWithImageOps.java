@@ -74,6 +74,25 @@ public class GuiWithImageOps extends GuiWithScan {
         }
     }
 
+    @Override
+    void setButtons() {
+        this.btnFitImage.setDisable(false);
+        this.btnActualSize.setDisable(true);
+        this.btnZoomIn.setDisable(false);
+        this.btnZoomOut.setDisable(false);
+
+        if (imageList.size() == 1) {
+            this.btnNextPage.setDisable(true);
+            this.btnPrevPage.setDisable(true);
+        } else {
+            this.btnNextPage.setDisable(false);
+            this.btnPrevPage.setDisable(false);
+        }
+
+        this.btnRotateCCW.setDisable(false);
+        this.btnRotateCW.setDisable(false);
+    }
+
     void btnPrevPageActionPerformed(ActionEvent evt) {
 //        this.labelStatus.setText(null);
         progressBar.setVisible(false);
@@ -96,6 +115,14 @@ public class GuiWithImageOps extends GuiWithScan {
         this.btnActualSize.setDisable(false);
         this.btnZoomIn.setDisable(true);
         this.btnZoomOut.setDisable(true);
+
+        imageView.setScaleX(1);
+        imageView.setScaleY(1);
+        imageView.fitWidthProperty().bind(scrollPaneImage.widthProperty());
+        imageView.fitHeightProperty().bind(scrollPaneImage.heightProperty());
+        imageView.fitWidthProperty().unbind();
+        imageView.fitHeightProperty().unbind();
+
 //        canvasImage.deselect();
 //        canvasImage.setSegmentedRegions(null);
 //        curScrollPos = this.scrollPaneImage.getViewport().getViewPosition();
@@ -128,6 +155,14 @@ public class GuiWithImageOps extends GuiWithScan {
 //        fitImageChange(originalW, originalH);
         scaleX = scaleY = 1f;
         isFitImageSelected = false;
+        imageView.fitWidthProperty().bind(imageView.xProperty());
+        imageView.fitHeightProperty().bind(imageView.yProperty());
+        imageView.fitWidthProperty().unbind();
+        imageView.fitHeightProperty().unbind();
+        scrollPaneImage.setFitToWidth(false);
+        scrollPaneImage.setFitToHeight(false);
+        imageView.setScaleX(1);
+        imageView.setScaleY(1);
     }
 
     void btnZoomOutActionPerformed(ActionEvent evt) {
@@ -159,14 +194,19 @@ public class GuiWithImageOps extends GuiWithScan {
                 double width = imageView.getImage().getWidth();
                 double height = imageView.getImage().getHeight();
 
+//                imageView.setPreserveRatio(true);
                 if (isZoomIn) {
+                    imageView.setScaleX(imageView.getScaleX() * ZOOM_FACTOR);
+                    imageView.setScaleY(imageView.getScaleY() * ZOOM_FACTOR);
 //                    image.setScaledSize((int) (width * ZOOM_FACTOR), (int) (height * ZOOM_FACTOR));
                 } else {
+                    imageView.setScaleX(imageView.getScaleX() / ZOOM_FACTOR);
+                    imageView.setScaleY(imageView.getScaleY() / ZOOM_FACTOR);
 //                    image.setScaledSize((int) (width / ZOOM_FACTOR), (int) (height / ZOOM_FACTOR));
                 }
 
 //                jImageLabel.revalidate();
-//                scrollPaneImage.repaint();
+                scrollPaneImage.requestLayout();
                 if (isZoomIn) {
                     scaleX /= ZOOM_FACTOR;
                     scaleY /= ZOOM_FACTOR;
@@ -184,6 +224,8 @@ public class GuiWithImageOps extends GuiWithScan {
      * @param evt
      */
     void btnRotateCCWActionPerformed(ActionEvent evt) {
+        this.imageView.setRotate(this.imageView.getRotate() - 90);
+        scrollPaneImage.requestLayout();
         rotateImage(270d);
 //        clearStack();
     }
@@ -194,6 +236,8 @@ public class GuiWithImageOps extends GuiWithScan {
      * @param evt
      */
     void btnRotateCWActionPerformed(ActionEvent evt) {
+        this.imageView.setRotate(this.imageView.getRotate() + 90);
+        scrollPaneImage.requestLayout();
         rotateImage(90d);
 //        clearStack();
     }
