@@ -122,6 +122,7 @@ public class GuiWithImageOps extends GuiWithScan {
         imageView.fitHeightProperty().bind(scrollPaneImage.heightProperty());
         imageView.fitWidthProperty().unbind();
         imageView.fitHeightProperty().unbind();
+        selectionBox.deselect();
 
 //        canvasImage.deselect();
 //        canvasImage.setSegmentedRegions(null);
@@ -163,6 +164,7 @@ public class GuiWithImageOps extends GuiWithScan {
         scrollPaneImage.setFitToHeight(false);
         imageView.setScaleX(1);
         imageView.setScaleY(1);
+        selectionBox.deselect();
     }
 
     void btnZoomOutActionPerformed(ActionEvent evt) {
@@ -171,6 +173,7 @@ public class GuiWithImageOps extends GuiWithScan {
         doChange(false);
         isFitImageSelected = false;
         this.btnActualSize.setDisable(false);
+        selectionBox.deselect();
     }
 
     void btnZoomInActionPerformed(ActionEvent evt) {
@@ -179,6 +182,7 @@ public class GuiWithImageOps extends GuiWithScan {
         doChange(true);
         isFitImageSelected = false;
         this.btnActualSize.setDisable(false);
+        selectionBox.deselect();
     }
 
     /**
@@ -227,6 +231,7 @@ public class GuiWithImageOps extends GuiWithScan {
         this.imageView.setRotate(this.imageView.getRotate() - 90);
         scrollPaneImage.requestLayout();
         rotateImage(270d);
+        selectionBox.deselect();
 //        clearStack();
     }
 
@@ -239,6 +244,7 @@ public class GuiWithImageOps extends GuiWithScan {
         this.imageView.setRotate(this.imageView.getRotate() + 90);
         scrollPaneImage.requestLayout();
         rotateImage(90d);
+        selectionBox.deselect();
 //        clearStack();
     }
 

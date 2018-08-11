@@ -274,7 +274,8 @@ public class GuiController implements Initializable {
         if (event.getSource() == btnOpen) {
             FileChooser fc = new FileChooser();
             fc.setTitle("Open Image File");
-            fc.setInitialDirectory(new File(currentDirectory));
+            File curDir = new File(currentDirectory);
+            fc.setInitialDirectory(curDir.exists() ? curDir : new File(System.getProperty("user.home")));
             FileChooser.ExtensionFilter allImageFilter = new FileChooser.ExtensionFilter(bundle.getString("All_Image_Files"), "*.bmp", "*.jpg", "*.jpeg", "*.png", "*.tif", "*.tiff");
             FileChooser.ExtensionFilter pngFilter = new FileChooser.ExtensionFilter("PNG", "*.png");
             FileChooser.ExtensionFilter tiffFilter = new FileChooser.ExtensionFilter("TIFF", "*.tif", "*.tiff");
@@ -423,6 +424,7 @@ public class GuiController implements Initializable {
     void loadImage() {
         BufferedImage bi = imageList.get(imageIndex);
         imageView.setImage(SwingFXUtils.toFXImage(bi, null));
+        selectionBox.deselect();
         labelDimensionValue.setText(String.format("%s × %spx  %sbpp", bi.getWidth(), bi.getHeight(), bi.getColorModel().getPixelSize()));
     }
 

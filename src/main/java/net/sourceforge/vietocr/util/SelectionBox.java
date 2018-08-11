@@ -30,7 +30,7 @@ public class SelectionBox {
 
         selectionBox.setStyle(
                 "-fx-stroke: forestgreen; "
-                + "-fx-stroke-width: 2px; "
+                + "-fx-stroke-width: 1px; "
                 + "-fx-stroke-dash-array: 12 2 4 2; "
                 + "-fx-stroke-dash-offset: 6; "
                 + "-fx-stroke-line-cap: butt; "
@@ -46,6 +46,14 @@ public class SelectionBox {
 
     public Rectangle getRect() {
         return selectionBox;
+    }
+    
+    /**
+     * Deselects selection box.
+     */
+    public void deselect() {
+        selectionBox.setWidth(0);
+        selectionBox.setHeight(0);
     }
 
     /**

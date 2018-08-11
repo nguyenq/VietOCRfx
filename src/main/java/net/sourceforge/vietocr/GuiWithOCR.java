@@ -126,14 +126,14 @@ public class GuiWithOCR extends GuiWithImageOps {
             if (!rect.isEmpty()) {
                 try {
                     Image ii = (Image) this.imageView.getImage();
-                    int offsetX = 0;
-                    int offsetY = 0;
-//                    if (ii.getIconWidth() < this.jScrollPaneImage.getWidth()) {
-//                        offsetX = (this.jScrollPaneImage.getViewport().getWidth() - ii.getIconWidth()) / 2;
-//                    }
-//                    if (ii.getIconHeight() < this.jScrollPaneImage.getHeight()) {
-//                        offsetY = (this.jScrollPaneImage.getViewport().getHeight() - ii.getIconHeight()) / 2;
-//                    }
+                    double offsetX = 0;
+                    double offsetY = 0;
+                    if (ii.getWidth() < this.scrollPaneImage.getWidth()) {
+                        offsetX = (this.scrollPaneImage.getViewportBounds().getWidth() - ii.getWidth()) / 2;
+                    }
+                    if (ii.getHeight() < this.scrollPaneImage.getHeight()) {
+                        offsetY = (this.scrollPaneImage.getViewportBounds().getHeight() - ii.getHeight()) / 2;
+                    }
 //                BufferedImage bi = ((BufferedImage) ii.getImage()).getSubimage((int) ((rect.x - offsetX) * scaleX), (int) ((rect.y - offsetY) * scaleY), (int) (rect.width * scaleX), (int) (rect.height * scaleY));
 
 //                // create a new rectangle with scale factors and offets factored in
