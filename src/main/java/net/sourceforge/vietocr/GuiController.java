@@ -124,8 +124,6 @@ public class GuiController implements Initializable {
     @FXML
     protected ProgressBar progressBar;
     @FXML
-    private HBox segmentedRegionsBox;
-    @FXML
     protected HBox statusBar;
     @FXML
     protected ChoiceBox cbPageNum;
@@ -521,7 +519,7 @@ public class GuiController implements Initializable {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
     }
-
+    
     /**
      * Quits the application.
      */

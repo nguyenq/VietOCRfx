@@ -1,5 +1,6 @@
 package net.sourceforge.vietocr.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +24,11 @@ public class SelectionBox {
     double mouseAnchorX;
     double mouseAnchorY;
     boolean dragdrawing;
-    HashMap<Color, List<Rectangle>> map;
+    HashMap<Color, List<java.awt.Rectangle>> map;
+    Group group;
 
     public SelectionBox(Group group) {
+        this.group = group;
         selectionBox = createDraggableRectangle();
 
         selectionBox.setStyle(
@@ -47,7 +50,7 @@ public class SelectionBox {
     public Rectangle getRect() {
         return selectionBox;
     }
-    
+
     /**
      * Deselects selection box.
      */
@@ -61,7 +64,7 @@ public class SelectionBox {
      *
      * @return map
      */
-    public HashMap<Color, List<Rectangle>> getSegmentedRegions() {
+    public HashMap<Color, List<java.awt.Rectangle>> getSegmentedRegions() {
         return map;
     }
 
@@ -70,8 +73,22 @@ public class SelectionBox {
      *
      * @param map
      */
-    public void setSegmentedRegions(HashMap<Color, List<Rectangle>> map) {
+    public void setSegmentedRegions(HashMap<Color, List<java.awt.Rectangle>> map) {
         this.map = map;
+        
+        if (map == null) {
+            // remove all SegmentedRegions from group
+            group.getChildren().removeIf(n -> n instanceof SegmentedRegion);
+            return;
+        }
+
+        List<SegmentedRegion> regions = new ArrayList<>();
+        for (Color c : map.keySet()) {
+            for (java.awt.Rectangle region : map.get(c)) {
+                regions.add(new SegmentedRegion(region, c));
+            }
+        }
+        group.getChildren().addAll(regions);
     }
 
     EventHandler<MouseEvent> onMousePressedEventHandler = new EventHandler<MouseEvent>() {
@@ -80,7 +97,7 @@ public class SelectionBox {
         public void handle(MouseEvent event) {
             mouseAnchorX = event.getX();
             mouseAnchorY = event.getY();
-            
+
             selectionBox.getParent().requestFocus();
 
             if (selectionBox.getParent().getChildrenUnmodifiable().filtered(grip -> (grip instanceof Rectangle) && grip.contains(mouseAnchorX, mouseAnchorY)).isEmpty()) {
@@ -398,6 +415,16 @@ public class SelectionBox {
             setStroke(color);
             setStrokeWidth(1);
             setStrokeType(StrokeType.OUTSIDE);
+        }
+    }
+
+    class SegmentedRegion extends Rectangle {
+
+        SegmentedRegion(java.awt.Rectangle rect, Color color) {
+            super(rect.x, rect.y, rect.width, rect.height);
+            setFill(Color.TRANSPARENT);
+            setStroke(color);
+            setStrokeWidth(1);
         }
     }
 }

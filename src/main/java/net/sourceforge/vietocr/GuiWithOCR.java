@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.Collator;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -38,10 +39,14 @@ import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuButton;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javax.imageio.IIOImage;
+import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.vietocr.util.Utils;
 import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 import net.sourceforge.vietpad.utilities.TextUtilities;
@@ -62,6 +67,18 @@ public class GuiWithOCR extends GuiWithImageOps {
     private Button btnPostProcess;
     @FXML
     private ComboBox cbOCRLanguage;
+    @FXML
+    private MenuButton btnSegmentedRegions;
+    @FXML
+    private CheckMenuItem chbCharacter; 
+    @FXML
+    private CheckMenuItem chbBlock;
+    @FXML
+    private CheckMenuItem chbWord;
+    @FXML
+    private CheckMenuItem chbTextLine;
+    @FXML
+    private CheckMenuItem chbParagraph;
 
     static GuiWithOCR instance;
 
@@ -96,6 +113,9 @@ public class GuiWithOCR extends GuiWithImageOps {
         btnCancelOCR.managedProperty().bind(btnCancelOCR.visibleProperty());
         getInstalledLanguagePacks();
         populateOCRLanguageBox();
+        btnSegmentedRegions.visibleProperty().addListener((observable) -> {
+            setSegmentedRegions();
+        });
     }
 
     /**
@@ -188,7 +208,9 @@ public class GuiWithOCR extends GuiWithImageOps {
         } else if (event.getSource() == btnPostProcess) {
 
         } else if (event.getSource() == cbOCRLanguage) {
-
+            
+        } else if (event.getSource() == chbCharacter || event.getSource() == chbWord || event.getSource() == chbTextLine || event.getSource() == chbParagraph || event.getSource() == chbBlock) {
+            setSegmentedRegions();
         } else {
             super.handleAction(event);
         }
@@ -325,6 +347,76 @@ public class GuiWithOCR extends GuiWithImageOps {
         });
 
         cbOCRLanguage.getSelectionModel().select(lookupISO639.getProperty(prefs.get(strLangCode, null)));
+    }
+    
+    void setSegmentedRegions() {
+        if (!btnSegmentedRegions.isVisible() || iioImageList == null || !this.btnActualSize.isDisabled()) {
+            selectionBox.setSegmentedRegions(null);
+            return;
+        }
+
+        try {
+            OCR<IIOImage> ocrEngine = new OCRImages(tessPath); // for Tess4J
+            ocrEngine.setDatapath(datapath);
+            HashMap<Color, List<Rectangle>> map = selectionBox.getSegmentedRegions();
+            if (map == null) {
+                map = new HashMap<Color, List<Rectangle>>();
+            }
+
+            IIOImage image = iioImageList.get(imageIndex);
+
+            List<Rectangle> regions;
+
+            if (chbBlock.isSelected()) {
+                if (!map.containsKey(Color.GRAY)) {
+                    regions = ocrEngine.getSegmentedRegions(image, ITessAPI.TessPageIteratorLevel.RIL_BLOCK);
+                    map.put(Color.GRAY, regions);
+                }
+            } else {
+                map.remove(Color.GRAY);
+            }
+
+            if (chbParagraph.isSelected()) {
+                if (!map.containsKey(Color.GREEN)) {
+                    regions = ocrEngine.getSegmentedRegions(image, ITessAPI.TessPageIteratorLevel.RIL_PARA);
+                    map.put(Color.GREEN, regions);
+                }
+            } else {
+                map.remove(Color.GREEN);
+            }
+
+            if (chbTextLine.isSelected()) {
+                if (!map.containsKey(Color.RED)) {
+                    regions = ocrEngine.getSegmentedRegions(image, ITessAPI.TessPageIteratorLevel.RIL_TEXTLINE);
+                    map.put(Color.RED, regions);
+                }
+            } else {
+                map.remove(Color.RED);
+            }
+
+            if (chbWord.isSelected()) {
+                if (!map.containsKey(Color.BLUE)) {
+                    regions = ocrEngine.getSegmentedRegions(image, ITessAPI.TessPageIteratorLevel.RIL_WORD);
+                    map.put(Color.BLUE, regions);
+                }
+            } else {
+                map.remove(Color.BLUE);
+            }
+
+            if (chbCharacter.isSelected()) {
+                if (!map.containsKey(Color.MAGENTA)) {
+                    regions = ocrEngine.getSegmentedRegions(image, ITessAPI.TessPageIteratorLevel.RIL_SYMBOL);
+                    map.put(Color.MAGENTA, regions);
+                }
+            } else {
+                map.remove(Color.MAGENTA);
+            }
+            
+            selectionBox.setSegmentedRegions(null);
+            selectionBox.setSegmentedRegions(map);
+        } catch (Exception ex) {
+            Logger.getLogger(GuiController.class.getName()).log(Level.INFO, null, ex);
+        }
     }
 
     @Override

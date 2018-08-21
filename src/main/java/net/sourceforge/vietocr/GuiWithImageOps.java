@@ -39,7 +39,7 @@ public class GuiWithImageOps extends GuiWithScan {
     @FXML
     private Button btnZoomOut;
     @FXML
-    private Button btnActualSize;
+    protected Button btnActualSize;
     @FXML
     private Button btnFitImage;
 

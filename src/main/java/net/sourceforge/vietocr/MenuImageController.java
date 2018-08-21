@@ -202,8 +202,8 @@ public class MenuImageController implements Initializable {
             Label labelScreenShotMode = (Label) menuBar.getScene().lookup("#labelScreenShotMode");
             labelScreenShotMode.setText(this.chmiScreenshotMode.isSelected() ? "On" : "Off");
         } else if (event.getSource() == chmiSegmentedRegions) {
-            Node segmentedRegionsBox = menuBar.getScene().lookup("#segmentedRegionsBox");
-            segmentedRegionsBox.setVisible(chmiSegmentedRegions.isSelected());
+            Node btnSegmentedRegions = menuBar.getScene().lookup("#btnSegmentedRegions");
+            btnSegmentedRegions.setVisible(chmiSegmentedRegions.isSelected());
         }
     }
 

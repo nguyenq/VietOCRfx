@@ -3,10 +3,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
@@ -269,16 +270,15 @@
                 <Label fx:id="labelDimensionValue" text="0 x 0px 0bpp" />
                 <Separator orientation="VERTICAL" />
                 <Region fx:id="rgn3" />
-                <HBox fx:id="segmentedRegionsBox" spacing="5.0" visible="false">
-                    <children>
-                        <Label text="Segmented Regions:" />
-                        <CheckBox text="Character" />
-                        <CheckBox text="Word" />
-                        <CheckBox text="Text Line" />
-                        <CheckBox text="Paragraph" />
-                        <CheckBox text="Block" />
-                    </children>
-                </HBox>
+                <MenuButton fx:id="btnSegmentedRegions" popupSide="TOP" text="Segmented Regions" visible="false" >
+                    <items>
+                        <CheckMenuItem fx:id="chbCharacter" text="Character" onAction="#handleAction"/>
+                        <CheckMenuItem fx:id="chbWord" text="Word" onAction="#handleAction"/>
+                        <CheckMenuItem fx:id="chbTextLine" text="Text Line" onAction="#handleAction"/>
+                        <CheckMenuItem fx:id="chbParagraph" text="Paragraph" onAction="#handleAction"/>
+                        <CheckMenuItem fx:id="chbBlock" text="Block" onAction="#handleAction"/>
+                    </items>
+                </MenuButton>
                 <Region fx:id="rgn4" />
                 <Separator orientation="VERTICAL" />
                 <Label text="Screenshot:" />
