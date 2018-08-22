@@ -6,9 +6,9 @@
 
 <Menu text="_Settings" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.MenuSettingsController">
     <items>
-        <Menu fx:id="menuIM" text="Viet Input _Method">
+        <Menu fx:id="menuIM" text="Viet Input _Method" visible="false" >
         </Menu>
-        <SeparatorMenuItem mnemonicParsing="false" />
+        <SeparatorMenuItem mnemonicParsing="false"  visible="false" />
         <Menu fx:id="miUILanguage" text="_User Interface Language">
         </Menu>
         <SeparatorMenuItem mnemonicParsing="false" />

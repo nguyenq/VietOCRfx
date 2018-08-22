@@ -23,6 +23,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -31,18 +32,15 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javax.imageio.IIOImage;
@@ -66,11 +64,11 @@ public class GuiWithOCR extends GuiWithImageOps {
     @FXML
     private Button btnPostProcess;
     @FXML
-    private ComboBox cbOCRLanguage;
+    private MenuButton mbtnOCRLanguage;
     @FXML
     private MenuButton btnSegmentedRegions;
     @FXML
-    private CheckMenuItem chbCharacter; 
+    private CheckMenuItem chbCharacter;
     @FXML
     private CheckMenuItem chbBlock;
     @FXML
@@ -141,7 +139,7 @@ public class GuiWithOCR extends GuiWithImageOps {
             }
 
             javafx.scene.shape.Rectangle roi = selectionBox.getRect();
-            Rectangle rect = new Rectangle((int)roi.getX(), (int)roi.getY(), (int)roi.getWidth(), (int)roi.getHeight());
+            Rectangle rect = new Rectangle((int) roi.getX(), (int) roi.getY(), (int) roi.getWidth(), (int) roi.getHeight());
 
             if (!rect.isEmpty()) {
                 try {
@@ -207,8 +205,6 @@ public class GuiWithOCR extends GuiWithImageOps {
             textarea.selectRange(start, start + result.length());
         } else if (event.getSource() == btnPostProcess) {
 
-        } else if (event.getSource() == cbOCRLanguage) {
-            
         } else if (event.getSource() == chbCharacter || event.getSource() == chbWord || event.getSource() == chbTextLine || event.getSource() == chbParagraph || event.getSource() == chbBlock) {
             setSegmentedRegions();
         } else {
@@ -240,7 +236,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         OCRImageEntity entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, curLangCode);
 //        entity.setScreenshotMode(this.checkBoxMenuItemScreenshotMode.isSelected());
 
-        // instantiate SwingWorker for OCR
+        // instantiate Task for OCR
         ocrWorker = new OcrWorker(entity);
         progressBar.progressProperty().bind(ocrWorker.progressProperty());
         labelStatus.textProperty().bind(ocrWorker.messageProperty());
@@ -326,29 +322,46 @@ public class GuiWithOCR extends GuiWithImageOps {
             return;
         }
 
-        cbOCRLanguage.getItems().addAll(FXCollections.observableArrayList(installedLanguages));
+        final List<String> selectedOCRLangs = new ArrayList<>();
+        final List<String> selectedLangCodes = new ArrayList<>();
 
-        cbOCRLanguage.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+        for (int i = 0; i < installedLanguages.length; i++) {
+            String lang = installedLanguages[i];
+            CheckMenuItem item = new CheckMenuItem(lang);
+            item.setUserData(installedLanguageCodes[i]);
+            item.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
+                if (newValue) {
+                    selectedOCRLangs.add(item.getText());
+                    selectedLangCodes.add((String) item.getUserData());
+                } else {
+                    selectedOCRLangs.remove(item.getText());
+                    selectedLangCodes.remove((String) item.getUserData());
+                }
 
-                for (Object key : lookupISO639.keySet()) {
-                    if (lookupISO639.getProperty(key.toString()).equals(newValue)) {
-                        curLangCode = key.toString();
-                        boolean vie = curLangCode.startsWith("vie");
-                        VietKeyListener.setVietModeEnabled(vie);
-                        Menu settingsMenu = (Menu) menuBar.getMenus().get(4);
-                        settingsMenu.getItems().get(0).setVisible(vie);
-                        settingsMenu.getItems().get(1).setVisible(vie);
-                        break;
-                    }
+                curLangCode = String.join("+", selectedLangCodes);
+                mbtnOCRLanguage.setText(String.join("+", selectedOCRLangs));
+
+                // Show Viet Input Method submenu if selected OCR language is Vietnamese
+                boolean isViet = curLangCode.contains("vie");
+                VietKeyListener.setVietModeEnabled(isViet);
+                Menu settingsMenu = (Menu) menuBar.getMenus().get(4);
+                settingsMenu.getItems().get(0).setVisible(isViet);
+                settingsMenu.getItems().get(1).setVisible(isViet);
+            });
+
+            mbtnOCRLanguage.getItems().add(item);
+        }
+
+        String savedLangCodes = prefs.get(strLangCode, "");
+        for (String langCode : savedLangCodes.split("\\+")) {
+            for (MenuItem item : mbtnOCRLanguage.getItems()) {
+                if (langCode.equals((String) item.getUserData())) {
+                    ((CheckMenuItem) item).setSelected(true);
                 }
             }
-        });
-
-        cbOCRLanguage.getSelectionModel().select(lookupISO639.getProperty(prefs.get(strLangCode, null)));
+        }
     }
-    
+
     void setSegmentedRegions() {
         if (!btnSegmentedRegions.isVisible() || iioImageList == null || !this.btnActualSize.isDisabled()) {
             selectionBox.setSegmentedRegions(null);
@@ -411,7 +424,7 @@ public class GuiWithOCR extends GuiWithImageOps {
             } else {
                 map.remove(Color.MAGENTA);
             }
-            
+
             selectionBox.setSegmentedRegions(null);
             selectionBox.setSegmentedRegions(map);
         } catch (Exception ex) {
