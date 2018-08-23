@@ -85,6 +85,7 @@ public class MenuImageController implements Initializable {
     private CheckMenuItem chmiSegmentedRegions;
 
     private final String strScreenshotMode = "ScreenshotMode";
+    private static final String strSegmentedRegions = "SegmentedRegions";
     private static final double MINIMUM_DESKEW_THRESHOLD = 0.05d;
     private BufferedImage originalImage;
     Deque<BufferedImage> stack = new FixedSizeStack<BufferedImage>(10);
@@ -98,7 +99,7 @@ public class MenuImageController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
         this.chmiScreenshotMode.setSelected(prefs.getBoolean(strScreenshotMode, false));
-//        labelScreenShotMode.setText(this.chmiScreenshotMode.isSelected() ? "On" : "Off");
+        this.chmiSegmentedRegions.setSelected(prefs.getBoolean(strSegmentedRegions, false));
     }
 
     void setMenuBar(MenuBar menuBar) {
@@ -269,6 +270,7 @@ public class MenuImageController implements Initializable {
     }
 
     void savePrefs() {
-
+        prefs.putBoolean(strScreenshotMode, this.chmiScreenshotMode.isSelected());
+        prefs.putBoolean(strSegmentedRegions, this.chmiSegmentedRegions.isSelected());
     }
 }

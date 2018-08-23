@@ -79,6 +79,12 @@ public class GuiWithOCR extends GuiWithImageOps {
     private CheckMenuItem chbParagraph;
 
     static GuiWithOCR instance;
+    
+    private static final String strSegmentedRegionsPara = "SegmentedRegionsPara";
+    private static final String strSegmentedRegionsTextLine = "SegmentedRegionsTextLine";
+    private static final String strSegmentedRegionsSymbol = "SegmentedRegionsSymbol";
+    private static final String strSegmentedRegionsBlock = "SegmentedRegionsBlock";
+    private static final String strSegmentedRegionsWord = "SegmentedRegionsWord";
 
     protected final File supportDir = new File(System.getProperty("user.home")
             + (MAC_OS_X ? "/Library/Application Support/" + VietOCR.APP_NAME : "/." + VietOCR.APP_NAME.toLowerCase()));
@@ -107,6 +113,12 @@ public class GuiWithOCR extends GuiWithImageOps {
         super.initialize(url, rb);
 
         instance = this;
+        
+        this.chbParagraph.setSelected(prefs.getBoolean(strSegmentedRegionsPara, false));
+        this.chbCharacter.setSelected(prefs.getBoolean(strSegmentedRegionsSymbol, false));
+        this.chbTextLine.setSelected(prefs.getBoolean(strSegmentedRegionsTextLine, false));
+        this.chbBlock.setSelected(prefs.getBoolean(strSegmentedRegionsBlock, false));
+        this.chbWord.setSelected(prefs.getBoolean(strSegmentedRegionsWord, false));
 
         btnCancelOCR.managedProperty().bind(btnCancelOCR.visibleProperty());
         getInstalledLanguagePacks();
@@ -435,6 +447,11 @@ public class GuiWithOCR extends GuiWithImageOps {
     @Override
     public void savePrefs() {
         prefs.put(strLangCode, curLangCode);
+        prefs.putBoolean(strSegmentedRegionsPara, this.chbParagraph.isSelected());
+        prefs.putBoolean(strSegmentedRegionsSymbol, this.chbCharacter.isSelected());
+        prefs.putBoolean(strSegmentedRegionsTextLine, this.chbTextLine.isSelected());
+        prefs.putBoolean(strSegmentedRegionsBlock, this.chbBlock.isSelected());
+        prefs.putBoolean(strSegmentedRegionsWord, this.chbWord.isSelected());
         super.savePrefs();
     }
 

@@ -269,7 +269,6 @@
                 <Label text="Image:" />
                 <Label fx:id="labelDimensionValue" text="0 x 0px 0bpp" />
                 <Separator orientation="VERTICAL" />
-                <Region fx:id="rgn3" />
                 <MenuButton fx:id="btnSegmentedRegions" popupSide="TOP" text="Segmented Regions" visible="false">
                     <items>
                         <CheckMenuItem fx:id="chbCharacter" onAction="#handleAction" text="Character" />

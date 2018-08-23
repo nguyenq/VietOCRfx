@@ -106,8 +106,6 @@ public class GuiController implements Initializable {
     @FXML
     private Region rgn2;
     @FXML
-    private Region rgn3;
-    @FXML
     private Region rgn4;
     @FXML
     protected TextArea textarea;
@@ -181,7 +179,6 @@ public class GuiController implements Initializable {
 
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
         HBox.setHgrow(rgn1, Priority.ALWAYS);
-        HBox.setHgrow(rgn3, Priority.ALWAYS);
         HBox.setHgrow(rgn4, Priority.ALWAYS);
         Platform.runLater(() -> {
             thumbnailPane = this.splitPaneImage.getItems().remove(0);
@@ -423,10 +420,15 @@ public class GuiController implements Initializable {
         BufferedImage bi = imageList.get(imageIndex);
         imageView.setImage(SwingFXUtils.toFXImage(bi, null));
         selectionBox.deselect();
+        setSegmentedRegions();
         labelDimensionValue.setText(String.format("%s × %spx  %sbpp", bi.getWidth(), bi.getHeight(), bi.getColorModel().getPixelSize()));
     }
 
     void setButtons() {
+        // to be implemented in subclass
+    }
+    
+    void setSegmentedRegions() {
         // to be implemented in subclass
     }
 

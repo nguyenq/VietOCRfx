@@ -123,9 +123,7 @@ public class GuiWithImageOps extends GuiWithScan {
         imageView.fitWidthProperty().unbind();
         imageView.fitHeightProperty().unbind();
         selectionBox.deselect();
-
-//        canvasImage.deselect();
-//        canvasImage.setSegmentedRegions(null);
+        selectionBox.setSegmentedRegions(null);
 //        curScrollPos = this.scrollPaneImage.getViewport().getViewPosition();
 //        int w = this.scrollPaneImage.getViewport().getWidth();
 //        if (this.scrollPaneImage.getVerticalScrollBar().isVisible()) {
@@ -151,8 +149,7 @@ public class GuiWithImageOps extends GuiWithScan {
         this.btnActualSize.setDisable(true);
         this.btnZoomIn.setDisable(false);
         this.btnZoomOut.setDisable(false);
-//        canvasImage.deselect();
-//        setSegmentedRegions();
+        setSegmentedRegions();
 //        fitImageChange(originalW, originalH);
         scaleX = scaleY = 1f;
         isFitImageSelected = false;
@@ -168,17 +165,16 @@ public class GuiWithImageOps extends GuiWithScan {
     }
 
     void btnZoomOutActionPerformed(ActionEvent evt) {
-//        canvasImage.deselect();
-//        canvasImage.setSegmentedRegions(null);
+        selectionBox.deselect();
+        selectionBox.setSegmentedRegions(null);
         doChange(false);
         isFitImageSelected = false;
         this.btnActualSize.setDisable(false);
-        selectionBox.deselect();
     }
 
     void btnZoomInActionPerformed(ActionEvent evt) {
-//        canvasImage.deselect();
-//        canvasImage.setSegmentedRegions(null);
+        selectionBox.deselect();
+        selectionBox.setSegmentedRegions(null);
         doChange(true);
         isFitImageSelected = false;
         this.btnActualSize.setDisable(false);
@@ -230,8 +226,10 @@ public class GuiWithImageOps extends GuiWithScan {
     void btnRotateCCWActionPerformed(ActionEvent evt) {
         this.imageView.setRotate(this.imageView.getRotate() - 90);
         scrollPaneImage.requestLayout();
-        rotateImage(270d);
+//        rotateImage(270d);
         selectionBox.deselect();
+        selectionBox.setSegmentedRegions(null);
+        setSegmentedRegions();
 //        clearStack();
     }
 
@@ -243,8 +241,10 @@ public class GuiWithImageOps extends GuiWithScan {
     void btnRotateCWActionPerformed(ActionEvent evt) {
         this.imageView.setRotate(this.imageView.getRotate() + 90);
         scrollPaneImage.requestLayout();
-        rotateImage(90d);
+//        rotateImage(90d);
         selectionBox.deselect();
+        selectionBox.setSegmentedRegions(null);
+        setSegmentedRegions();
 //        clearStack();
     }
 
