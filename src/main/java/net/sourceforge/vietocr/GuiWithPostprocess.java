@@ -48,7 +48,8 @@ public class GuiWithPostprocess extends GuiWithOCR {
                 public Void call() throws Exception {
                     updateMessage(bundle.getString("Correcting_errors..."));
                     String selectedText = textarea.getSelectedText();
-                    result = Processor.postProcess(!selectedText.trim().equals("") ? selectedText : textarea.getText(), curLangCode, dangAmbigsPath, dangAmbigsOn, replaceHyphensEnabled);
+                    // use only the first language if multiple are selected
+                    result = Processor.postProcess(!selectedText.trim().equals("") ? selectedText : textarea.getText(), curLangCode.split("\\+")[0], dangAmbigsPath, dangAmbigsOn, replaceHyphensEnabled);
                     return null;
                 }
                 
