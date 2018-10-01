@@ -26,7 +26,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import net.sourceforge.vietpad.utilities.SpellCheckHelper;
 
-public class GuiWithSpellCheck extends GuiWithPostprocess {
+public class GuiWithSpellCheck extends GuiWithFindReplace {
 
     @FXML
     private ToggleButton btnSpellCheck;

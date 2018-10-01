@@ -10,11 +10,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260.0" prefWidth="330.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.DownloadDialogController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260.0" prefWidth="330.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.DownloadDialogController">
    <bottom>
       <HBox prefHeight="22.0" prefWidth="536.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Label text="Label" />
+            <Label text="Status" />
             <ProgressBar prefWidth="160.0" progress="0.0" />
          </children>
          <padding>
@@ -39,7 +39,7 @@
       </VBox>
    </right>
    <center>
-      <TitledPane text="Available Languages" BorderPane.alignment="TOP_CENTER">
+      <TitledPane collapsible="false" text="Available Languages" BorderPane.alignment="TOP_CENTER">
          <content>
             <ListView fx:id="listViewLang" />
          </content>
