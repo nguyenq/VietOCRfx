@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleButton;
 import net.sourceforge.vietpad.utilities.SpellCheckHelper;
@@ -40,14 +41,17 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        super.initialize(url, rb);
 //        JFXHighlighter1 highlighter = new JFXHighlighter1();
-//        textarea.scrollTopProperty().addListener((obs, oldVal, newVal) -> {
+        textarea.scrollTopProperty().addListener((obs, oldVal, newVal) -> {
+            spellCheck(null);
 //            Platform.runLater(()-> highlighter.highlight((Parent) textarea.lookup(".content"), "um"));
-//        });
-//
-//        textarea.scrollLeftProperty().addListener((obs, oldVal, newVal) -> {
+        });
+
+        textarea.scrollLeftProperty().addListener((obs, oldVal, newVal) -> {
+            spellCheck(null);
 //            Platform.runLater(()-> highlighter.highlight((Parent) textarea.lookup(".content"), "um"));
-//        });
+        });
 
      }
 
@@ -155,7 +159,7 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
             localeId = lookupISO_3_1_Codes.getProperty(curLangCode.substring(0, 3));
         }
         if (localeId == null) {
-//            JOptionPane.showMessageDialog(null, "Need to add an entry in data/ISO639-1.xml file.", VietOCR.APP_NAME, JOptionPane.ERROR_MESSAGE);
+            new Alert(Alert.AlertType.ERROR, "Need to add an entry in data/ISO639-1.xml file.").show();
             return;
         }
 

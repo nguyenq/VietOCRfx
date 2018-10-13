@@ -23,20 +23,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
 
-import net.sourceforge.vietocr.util.Utils;
-
-import com.stibocatalog.hunspell.Hunspell;
-import com.sun.jna.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.TextInputControl;
+import javafx.scene.Parent;
+import javafx.scene.control.IndexRange;
+
+import com.stibocatalog.hunspell.Hunspell;
+import com.jfoenix.utils.JFXHighlighter1;
+import com.sun.jna.Platform;
+import javafx.scene.control.TextArea;
+import net.sourceforge.vietocr.util.Utils;
 
 public class SpellCheckHelper {
 
     private static final String JNA_LIBRARY_PATH = "jna.library.path";
-    TextInputControl textComp;
+    TextArea textarea;
     // define the highlighter
-    //Highlighter.HighlightPainter myPainter = new WavyLineHighlighter(Color.red);
+    static JFXHighlighter1 highlighter = new JFXHighlighter1();
     String localeId;
     File baseDir;
     static List<ChangeListener> lstList = new ArrayList<ChangeListener>();
@@ -49,13 +52,21 @@ public class SpellCheckHelper {
     /**
      * Constructor.
      *
-     * @param textComp
+     * @param textarea
      * @param localeId
      */
-    public SpellCheckHelper(TextInputControl textComp, String localeId) {
-        this.textComp = textComp;
+    public SpellCheckHelper(TextArea textarea, String localeId) {
+        this.textarea = textarea;
         this.localeId = localeId;
         baseDir = Utils.getBaseDir(SpellCheckHelper.this);
+//        highlighter = new JFXHighlighter1();
+//        textarea.scrollTopProperty().addListener((obs, oldVal, newVal) -> {
+//            javafx.application.Platform.runLater(()-> highlighter.highlight((Parent) this.textarea.lookup(".content"), ranges));
+//        });
+//
+//        textarea.scrollLeftProperty().addListener((obs, oldVal, newVal) -> {
+//            javafx.application.Platform.runLater(()-> highlighter.highlight((Parent) this.textarea.lookup(".content"), ranges));
+//        });
     }
 
     public boolean initializeSpellCheck() {
@@ -97,7 +108,7 @@ public class SpellCheckHelper {
 
             SpellcheckDocumentListener docListener = new SpellcheckDocumentListener();
             lstList.add(docListener);
-            this.textComp.textProperty().addListener(docListener);
+            this.textarea.textProperty().addListener(docListener);
             spellCheck();
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
@@ -110,8 +121,9 @@ public class SpellCheckHelper {
      */
     public void disableSpellCheck() {
         if (lstList.size() > 0) {
-            this.textComp.textProperty().removeListener(lstList.remove(0));
-//            this.textComp.getHighlighter().removeAllHighlights();
+            this.textarea.textProperty().removeListener(lstList.remove(0));
+            // remove All Highlights
+            highlighter.clear();
         }
     }
 
@@ -119,10 +131,7 @@ public class SpellCheckHelper {
      * Spellchecks.
      */
     public void spellCheck() {
-//        Highlighter hi = textComp.getHighlighter();
-//        hi.removeAllHighlights();
-
-        List<String> words = parseText(textComp.getText());
+        List<String> words = parseText(textarea.getText());
         List<String> misspelledWords = spellCheck(words);
         if (misspelledWords.isEmpty()) {
             return;
@@ -138,19 +147,18 @@ public class SpellCheckHelper {
         String patternStr = "\\b(" + sb.toString() + ")\\b";
 
         Pattern pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(textComp.getText());
+        Matcher matcher = pattern.matcher(textarea.getText());
+        List<IndexRange> ranges = new ArrayList<IndexRange>();
 
         while (matcher.find()) {
-//            try {
-//                hi.addHighlight(matcher.start(), matcher.end(), myPainter);
-//            } catch (BadLocationException ex) {
-////                Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+            ranges.add(new IndexRange(matcher.start(), matcher.end()));
         }
+        
+        javafx.application.Platform.runLater(()-> highlighter.highlight((Parent) this.textarea.lookup(".content"), ranges));
     }
 
     /**
-     * Spellhecks list of words.
+     * Spellchecks list of words.
      *
      * @param words
      * @return
