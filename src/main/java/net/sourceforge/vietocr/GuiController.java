@@ -69,7 +69,6 @@ import net.sourceforge.tess4j.util.ImageHelper;
 import net.sourceforge.tess4j.util.ImageIOHelper;
 import net.sourceforge.vietocr.util.SelectionBox;
 import net.sourceforge.vietocr.util.Utils;
-import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 
 public class GuiController implements Initializable {
 
@@ -156,10 +155,6 @@ public class GuiController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         instance = this;
-        final String os = System.getProperty("os.name");
-        if (os != null && os.startsWith("Mac")) {
-            menuBar.useSystemMenuBarProperty().set(true);
-        }
 
         currentDirectory = prefs.get("currentDirectory", System.getProperty("user.home"));
         outputDirectory = prefs.get("outputDirectory", System.getProperty("user.home"));
@@ -172,9 +167,10 @@ public class GuiController implements Initializable {
                 style.contains("Italic") ? FontPosture.ITALIC : FontPosture.REGULAR,
                 prefs.getDouble("fontSize", 12));
         textarea.setFont(font);
-        new VietKeyListener(textarea);
-        selectionBox = new SelectionBox(imagePane);
         
+  
+        selectionBox = new SelectionBox(imagePane);
+
         btnSave.disableProperty().bind(textarea.textProperty().length().isEqualTo(0));
 
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
@@ -427,7 +423,7 @@ public class GuiController implements Initializable {
     void setButtons() {
         // to be implemented in subclass
     }
-    
+
     void setSegmentedRegions() {
         // to be implemented in subclass
     }
@@ -521,7 +517,7 @@ public class GuiController implements Initializable {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
     }
-    
+
     /**
      * Quits the application.
      */

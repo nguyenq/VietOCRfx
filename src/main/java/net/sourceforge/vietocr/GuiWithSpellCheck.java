@@ -16,7 +16,9 @@
 package net.sourceforge.vietocr;
 
 import java.awt.Point;
+import java.net.URL;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
@@ -35,6 +37,19 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
     private SpellCheckHelper speller;
 
     private final static Logger logger = Logger.getLogger(GuiWithOCR.class.getName());
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+//        JFXHighlighter1 highlighter = new JFXHighlighter1();
+//        textarea.scrollTopProperty().addListener((obs, oldVal, newVal) -> {
+//            Platform.runLater(()-> highlighter.highlight((Parent) textarea.lookup(".content"), "um"));
+//        });
+//
+//        textarea.scrollLeftProperty().addListener((obs, oldVal, newVal) -> {
+//            Platform.runLater(()-> highlighter.highlight((Parent) textarea.lookup(".content"), "um"));
+//        });
+
+     }
 
     @FXML
     @Override
@@ -150,6 +165,5 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
         } else {
             speller.disableSpellCheck();
         }
-//        this.textarea.repaint();
     }
 }

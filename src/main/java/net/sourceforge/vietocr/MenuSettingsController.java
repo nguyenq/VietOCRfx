@@ -56,6 +56,8 @@ public class MenuSettingsController implements Initializable {
     @FXML
     private Menu menuIM;
     @FXML
+    private MenuItem menuItemSeparatorIM;
+    @FXML
     private Menu miUILanguage;
 
     private final String strPSM = "PageSegMode";
@@ -97,6 +99,7 @@ public class MenuSettingsController implements Initializable {
         });
 
         selectedInputMethod = prefs.get(strInputMethod, "Telex");
+        menuItemSeparatorIM.visibleProperty().bind(menuIM.visibleProperty());
 
         // build Input Method submenu
         ToggleGroup groupIM = new ToggleGroup();

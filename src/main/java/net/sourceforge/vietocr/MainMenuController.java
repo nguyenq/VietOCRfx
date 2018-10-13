@@ -22,7 +22,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuBar;
 
-
 public class MainMenuController implements Initializable {
 
     @FXML
@@ -45,6 +44,11 @@ public class MainMenuController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        final String os = System.getProperty("os.name");
+        if (os != null && os.startsWith("Mac")) {
+            menuBar.useSystemMenuBarProperty().set(true);
+        }
+
         menuFileController.setMenuBar(menuBar);
         menuCommandController.setMenuBar(menuBar);
         menuImageController.setMenuBar(menuBar);

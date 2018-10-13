@@ -32,6 +32,8 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -123,6 +125,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         btnCancelOCR.managedProperty().bind(btnCancelOCR.visibleProperty());
         getInstalledLanguagePacks();
         populateOCRLanguageBox();
+        new VietKeyListener(textarea);
         btnSegmentedRegions.visibleProperty().addListener((observable) -> {
             setSegmentedRegions();
         });
@@ -336,7 +339,8 @@ public class GuiWithOCR extends GuiWithImageOps {
 
         final List<String> selectedOCRLangs = new ArrayList<>();
         final List<String> selectedLangCodes = new ArrayList<>();
-
+        BooleanProperty isViet = new SimpleBooleanProperty();
+        
         for (int i = 0; i < installedLanguages.length; i++) {
             String lang = installedLanguages[i];
             CheckMenuItem item = new CheckMenuItem(lang);
@@ -352,17 +356,17 @@ public class GuiWithOCR extends GuiWithImageOps {
 
                 curLangCode = String.join("+", selectedLangCodes);
                 mbtnOCRLanguage.setText(String.join("+", selectedOCRLangs));
-
-                // Show Viet Input Method submenu if selected OCR language is Vietnamese
-                boolean isViet = curLangCode.contains("vie");
-                VietKeyListener.setVietModeEnabled(isViet);
-                Menu settingsMenu = (Menu) menuBar.getMenus().get(4);
-                settingsMenu.getItems().get(0).setVisible(isViet);
-                settingsMenu.getItems().get(1).setVisible(isViet);
+                
+                isViet.set(curLangCode.contains("vie"));
+                VietKeyListener.setVietModeEnabled(isViet.get());
             });
 
             mbtnOCRLanguage.getItems().add(item);
         }
+        
+        // Show Viet Input Method submenu if selected OCR language is Vietnamese
+        Menu settingsMenu = (Menu) menuBar.getMenus().get(4);
+        settingsMenu.getItems().get(0).visibleProperty().bind(isViet);
 
         String savedLangCodes = prefs.get(strLangCode, "");
         for (String langCode : savedLangCodes.split("\\+")) {
