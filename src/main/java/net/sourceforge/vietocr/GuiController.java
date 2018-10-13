@@ -167,7 +167,7 @@ public class GuiController implements Initializable {
                 style.contains("Italic") ? FontPosture.ITALIC : FontPosture.REGULAR,
                 prefs.getDouble("fontSize", 12));
         textarea.setFont(font);
-        
+        textarea.wrapTextProperty().bind(this.menuBarController.menuFormatController.chmiWordWrap.selectedProperty());
   
         selectionBox = new SelectionBox(imagePane);
 

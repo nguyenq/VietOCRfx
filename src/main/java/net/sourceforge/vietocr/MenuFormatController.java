@@ -41,7 +41,7 @@ public class MenuFormatController implements Initializable {
     @FXML
     private MenuBar menuBar;
     @FXML
-    private CheckMenuItem chmiWordWrap;
+    protected CheckMenuItem chmiWordWrap;
     @FXML
     private MenuItem miChangeCase;
     @FXML
@@ -57,7 +57,6 @@ public class MenuFormatController implements Initializable {
 
     protected ResourceBundle bundle;
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
-    private boolean wordWrapOn;
     private TextArea textarea;
     private static MenuFormatController instance;
 
@@ -67,8 +66,7 @@ public class MenuFormatController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         instance = this;
-        wordWrapOn = prefs.getBoolean("wordWrap", true);
-        chmiWordWrap.setSelected(wordWrapOn);
+        chmiWordWrap.setSelected(prefs.getBoolean("wordWrap", true));
     }
 
     /**
@@ -88,10 +86,7 @@ public class MenuFormatController implements Initializable {
     private void handleAction(ActionEvent event) {
         textarea = (TextArea) menuBar.getScene().lookup("#textarea");
 
-        if (event.getSource() == chmiWordWrap) {
-            wordWrapOn = chmiWordWrap.isSelected();
-            textarea.setWrapText(wordWrapOn);
-        } else if (event.getSource() == miChangeCase) {
+        if (event.getSource() == miChangeCase) {
             try {
                 if (changeCaseDialog == null) {
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/ChangeCaseDialog.fxml"));
@@ -153,6 +148,7 @@ public class MenuFormatController implements Initializable {
             prefs.putDouble(strChangeCaseX, changeCaseDialog.getX());
             prefs.putDouble(strChangeCaseY, changeCaseDialog.getY());
         }
+        
+        prefs.putBoolean("wordWrap", textarea.isWrapText());
     }
-
 }

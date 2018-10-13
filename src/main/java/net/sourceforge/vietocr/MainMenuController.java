@@ -37,7 +37,7 @@ public class MainMenuController implements Initializable {
     @FXML
     protected MenuToolsController menuToolsController;
     @FXML
-    private MenuFormatController menuFormatController;
+    protected MenuFormatController menuFormatController;
 
     /**
      * Initializes the controller class.
