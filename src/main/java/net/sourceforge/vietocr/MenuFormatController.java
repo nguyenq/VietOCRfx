@@ -149,6 +149,6 @@ public class MenuFormatController implements Initializable {
             prefs.putDouble(strChangeCaseY, changeCaseDialog.getY());
         }
         
-        prefs.putBoolean("wordWrap", textarea.isWrapText());
+        prefs.putBoolean("wordWrap", chmiWordWrap.isSelected());
     }
 }
