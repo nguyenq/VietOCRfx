@@ -15,8 +15,10 @@
  */
 package net.sourceforge.vietocr;
 
-import java.awt.Point;
+import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import java.net.URL;
+import java.text.BreakIterator;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -25,8 +27,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import net.sourceforge.vietpad.utilities.SpellCheckHelper;
 
 public class GuiWithSpellCheck extends GuiWithFindReplace {
@@ -34,7 +42,8 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
     @FXML
     private ToggleButton btnSpellCheck;
 
-    private int start, end;
+    private IndexRange wordBoundaries;
+    int pointClicked;
     private SpellCheckHelper speller;
 
     private final static Logger logger = Logger.getLogger(GuiWithOCR.class.getName());
@@ -42,18 +51,25 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         super.initialize(url, rb);
-//        JFXHighlighter1 highlighter = new JFXHighlighter1();
-        textarea.scrollTopProperty().addListener((obs, oldVal, newVal) -> {
-            spellCheck(null);
-//            Platform.runLater(()-> highlighter.highlight((Parent) textarea.lookup(".content"), "um"));
+
+        textarea.setOnMouseClicked((MouseEvent event) -> {
+            if (event.getButton() == MouseButton.SECONDARY) {
+                TextAreaSkin skin = (TextAreaSkin) textarea.getSkin();
+                pointClicked = skin.getInsertionPoint(event.getX(), event.getY());
+            }
         });
 
-        textarea.scrollLeftProperty().addListener((obs, oldVal, newVal) -> {
-            spellCheck(null);
-//            Platform.runLater(()-> highlighter.highlight((Parent) textarea.lookup(".content"), "um"));
-        });
-
-     }
+        TextAreaSkin customContextSkin = new TextAreaSkin(textarea) {
+            @Override
+            public void populateContextMenu(ContextMenu contextMenu) {
+                super.populateContextMenu(contextMenu);
+                if (btnSpellCheck.isSelected()) {
+                    populatePopupMenuWithSuggestions(contextMenu, pointClicked);
+                }
+            }
+        };
+        textarea.setSkin(customContextSkin);
+    }
 
     @FXML
     @Override
@@ -65,15 +81,11 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
         }
     }
 
-    void populatePopupMenuWithSuggestions(Point pointClicked) {
+    void populatePopupMenuWithSuggestions(ContextMenu contextMenu, int offset) {
         try {
-            if (this.btnSpellCheck.isSelected()) {
-//                int offset = textarea.viewToModel(pointClicked);
-//                start = javax.swing.text.Utilities.getWordStart(textarea, offset);
-//                end = javax.swing.text.Utilities.getWordEnd(textarea, offset);
-//                String curWord = textarea.getText(start, end - start);
-//                makeSuggestions(curWord);
-            }
+            wordBoundaries = getWordBoundaries(textarea, offset);
+            String curWord = textarea.getText(wordBoundaries.getStart(), wordBoundaries.getEnd());
+            makeSuggestions(contextMenu, curWord);
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         } finally {
@@ -82,16 +94,43 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
         }
     }
 
+//    private int getWordStart(String text, int pos) {
+//        int index;
+//        for (index = pos; index >= 0 && !Character.isWhitespace(text.charAt(index)); index--);
+//        return index + 1;
+//    }
+//
+//    private int getWordEnd(String text, int pos) {
+//        int index;
+//        for (index = pos; index < text.length() && !Character.isWhitespace(text.charAt(index)); index++);
+//        return index;
+//    }
+
+    /**
+     * Gets word boundaries at specified position.
+     * 
+     * @param textcontrol
+     * @param pos position in text
+     * @return index range
+     */
+    private IndexRange getWordBoundaries(TextInputControl textcontrol, int pos) {
+        BreakIterator boundary = BreakIterator.getWordInstance();
+        boundary.setText(textcontrol.getText());
+        int end = boundary.following(pos);
+        int start = boundary.previous();
+        return new IndexRange(start, end);
+    }
+
     void repopulatePopupMenu() {
-//        popup.add(m_undoAction);
-//        popup.add(m_redoAction);
-//        popup.getItems().addSeparator();
-//        popup.add(actionCut);
-//        popup.add(actionCopy);
-//        popup.add(actionPaste);
-//        popup.add(actionDelete);
-//        popup.addSeparator();
-//        popup.add(actionSelectAll);
+//        contextMenu.add(m_undoAction);
+//        contextMenu.add(m_redoAction);
+//        contextMenu.getItems().addSeparator();
+//        contextMenu.add(actionCut);
+//        contextMenu.add(actionCopy);
+//        contextMenu.add(actionPaste);
+//        contextMenu.add(actionDelete);
+//        contextMenu.addSeparator();
+//        contextMenu.add(actionSelectAll);
     }
 
     /**
@@ -99,7 +138,7 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
      *
      * @param curWord
      */
-    void makeSuggestions(final String curWord) {
+    void makeSuggestions(ContextMenu contextMenu, final String curWord) {
         if (speller == null || curWord == null || curWord.trim().length() == 0) {
             return;
         }
@@ -113,41 +152,40 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
 
             @Override
             public void handle(ActionEvent e) {
-                String selectedSuggestion = e.getSource().toString();
+                MenuItem menuItem = (MenuItem) e.getSource();
+                String selectedSuggestion = (String) menuItem.getUserData();
                 if (selectedSuggestion.equals("ignore.word")) {
                     speller.ignoreWord(curWord);
                 } else if (selectedSuggestion.equals("add.word")) {
                     speller.addWord(curWord);
                 } else {
-                    textarea.selectRange(start, end);
-                    textarea.replaceSelection(selectedSuggestion);
+                    textarea.replaceText(wordBoundaries, selectedSuggestion);
                 }
                 speller.spellCheck();
             }
         };
 
+        MenuItem addItem = new MenuItem(bundle.getString("Add_to_Dictionary"));
+        addItem.setUserData("add.word");
+        addItem.setOnAction(correctLst);
+        MenuItem ignoreItem = new MenuItem(bundle.getString("Ignore_All"));
+        ignoreItem.setUserData("ignore.word");
+        ignoreItem.setOnAction(correctLst);
+        contextMenu.getItems().addAll(0, Arrays.asList(new SeparatorMenuItem(), ignoreItem, addItem, new SeparatorMenuItem()));
+
         for (String word : suggests) {
-            MenuItem item = new MenuItem(word);
+            MenuItem spellItem = new MenuItem(word);
+            spellItem.setUserData(word);
 //            Font itemFont = item.getFont();
 //            if (itemFont.canDisplayUpTo(word) == -1) {
-//                item.setFont(itemFont.deriveFont(Font.BOLD));
+            spellItem.setStyle("-fx-font-weight: bold");
 //            } else {
-//                // use jTextArea's font
+//                // use TextArea's font
 //                item.setFont(font.deriveFont(Font.BOLD, itemFont.getSize2D()));
 //            }
-            item.setOnAction(correctLst);
+            spellItem.setOnAction(correctLst);
+            contextMenu.getItems().add(0, spellItem);
         }
-
-//        popup.addSeparator();
-//        MenuItem item = new MenuItem(bundle.getString("Ignore_All"));
-//        item.setActionCommand("ignore.word");
-//        item.addActionListener(correctLst);
-//        popup.add(item);
-//        item = new MenuItem(bundle.getString("Add_to_Dictionary"));
-//        item.setActionCommand("add.word");
-//        item.addActionListener(correctLst);
-//        popup.add(item);
-//        popup.addSeparator();
     }
 
     void spellCheck(ActionEvent evt) {

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package com.jfoenix.utils;
 
 import com.jfoenix.concurrency.JFXUtilities;
@@ -46,10 +45,9 @@ import java.lang.reflect.Method;
 import java.util.*;
 import javafx.scene.control.IndexRange;
 
-
 /**
- * JFXHighlighter is used to highlight Text and LabeledText nodes
- * (in a specific {@link Parent}) that matches the user query.
+ * JFXHighlighter is used to highlight Text and LabeledText nodes (in a specific
+ * {@link Parent}) that matches the user query.
  *
  * @author Shadi Shaheen
  * @version 1.0
@@ -59,10 +57,12 @@ public class JFXHighlighter1 {
 
     private Parent parent;
     private HashMap<Node, List<Rectangle>> boxes = new HashMap<>();
+    private List<IndexRange> ranges;
     private ObjectProperty<Paint> paint = new SimpleObjectProperty<>(Color.rgb(255, 0, 0, 0.4));
 
     private Method textLayoutMethod;
     private Field parentChildrenField;
+
     {
         try {
             textLayoutMethod = Text.class.getDeclaredMethod("getTextLayout");
@@ -76,6 +76,7 @@ public class JFXHighlighter1 {
 
     /**
      * highlights the matching text in the specified pane
+     *
      * @param pane node to search into its text
      * @param query search text
      */
@@ -83,7 +84,9 @@ public class JFXHighlighter1 {
         if (this.parent != null && !boxes.isEmpty()) {
             clear();
         }
-        if(query == null || query.isEmpty()) return;
+        if (query == null || query.isEmpty()) {
+            return;
+        }
 
         this.parent = pane;
 
@@ -115,11 +118,12 @@ public class JFXHighlighter1 {
             }
         }
 
-        Platform.runLater(()-> getParentChildren(pane).addAll(allRectangles));
+        Platform.runLater(() -> getParentChildren(pane).addAll(allRectangles));
     }
-    
+
     /**
      * highlights the matching text in the specified pane
+     *
      * @param pane node to search into its text
      * @param ranges highlight ranges
      */
@@ -127,9 +131,12 @@ public class JFXHighlighter1 {
         if (this.parent != null && !boxes.isEmpty()) {
             clear();
         }
-        if (ranges.isEmpty()) return;
+        if (ranges == null || ranges.isEmpty()) {
+            return;
+        }
 
         this.parent = pane;
+        this.ranges = ranges;
 
         Set<Node> nodes = getTextNodes(pane);
 
@@ -158,10 +165,10 @@ public class JFXHighlighter1 {
             }
         }
 
-        Platform.runLater(()-> getParentChildren(pane).addAll(allRectangles));
+        Platform.runLater(() -> getParentChildren(pane).addAll(allRectangles));
     }
 
-    private class HighLightRectangle extends Rectangle{
+    private class HighLightRectangle extends Rectangle {
         // add listener to remove the current rectangle if text was changed
         private InvalidationListener listener;
 
@@ -173,8 +180,12 @@ public class JFXHighlighter1 {
 
         private void clear(Text text) {
             final List<Rectangle> rectangles = boxes.get(text);
-            if(rectangles != null && !rectangles.isEmpty())
+            if (rectangles != null && !rectangles.isEmpty()) {
                 Platform.runLater(() -> getParentChildren(parent).removeAll(rectangles));
+            }
+            
+            //hightlight again
+//            highlight(parent, ranges);
         }
     }
 
@@ -187,7 +198,7 @@ public class JFXHighlighter1 {
         return nodes;
     }
 
-    private ObservableList<Node> getParentChildren(Parent parent){
+    private ObservableList<Node> getParentChildren(Parent parent) {
         try {
             return (ObservableList<Node>) parentChildrenField.get(parent);
         } catch (IllegalAccessException e) {
@@ -244,8 +255,8 @@ public class JFXHighlighter1 {
                 double startX = maxX - width;
 
                 rectBounds.add(new BoundingBox(textBounds.getMinX() + startX,
-                    textBounds.getMinY() + startY,
-                    width, temp.getLayoutBounds().getHeight()));
+                        textBounds.getMinY() + startY,
+                        width, temp.getLayoutBounds().getHeight()));
 
                 beginIndex = lineTextLow.indexOf(queryLow, beginIndex + queryLength);
             }
@@ -274,26 +285,26 @@ public class JFXHighlighter1 {
         for (int i = 0; i < lines.length; i++) {
             TextLine line = lines[i];
             String lineText = text.getText().substring(line.getStart(), line.getStart() + line.getLength());
-            
+
             RectBounds lineBounds = (line.getBounds());
 
             // compute Y layout
             double height = Math.round(lineBounds.getMaxY()) - Math.round(lineBounds.getMinY());
             double startY = height * i;
-            
+
             for (IndexRange range : ranges) {
-                System.out.println(line.getStart() + " " + range.getStart()+ ", " + (line.getStart() + + line.getLength()) + " " + range.getEnd()); 
+                System.out.println(line.getStart() + " " + range.getStart() + ", " + (line.getStart() + +line.getLength()) + " " + range.getEnd());
 
                 // highlights before current line
                 if (range.getStart() < line.getStart()) {
                     continue;
                 }
-                
+
                 // highlights after current line
                 if (range.getStart() > (line.getStart() + line.getLength())) {
                     break;
                 }
-                
+
                 // compute X layout
                 Text temp = null;
                 try {
@@ -301,7 +312,7 @@ public class JFXHighlighter1 {
                 } catch (StringIndexOutOfBoundsException e) {
                     break;
                 }
-                
+
                 temp.setFont(text.getFont());
                 temp.applyCss();
                 double width = temp.getLayoutBounds().getWidth();
@@ -311,8 +322,8 @@ public class JFXHighlighter1 {
                 double startX = maxX - width;
 
                 rectBounds.add(new BoundingBox(textBounds.getMinX() + startX,
-                    textBounds.getMinY() + startY,
-                    width, temp.getLayoutBounds().getHeight()));
+                        textBounds.getMinY() + startY,
+                        width, temp.getLayoutBounds().getHeight()));
             }
         }
 
@@ -329,7 +340,9 @@ public class JFXHighlighter1 {
             flatBoxes.addAll(box);
         }
         boxes.clear();
-        if(parent!=null) JFXUtilities.runInFX(()-> getParentChildren(parent).removeAll(flatBoxes));
+        if (parent != null) {
+            JFXUtilities.runInFX(() -> getParentChildren(parent).removeAll(flatBoxes));
+        }
     }
 
     public Paint getPaint() {

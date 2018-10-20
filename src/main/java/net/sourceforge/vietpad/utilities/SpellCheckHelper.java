@@ -24,13 +24,15 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import javafx.scene.control.IndexRange;
 
 import com.stibocatalog.hunspell.Hunspell;
 import com.jfoenix.utils.JFXHighlighter1;
 import com.sun.jna.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.WeakInvalidationListener;
 import javafx.scene.control.TextArea;
 import net.sourceforge.vietocr.util.Utils;
 
@@ -42,7 +44,7 @@ public class SpellCheckHelper {
     static JFXHighlighter1 highlighter = new JFXHighlighter1();
     String localeId;
     File baseDir;
-    static List<ChangeListener> lstList = new ArrayList<ChangeListener>();
+    static List<InvalidationListener> lstList = new ArrayList<InvalidationListener>();
     Hunspell.Dictionary spellDict;
     static List<String> userWordList = new ArrayList<String>();
     static long mapLastModified = Long.MIN_VALUE;
@@ -106,9 +108,9 @@ public class SpellCheckHelper {
             spellDict = Hunspell.getInstance().getDictionary(new File(baseDir, "dict/" + localeId).getPath());
             loadUserDictionary();
 
-            SpellcheckDocumentListener docListener = new SpellcheckDocumentListener();
-            lstList.add(docListener);
-            this.textarea.textProperty().addListener(docListener);
+//            SpellcheckListener docListener = new SpellcheckListener();
+//            lstList.add(docListener);
+//            this.textarea.textProperty().addListener(new WeakInvalidationListener(docListener));
             spellCheck();
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
@@ -288,10 +290,10 @@ public class SpellCheckHelper {
         return true;
     }
 
-    class SpellcheckDocumentListener implements ChangeListener {
+    class SpellcheckListener implements InvalidationListener {
 
         @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+        public void invalidated(Observable observable) {
             spellCheck();
         }
     }
