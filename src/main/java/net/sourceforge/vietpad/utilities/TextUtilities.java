@@ -1,13 +1,15 @@
 package net.sourceforge.vietpad.utilities;
 
+import java.text.BreakIterator;
 import java.util.regex.*;
+import javafx.scene.control.IndexRange;
 
 /**
- *  Text utilities
+ *  Text utilities.
  *
  *@author     Quan Nguyen
  *@author     Gero Herrmann
- *@version    1.1, 24 February 2010
+ *@version    1.2, 21 October 2018
  */
 public class TextUtilities {
 
@@ -71,4 +73,44 @@ public class TextUtilities {
     public static String removeLineBreaks(String text) {
         return text.replaceAll("(?<=\n|^)[\t ]+|[\t ]+(?=$|\n)", "").replaceAll("(?<=.)\n(?=.)", " ");
     }
+        
+    /**
+     * Gets boundaries of the word at specified position.
+     * 
+     * @param text source text
+     * @param pos position in source text
+     * @return index range
+     */
+    public static IndexRange getWordBoundaries(String text, int pos) {
+        BreakIterator boundary = BreakIterator.getWordInstance();
+        boundary.setText(text);
+        int end = boundary.following(pos);
+        int start = boundary.previous();
+        return new IndexRange(start, end);
+    }
+    
+//    /**
+//     * Gets word start.
+//     * 
+//     * @param text
+//     * @param pos
+//     * @return 
+//     */    
+//    public static int getWordStart(String text, int pos) {
+//        int index;
+//        for (index = pos; index >= 0 && !Character.isWhitespace(text.charAt(index)); index--);
+//        return index + 1;
+//    }
+//
+//    /**
+//     * Gets word end.
+//     * @param text
+//     * @param pos
+//     * @return 
+//     */
+//    public static int getWordEnd(String text, int pos) {
+//        int index;
+//        for (index = pos; index < text.length() && !Character.isWhitespace(text.charAt(index)); index++);
+//        return index;
+//    }
 }

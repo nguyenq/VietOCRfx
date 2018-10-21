@@ -17,7 +17,6 @@ package net.sourceforge.vietocr;
 
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import java.net.URL;
-import java.text.BreakIterator;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -31,11 +30,11 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextInputControl;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import net.sourceforge.vietpad.utilities.SpellCheckHelper;
+import net.sourceforge.vietpad.utilities.TextUtilities;
 
 public class GuiWithSpellCheck extends GuiWithFindReplace {
 
@@ -81,44 +80,17 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
         }
     }
 
-    void populatePopupMenuWithSuggestions(ContextMenu contextMenu, int offset) {
+    void populatePopupMenuWithSuggestions(ContextMenu contextMenu, int pos) {
         try {
-            wordBoundaries = getWordBoundaries(textarea, offset);
+            wordBoundaries = TextUtilities.getWordBoundaries(textarea.getText(), pos);
             String curWord = textarea.getText(wordBoundaries.getStart(), wordBoundaries.getEnd());
             makeSuggestions(contextMenu, curWord);
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage(), e);
-        } finally {
-            // load standard menu items
-            repopulatePopupMenu();
+//        } finally {
+//            // load standard menu items
+//            repopulatePopupMenu();
         }
-    }
-
-//    private int getWordStart(String text, int pos) {
-//        int index;
-//        for (index = pos; index >= 0 && !Character.isWhitespace(text.charAt(index)); index--);
-//        return index + 1;
-//    }
-//
-//    private int getWordEnd(String text, int pos) {
-//        int index;
-//        for (index = pos; index < text.length() && !Character.isWhitespace(text.charAt(index)); index++);
-//        return index;
-//    }
-
-    /**
-     * Gets word boundaries at specified position.
-     * 
-     * @param textcontrol
-     * @param pos position in text
-     * @return index range
-     */
-    private IndexRange getWordBoundaries(TextInputControl textcontrol, int pos) {
-        BreakIterator boundary = BreakIterator.getWordInstance();
-        boundary.setText(textcontrol.getText());
-        int end = boundary.following(pos);
-        int start = boundary.previous();
-        return new IndexRange(start, end);
     }
 
     void repopulatePopupMenu() {
@@ -161,7 +133,6 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
                 } else {
                     textarea.replaceText(wordBoundaries, selectedSuggestion);
                 }
-                speller.spellCheck();
             }
         };
 

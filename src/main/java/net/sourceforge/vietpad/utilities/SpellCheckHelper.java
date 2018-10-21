@@ -23,7 +23,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
 
-import javafx.beans.value.ChangeListener;
 import javafx.scene.Parent;
 import javafx.scene.control.IndexRange;
 
@@ -108,9 +107,9 @@ public class SpellCheckHelper {
             spellDict = Hunspell.getInstance().getDictionary(new File(baseDir, "dict/" + localeId).getPath());
             loadUserDictionary();
 
-//            SpellcheckListener docListener = new SpellcheckListener();
-//            lstList.add(docListener);
-//            this.textarea.textProperty().addListener(new WeakInvalidationListener(docListener));
+            WeakInvalidationListener docListener = new WeakInvalidationListener(new SpellcheckListener());
+            lstList.add(docListener);
+            this.textarea.textProperty().addListener(docListener);
             spellCheck();
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
@@ -124,8 +123,8 @@ public class SpellCheckHelper {
     public void disableSpellCheck() {
         if (lstList.size() > 0) {
             this.textarea.textProperty().removeListener(lstList.remove(0));
-            // remove All Highlights
-            highlighter.clear();
+            // remove highlights
+            highlighter.highlight(null, new ArrayList<IndexRange>());
         }
     }
 
@@ -155,8 +154,8 @@ public class SpellCheckHelper {
         while (matcher.find()) {
             ranges.add(new IndexRange(matcher.start(), matcher.end()));
         }
-        
-        javafx.application.Platform.runLater(()-> highlighter.highlight((Parent) this.textarea.lookup(".content"), ranges));
+
+        javafx.application.Platform.runLater(() -> highlighter.highlight((Parent) this.textarea.lookup(".content"), ranges));
     }
 
     /**
@@ -294,6 +293,7 @@ public class SpellCheckHelper {
 
         @Override
         public void invalidated(Observable observable) {
+            //System.out.println("SpellcheckListener");
             spellCheck();
         }
     }

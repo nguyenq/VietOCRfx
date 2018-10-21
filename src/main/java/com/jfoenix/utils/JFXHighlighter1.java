@@ -131,12 +131,13 @@ public class JFXHighlighter1 {
         if (this.parent != null && !boxes.isEmpty()) {
             clear();
         }
+                
+        this.ranges = ranges;
+        this.parent = pane;
+        
         if (ranges == null || ranges.isEmpty()) {
             return;
         }
-
-        this.parent = pane;
-        this.ranges = ranges;
 
         Set<Node> nodes = getTextNodes(pane);
 
@@ -184,8 +185,8 @@ public class JFXHighlighter1 {
                 Platform.runLater(() -> getParentChildren(parent).removeAll(rectangles));
             }
             
-            //hightlight again
-//            highlight(parent, ranges);
+            // re-hightlight
+            highlight(parent, ranges);
         }
     }
 
@@ -293,7 +294,7 @@ public class JFXHighlighter1 {
             double startY = height * i;
 
             for (IndexRange range : ranges) {
-                System.out.println(line.getStart() + " " + range.getStart() + ", " + (line.getStart() + +line.getLength()) + " " + range.getEnd());
+//                System.out.println(line.getStart() + " " + range.getStart() + ", " + (line.getStart() + +line.getLength()) + " " + range.getEnd());
 
                 // highlights before current line
                 if (range.getStart() < line.getStart()) {
