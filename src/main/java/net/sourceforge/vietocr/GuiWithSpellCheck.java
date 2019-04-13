@@ -15,7 +15,7 @@
  */
 package net.sourceforge.vietocr;
 
-import com.sun.javafx.scene.control.skin.TextAreaSkin;
+import javafx.scene.control.skin.TextAreaSkin;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +33,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.HitInfo;
 import net.sourceforge.vietpad.utilities.SpellCheckHelper;
 import net.sourceforge.vietpad.utilities.TextUtilities;
 
@@ -54,18 +55,19 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
         textarea.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton() == MouseButton.SECONDARY) {
                 TextAreaSkin skin = (TextAreaSkin) textarea.getSkin();
-                pointClicked = skin.getInsertionPoint(event.getX(), event.getY());
+                HitInfo mouseHit = skin.getIndex(event.getX(), event.getY());
+                pointClicked = mouseHit.getInsertionIndex();
             }
         });
 
         TextAreaSkin customContextSkin = new TextAreaSkin(textarea) {
-            @Override
-            public void populateContextMenu(ContextMenu contextMenu) {
-                super.populateContextMenu(contextMenu);
-                if (btnSpellCheck.isSelected()) {
-                    populatePopupMenuWithSuggestions(contextMenu, pointClicked);
-                }
-            }
+//            @Override
+//            public void populateContextMenu(ContextMenu contextMenu) {
+//                super.populateContextMenu(contextMenu);
+//                if (btnSpellCheck.isSelected()) {
+//                    populatePopupMenuWithSuggestions(contextMenu, pointClicked);
+//                }
+//            }
         };
         textarea.setSkin(customContextSkin);
     }
@@ -85,6 +87,8 @@ public class GuiWithSpellCheck extends GuiWithFindReplace {
             wordBoundaries = TextUtilities.getWordBoundaries(textarea.getText(), pos);
             String curWord = textarea.getText(wordBoundaries.getStart(), wordBoundaries.getEnd());
             makeSuggestions(contextMenu, curWord);
+        } catch (IllegalArgumentException e) {
+            // ignore
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage(), e);
 //        } finally {
