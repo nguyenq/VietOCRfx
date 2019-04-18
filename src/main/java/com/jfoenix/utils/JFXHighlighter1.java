@@ -18,7 +18,6 @@
  */
 package com.jfoenix.utils;
 
-import com.jfoenix.concurrency.JFXUtilities;
 import com.sun.javafx.geom.RectBounds;
 import com.sun.javafx.scene.text.TextLayout;
 import com.sun.javafx.scene.text.TextLine;
