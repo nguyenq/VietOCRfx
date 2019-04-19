@@ -65,6 +65,7 @@ public class MenuToolsController implements Initializable {
 
     protected ResourceBundle bundle;
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
+    private final String strImageFolder = "ImageFolder";
     File imageFolder;
     ExtensionFilter selectedFilter;
 
@@ -76,7 +77,7 @@ public class MenuToolsController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
-        imageFolder = new File(prefs.get("ImageFolder", System.getProperty("user.home")));
+        imageFolder = new File(prefs.get(strImageFolder, System.getProperty("user.home")));
     }
 
     void setMenuBar(MenuBar menuBar) {
@@ -383,62 +384,59 @@ public class MenuToolsController implements Initializable {
             fc.setInitialDirectory(imageFolder);
             FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF", "*.pdf");
             fc.getExtensionFilters().add(pdfFilter);
-            File inputPdf = fc.showOpenDialog(menuBar.getScene().getWindow());
+            final List<File> inputPdfs = fc.showOpenMultipleDialog(menuBar.getScene().getWindow());
 
-            if (inputPdf != null) {
-                imageFolder = inputPdf.getParentFile();
-                fc.setTitle(bundle.getString("Save_Multi-page_TIFF_Image"));
-                fc.setInitialDirectory(imageFolder);
-                fc.getExtensionFilters().clear();
-                fc.getExtensionFilters().add(tiffFilter);
+            if (inputPdfs != null) {
+                imageFolder = inputPdfs.get(0).getParentFile();
+                progressBar.setVisible(true);
+                labelStatus.setVisible(true);
+                labelStatus.getScene().setCursor(Cursor.WAIT);
 
-                File targetFile = fc.showSaveDialog(menuBar.getScene().getWindow());
-                if (targetFile != null) {
-                    progressBar.setVisible(true);
-                    labelStatus.setVisible(true);
-                    labelStatus.getScene().setCursor(Cursor.WAIT);
+                Task<File> worker = new Task<File>() {
 
-                    Task<String> worker = new Task<String>() {
+                    @Override
+                    protected File call() throws Exception {
+                        updateMessage(bundle.getString("ConvertPDF_running..."));
 
-                        @Override
-                        protected String call() throws Exception {
-                            updateMessage(bundle.getString("ConvertPDF_running..."));
-                            File outputTiffFile = PdfUtilities.convertPdf2Tiff(inputPdf);
-                            Files.move(outputTiffFile.toPath(), targetFile.toPath(), REPLACE_EXISTING);
-                            return targetFile.getName();
+                        for (File inputFile : inputPdfs) {
+                            File outputTiffFile = PdfUtilities.convertPdf2Tiff(inputFile);
+                            String targetFile = Utils.stripExtension(inputFile.getPath()) + ".tif";
+                            Files.move(outputTiffFile.toPath(), new File(targetFile).toPath(), REPLACE_EXISTING);
                         }
+                        
+                        return imageFolder;
+                    }
 
-                        @Override
-                        protected void succeeded() {
-                            super.succeeded();
-                            updateMessage(bundle.getString("ConvertPDF_completed"));
-                            updateProgress(1, 1);
-                            String msg = bundle.getString("ConvertPDF_completed") + getValue() + bundle.getString("created");
-                            new Alert(Alert.AlertType.NONE, msg, ButtonType.OK).showAndWait();
-                            progressBar.setVisible(false);
-                            labelStatus.setVisible(false);
-                            labelStatus.getScene().setCursor(Cursor.DEFAULT);
-                        }
+                    @Override
+                    protected void succeeded() {
+                        super.succeeded();
+                        updateMessage(bundle.getString("ConvertPDF_completed"));
+                        updateProgress(1, 1);
+                        String msg = bundle.getString("ConvertPDF_completed") + bundle.getString("check_output_in") + "\n" + getValue();
+                        new Alert(Alert.AlertType.NONE, msg, ButtonType.OK).showAndWait();
+                        progressBar.setVisible(false);
+                        labelStatus.setVisible(false);
+                        labelStatus.getScene().setCursor(Cursor.DEFAULT);
+                    }
 
-                        @Override
-                        protected void failed() {
-                            super.failed();
-                            updateMessage(null);
-                            Throwable ex = getException();
-                            logger.log(Level.SEVERE, ex.getMessage(), ex);
-                            new Alert(Alert.AlertType.NONE, ex.getMessage(), ButtonType.OK).showAndWait();
-                            progressBar.setVisible(false);
-                            labelStatus.setVisible(false);
-                            labelStatus.getScene().setCursor(Cursor.DEFAULT);
-                        }
-                    };
+                    @Override
+                    protected void failed() {
+                        super.failed();
+                        updateMessage(null);
+                        Throwable ex = getException();
+                        logger.log(Level.SEVERE, ex.getMessage(), ex);
+                        new Alert(Alert.AlertType.NONE, ex.getMessage(), ButtonType.OK).showAndWait();
+                        progressBar.setVisible(false);
+                        labelStatus.setVisible(false);
+                        labelStatus.getScene().setCursor(Cursor.DEFAULT);
+                    }
+                };
 
-                    labelStatus.textProperty().bind(worker.messageProperty());
-                    progressBar.progressProperty().unbind();
-                    progressBar.progressProperty().bind(worker.progressProperty());
+                labelStatus.textProperty().bind(worker.messageProperty());
+                progressBar.progressProperty().unbind();
+                progressBar.progressProperty().bind(worker.progressProperty());
 
-                    new Thread(worker).start();
-                }
+                new Thread(worker).start();
             }
         }
     }
@@ -447,6 +445,6 @@ public class MenuToolsController implements Initializable {
      * Remembers settings.
      */
     protected void savePrefs() {
-
+        prefs.put(strImageFolder, imageFolder.getPath());
     }
 }
