@@ -248,7 +248,7 @@ public class GuiWithOCR extends GuiWithImageOps {
 //        this.miOCR.setDisable(true);
 //        this.miOCRAll.setDisable(true);
 
-        OCRImageEntity entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, curLangCode);
+        OCRImageEntity entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, false, curLangCode);
 //        entity.setScreenshotMode(this.checkBoxMenuItemScreenshotMode.isSelected());
 
         // instantiate Task for OCR

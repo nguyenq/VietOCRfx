@@ -17,6 +17,7 @@ package net.sourceforge.vietocr;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javax.imageio.IIOImage;
+import net.sourceforge.tess4j.util.ImageHelper;
 
 public class OCRImageEntity {
 
@@ -46,6 +48,11 @@ public class OCRImageEntity {
      * bounding rectangle
      */
     private Rectangle rect;
+    
+    /**
+     * double-sided page
+     */
+    private boolean doublesided;
 
     /**
      * Horizontal Resolution
@@ -83,18 +90,20 @@ public class OCRImageEntity {
      * @param rect the bounding rectangle defines the region of the image to be
      * recognized. A rectangle of zero dimension or <code>null</code> indicates
      * the whole image.
+     * @param doublesided single- or double-sided page
      * @param lang language code, which follows ISO 639-3 standard
      */
-    public OCRImageEntity(List<IIOImage> oimages, String inputfilename, int index, Rectangle rect, String lang) {
+    public OCRImageEntity(List<IIOImage> oimages, String inputfilename, int index, Rectangle rect, boolean doublesided, String lang) {
         this.oimages = oimages;
         this.inputfilename = inputfilename;
         this.index.set(index);
         this.rect = rect;
+        this.doublesided = doublesided;
         this.language.set(lang);
     }
 
-    public OCRImageEntity(ArrayList<BufferedImage> images, String inputfilename, int index, Rectangle rect, String lang) {
-        this(convertBufferedImageToIIOImage(images), inputfilename, index, rect, lang);
+    public OCRImageEntity(ArrayList<BufferedImage> images, String inputfilename, int index, Rectangle rect, boolean doublesided, String lang) {
+        this(convertBufferedImageToIIOImage(images), inputfilename, index, rect, doublesided, lang);
     }
 
     static List<IIOImage> convertBufferedImageToIIOImage(List<BufferedImage> bis) {
@@ -139,7 +148,16 @@ public class OCRImageEntity {
      * @return the list of selected oimages
      */
     public List<IIOImage> getSelectedOimages() {
-        return index.get() == -1 ? oimages : oimages.subList(index.get(), index.get() + 1);
+        if (doublesided) {
+            List<IIOImage> tempList = new ArrayList<IIOImage>();
+            for (IIOImage image : (index.get() == -1 ? oimages : oimages.subList(index.get(), index.get() + 1))) {
+                // split image in half
+                tempList.addAll(splitImage(image));
+            }
+            return tempList;
+        } else {
+            return index.get() == -1 ? oimages : oimages.subList(index.get(), index.get() + 1);
+        }
     }
 
     /**
@@ -269,5 +287,24 @@ public class OCRImageEntity {
      */
     public String getInputfilename() {
         return inputfilename;
+    }
+
+    /**
+     * Splits image in halves (as in double-sided pages).
+     * 
+     * @param image
+     * @return two half images
+     */
+    public List<IIOImage> splitImage(IIOImage image) {
+        List<IIOImage> tempList = new ArrayList<IIOImage>();
+        RenderedImage ri = image.getRenderedImage();
+        Rectangle cropRect = new Rectangle(0, 0, ri.getWidth() / 2, ri.getHeight());
+        BufferedImage bi = ImageHelper.getSubImage((BufferedImage) ri, cropRect.x, cropRect.y, cropRect.width, cropRect.height);
+        tempList.add(new IIOImage(bi, null, null));
+        cropRect = new Rectangle(ri.getWidth() / 2, 0, ri.getWidth() / 2, ri.getHeight());
+        bi = ImageHelper.getSubImage((BufferedImage) ri, cropRect.x, cropRect.y, cropRect.width, cropRect.height);
+        tempList.add(new IIOImage(bi, null, null));
+
+        return tempList;
     }
 }

@@ -153,7 +153,7 @@ public class MenuCommandController implements Initializable {
         this.miOCR.setDisable(true);
         this.miOCRAll.setDisable(true);
 
-        entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, curLangCode);
+        entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, false, curLangCode);
         entity.setScreenshotMode(this.chmiScreenshotMode.isSelected());
 
         // instantiate Task for OCR

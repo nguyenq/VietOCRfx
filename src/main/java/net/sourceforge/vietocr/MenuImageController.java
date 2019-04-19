@@ -80,10 +80,13 @@ public class MenuImageController implements Initializable {
     @FXML
     protected MenuItem miUndo;
     @FXML
+    protected CheckMenuItem chmiDoubleSidedPage;
+    @FXML
     protected CheckMenuItem chmiScreenshotMode;
     @FXML
     private CheckMenuItem chmiSegmentedRegions;
 
+    private final String strPageSide = "PageSide";
     private final String strScreenshotMode = "ScreenshotMode";
     private static final String strSegmentedRegions = "SegmentedRegions";
     private static final double MINIMUM_DESKEW_THRESHOLD = 0.05d;
@@ -98,6 +101,7 @@ public class MenuImageController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
+        this.chmiDoubleSidedPage.setSelected(prefs.getBoolean(strPageSide, false));
         this.chmiScreenshotMode.setSelected(prefs.getBoolean(strScreenshotMode, false));
         this.chmiSegmentedRegions.setSelected(prefs.getBoolean(strSegmentedRegions, false));
     }
@@ -111,7 +115,7 @@ public class MenuImageController implements Initializable {
         List<IIOImage> iioImageList = GuiController.getInstance().iioImageList;
         List<BufferedImage> imageList = GuiController.getInstance().imageList;
         int imageIndex = GuiController.getInstance().imageIndex;
-        if (iioImageList == null && (event.getSource() != chmiScreenshotMode) && event.getSource() != chmiSegmentedRegions) {
+        if (iioImageList == null && (event.getSource() != chmiDoubleSidedPage) && (event.getSource() != chmiScreenshotMode) && event.getSource() != chmiSegmentedRegions) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION, bundle.getString("Please_load_an_image."));
             alert.show();
             return;
@@ -152,11 +156,11 @@ public class MenuImageController implements Initializable {
 
             menuBar.getScene().setCursor(Cursor.DEFAULT);
         } else if (event.getSource() == miCrop) {
-            
+
         } else if (event.getSource() == mi2x2) {
-            
+
         } else if (event.getSource() == mi3x3) {
-            
+
         } else if (event.getSource() == miBrightness) {
 
         } else if (event.getSource() == miContrast) {
@@ -199,6 +203,9 @@ public class MenuImageController implements Initializable {
             imageList.set(imageIndex, image);
             iioImageList.get(imageIndex).setRenderedImage(image);
             GuiController.getInstance().loadImage();
+        } else if (event.getSource() == chmiDoubleSidedPage) {
+            Label labelDoubleSidedPage = (Label) menuBar.getScene().lookup("#labelDoubleSidedPage");
+            labelDoubleSidedPage.setText(this.chmiDoubleSidedPage.isSelected() ? "Double" : "Single");
         } else if (event.getSource() == chmiScreenshotMode) {
             Label labelScreenShotMode = (Label) menuBar.getScene().lookup("#labelScreenShotMode");
             labelScreenShotMode.setText(this.chmiScreenshotMode.isSelected() ? "On" : "Off");
@@ -270,6 +277,7 @@ public class MenuImageController implements Initializable {
     }
 
     void savePrefs() {
+        prefs.putBoolean(strPageSide, this.chmiDoubleSidedPage.isSelected());
         prefs.putBoolean(strScreenshotMode, this.chmiScreenshotMode.isSelected());
         prefs.putBoolean(strSegmentedRegions, this.chmiSegmentedRegions.isSelected());
     }

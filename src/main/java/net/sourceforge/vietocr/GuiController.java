@@ -383,7 +383,7 @@ public class GuiController implements Initializable {
 
             ArrayList<BufferedImage> al = new ArrayList<BufferedImage>();
             al.addAll(imageList);
-            entity = new OCRImageEntity(al, selectedFile.getName(), imageIndex, null, "eng");
+            entity = new OCRImageEntity(al, selectedFile.getName(), imageIndex, null, false, "eng");
             menuBar.setUserData(entity);
             imageView.setScaleX(1);
             imageView.setScaleY(1);

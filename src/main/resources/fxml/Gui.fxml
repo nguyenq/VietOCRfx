@@ -288,6 +288,9 @@
                 </MenuButton>
                 <Region fx:id="rgn4" />
                 <Separator orientation="VERTICAL" />
+                <Label text="Page:" />
+                <Label fx:id="labelDoubleSidedPage" text="Single" />
+                <Separator orientation="VERTICAL" />
                 <Label text="Screenshot:" />
                 <Label fx:id="labelScreenShotMode" text="Off" />
                 <Separator orientation="VERTICAL" />

@@ -62,6 +62,8 @@
             </accelerator>
         </MenuItem>
         <SeparatorMenuItem />
+      <CheckMenuItem fx:id="chmiDoubleSidedPage" onAction="#handleAction" text="Double-sided Page" />
+        <SeparatorMenuItem />
       <CheckMenuItem fx:id="chmiScreenshotMode" onAction="#handleAction" text="_Screenshot" />
         <SeparatorMenuItem />
       <CheckMenuItem fx:id="chmiSegmentedRegions" onAction="#handleAction" text="Segmented _Regions" />              
