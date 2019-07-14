@@ -63,6 +63,7 @@ public class MenuCommandController implements Initializable {
     private Button btnCancelOCR;
     private Button btnOCR;
     private CheckMenuItem chmiScreenshotMode;
+    private CheckMenuItem chmiDoubleSidedPage;
 
     private double scaleX, scaleY;
     List<IIOImage> iioImageList;
@@ -153,7 +154,7 @@ public class MenuCommandController implements Initializable {
         this.miOCR.setDisable(true);
         this.miOCRAll.setDisable(true);
 
-        entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, false, curLangCode);
+        entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, this.chmiDoubleSidedPage.isSelected(), curLangCode);
         entity.setScreenshotMode(this.chmiScreenshotMode.isSelected());
 
         // instantiate Task for OCR
