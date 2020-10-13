@@ -145,22 +145,22 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>14.0.2.1</version>
+            <version>15</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>14.0.2.1</version>
+            <version>15</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>14.0.2.1</version>
+            <version>15</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>14.0.2.1</version>
+            <version>15</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>com.jfoenix</groupId>
             <artifactId>jfoenix</artifactId>
-            <version>8.0.10</version>
+            <version>9.0.10</version>
         </dependency>
         <dependency>
             <groupId>com.ice</groupId>
@@ -196,7 +196,7 @@
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <scope>test</scope>
-            <version>2.53.1</version>
+            <version>3.141.59</version>
         </dependency>
         <dependency>
             <groupId>com.opera</groupId>
@@ -214,7 +214,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-            <version>4.13</version>
+            <version>4.13.1</version>
         </dependency>
     </dependencies>
 </project>
