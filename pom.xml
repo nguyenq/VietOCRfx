@@ -135,7 +135,7 @@
         <dependency>
             <groupId>net.sourceforge.tess4j</groupId>
             <artifactId>tess4j</artifactId>
-            <version>4.5.3</version>
+            <version>4.5.4</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
@@ -150,22 +150,22 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>15</version>
+            <version>15.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>15</version>
+            <version>15.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>15</version>
+            <version>15.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>8.40.17</version>
+            <version>8.40.18</version>
         </dependency>
         <dependency>
             <groupId>com.jfoenix</groupId>
