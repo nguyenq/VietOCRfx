@@ -57,7 +57,6 @@ public class OCRImages extends OCR<IIOImage> {
         instance.setDatapath(datapath);
         instance.setLanguage(language);
         instance.setPageSegMode(Integer.parseInt(pageSegMode));
-        instance.setHocr(outputFormat.equalsIgnoreCase("hocr"));
 
         File configsFilePath = new File(datapath, CONFIG_PATH + CONFIGS_FILE);
         if (configsFilePath.exists()) {
@@ -103,7 +102,7 @@ public class OCRImages extends OCR<IIOImage> {
             if (!line.trim().startsWith("#")) {
                 try {
                     String[] keyValuePair = line.trim().split("\\s+");
-                    instance.setTessVariable(keyValuePair[0], keyValuePair[1]);
+                    instance.setVariable(keyValuePair[0], keyValuePair[1]);
                 } catch (Exception e) {
                     //ignore and continue on
                 }
