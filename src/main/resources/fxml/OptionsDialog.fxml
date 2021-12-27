@@ -3,7 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -55,14 +55,12 @@
                      <children>
                         <Label text="Watch Folder:" />
                         <Label text="Output Folder:" GridPane.rowIndex="1" />
-                        <Label text="Output Format" GridPane.rowIndex="2" />
                         <TextField GridPane.columnIndex="1" />
                         <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
                         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <ChoiceBox fx:id="cbOutputFormat" prefWidth="70.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <CheckBox fx:id="chbEnable" mnemonicParsing="false" text="Enable" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
-                        <CheckBox fx:id="chbDeskew" mnemonicParsing="false" text="Deskew" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                        <MenuButton fx:id="mbOutputFormat" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="chbEnable" mnemonicParsing="false" text="Enable" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                      </children>
                      <padding>
                         <Insets top="5.0" />

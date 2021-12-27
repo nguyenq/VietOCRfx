@@ -60,12 +60,17 @@ public class MenuSettingsController implements Initializable {
     @FXML
     private Menu miUILanguage;
 
+    private OptionsDialogController controller;
+    private Stage optionsDialog;
+
     private final String strPSM = "PageSegMode";
     private final String strInputMethod = "inputMethod";
     private final String strUILanguage = "UILanguage";
+    private final String strBatchOutputFormat = "BatchOutputFormat";
     protected String selectedPSM = "3"; // 3 - Fully automatic page segmentation, but no OSD (default)
     private String selectedInputMethod;
     private String selectedUILang = "en";
+    protected String outputFormats;
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr3");
 
     /**
@@ -74,7 +79,7 @@ public class MenuSettingsController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         selectedPSM = prefs.get(strPSM, "3");
-
+        outputFormats = prefs.get(strBatchOutputFormat, "text");
 //        Label labelPSMValue = (Label) menuBar.getScene().lookup("#labelPSMValue");
 //        labelPSMValue.setText(enumOf(selectedPSM));
         // build PageSegMode submenu
@@ -217,16 +222,21 @@ public class MenuSettingsController implements Initializable {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/OptionsDialog.fxml"));
                 Parent root = fxmlLoader.load();
-                OptionsDialogController controller = fxmlLoader.getController();
-                Stage optionsDialog = new Stage();
-                optionsDialog.setResizable(false);
-                optionsDialog.initStyle(StageStyle.UTILITY);
-                optionsDialog.setAlwaysOnTop(true);
+                controller = fxmlLoader.getController();
+                controller.setSelectedOutputFormats(outputFormats);
+
+                if (optionsDialog == null) {
+                    optionsDialog = new Stage();
+                    optionsDialog.setResizable(false);
+                    optionsDialog.initStyle(StageStyle.UTILITY);
+                    optionsDialog.setAlwaysOnTop(true);
 //            optionsDialog.setX(prefs.getDouble(strChangeCaseX, changeCaseDialog.getX()));
 //            optionsDialog.setY(prefs.getDouble(strChangeCaseY, changeCaseDialog.getY()));
-                Scene scene1 = new Scene(root);
-                optionsDialog.setScene(scene1);
-                optionsDialog.setTitle("Options");
+                    Scene scene1 = new Scene(root);
+                    optionsDialog.setScene(scene1);
+                    optionsDialog.setTitle("Options");
+                }
+
                 optionsDialog.toFront();
                 optionsDialog.show();
             } catch (Exception e) {
@@ -248,5 +258,9 @@ public class MenuSettingsController implements Initializable {
     void savePrefs() {
         prefs.put(strPSM, selectedPSM);
         prefs.put(strUILanguage, selectedUILang);
+
+        if (optionsDialog != null) {
+            prefs.put(strBatchOutputFormat, controller.getSelectedOutputFormats());
+        }
     }
 }

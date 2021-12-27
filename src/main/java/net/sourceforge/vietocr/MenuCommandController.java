@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -65,6 +66,10 @@ public class MenuCommandController implements Initializable {
     private CheckMenuItem chmiScreenshotMode;
     private CheckMenuItem chmiDoubleSidedPage;
 
+    static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
+
+    private BulkDialogController controller;
+    private Stage bulkDialog;
     private double scaleX, scaleY;
     List<IIOImage> iioImageList;
     String inputfilename, curLangCode;
@@ -73,6 +78,8 @@ public class MenuCommandController implements Initializable {
     String selectedPSM;
     private OCRImageEntity entity;
     private OcrWorker ocrWorker;
+    private final String strBulkOutputFormat = "BulkOutputFormat";
+    private String outputFormats;
 
     protected ResourceBundle bundle;
 
@@ -86,7 +93,7 @@ public class MenuCommandController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        outputFormats = prefs.get(strBulkOutputFormat, "text");
     }
 
     void setMenuBar(MenuBar menuBar) {
@@ -115,16 +122,20 @@ public class MenuCommandController implements Initializable {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/BulkDialog.fxml"));
                 Parent root = fxmlLoader.load();
-                BulkDialogController controller = fxmlLoader.getController();
-                Stage bulkDialog = new Stage();
-                bulkDialog.setResizable(false);
-                bulkDialog.initStyle(StageStyle.UTILITY);
-                bulkDialog.setAlwaysOnTop(true);
+                controller = fxmlLoader.getController();
+                controller.setSelectedOutputFormats(outputFormats);
+                if (bulkDialog == null) {
+                    bulkDialog = new Stage();
+                    bulkDialog.setResizable(false);
+                    bulkDialog.initStyle(StageStyle.UTILITY);
+                    bulkDialog.setAlwaysOnTop(true);
 //            bulkDialog.setX(prefs.getDouble(strChangeCaseX, changeCaseDialog.getX()));
 //            bulkDialog.setY(prefs.getDouble(strChangeCaseY, changeCaseDialog.getY()));
-                Scene scene1 = new Scene(root);
-                bulkDialog.setScene(scene1);
-                bulkDialog.setTitle("Bulk OCR");
+                    Scene scene1 = new Scene(root);
+                    bulkDialog.setScene(scene1);
+                    bulkDialog.setTitle("Bulk OCR");                    
+                }
+
                 bulkDialog.toFront();
                 bulkDialog.show();
             } catch (Exception e) {
@@ -170,6 +181,12 @@ public class MenuCommandController implements Initializable {
         }
 
         this.btnCancelOCR.setDisable(true);
+    }
+
+    void savePrefs() {
+        if (bulkDialog != null) {
+            prefs.put(strBulkOutputFormat, controller.getSelectedOutputFormats());
+        }
     }
 
     /**

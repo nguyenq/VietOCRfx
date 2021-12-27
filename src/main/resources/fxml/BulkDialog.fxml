@@ -3,7 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -26,19 +26,17 @@
     <children>
         <Label text="Input Folder:" />
         <Label text="Output Folder:" GridPane.rowIndex="1" />
-        <Label text="Output Format" GridPane.rowIndex="2" />
         <TextField GridPane.columnIndex="1" />
         <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <ComboBox fx:id="cbOutputFormat" maxWidth="-Infinity" prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <CheckBox fx:id="chbDeskew" text="Deskew" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+        <MenuButton fx:id="mbOutputFormat" maxWidth="-Infinity" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-      <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
-         <children>
-              <Button fx:id="btnRun" mnemonicParsing="false" onAction="#handleAction" text="Run" />
-              <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#handleAction" text="Cancel" />
-         </children>
-      </HBox>
+        <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" style="-fx-padding: 10 0 0 0;" >
+            <children>
+                <Button fx:id="btnRun" mnemonicParsing="false" onAction="#handleAction" text="Run" />
+                <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#handleAction" text="Cancel" />
+            </children>
+        </HBox>
     </children>
     <padding>
         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

@@ -64,7 +64,7 @@ public class MainMenuController implements Initializable {
 
     public void savePrefs() {
         menuFileController.savePrefs();
-        //menuEditController.savePrefs();
+        menuCommandController.savePrefs();
         menuImageController.savePrefs();
         menuFormatController.savePrefs();
         menuSettingsController.savePrefs();

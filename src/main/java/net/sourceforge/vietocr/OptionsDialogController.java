@@ -16,12 +16,18 @@
 package net.sourceforge.vietocr;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import net.sourceforge.tess4j.ITesseract;
+import net.sourceforge.vietocr.controls.OuputFormatCheckBoxActionListener;
 
 /**
  * FXML Controller class
@@ -35,18 +41,23 @@ public class OptionsDialogController implements Initializable {
     @FXML
     private Button btnCancel;
     @FXML
-    private ChoiceBox cbOutputFormat;
+    private MenuButton mbOutputFormat;
     @FXML
     private CheckBox chbEnable;
-    @FXML
-    private CheckBox chbDeskew;
     
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        cbOutputFormat.getItems().addAll("Text", "HTML", "PDF");
+        for (ITesseract.RenderedFormat value : ITesseract.RenderedFormat.values()) {
+            CheckBox chb = new CheckBox(value.name());
+            chb.setOnAction(new OuputFormatCheckBoxActionListener(mbOutputFormat));
+            CustomMenuItem menuItem = new CustomMenuItem(chb);
+            // keep the menu open during selection
+            menuItem.setHideOnClick(false);
+            mbOutputFormat.getItems().add(menuItem);
+        }
     }
 
     @FXML
@@ -56,6 +67,38 @@ public class OptionsDialogController implements Initializable {
             ((Stage) btnOK.getScene().getWindow()).close();
         } else if (event.getSource() == btnCancel) {
             ((Stage) btnCancel.getScene().getWindow()).close();
+        }
+    }
+    
+        /**
+     * @return the selectedFormats
+     */
+    public String getSelectedOutputFormats() {
+        List<String> list = new ArrayList<>();
+        for (MenuItem mi : mbOutputFormat.getItems()) {
+            if (mi instanceof CustomMenuItem cmi) {
+                CheckBox item = (CheckBox) cmi.getContent();
+                if (item.isSelected()) {
+                    list.add(item.getText());
+                }
+            }
+
+        }
+        return list.stream().map(n -> String.valueOf(n)).collect(Collectors.joining(","));
+    }
+
+    /**
+     * @param selectedFormats the selectedFormats to set
+     */
+    public void setSelectedOutputFormats(String selectedFormats) {
+        List<String> list = Arrays.asList(selectedFormats.split(","));
+        for (MenuItem mi : mbOutputFormat.getItems()) {
+            if (mi instanceof CustomMenuItem cmi) {
+                CheckBox item = (CheckBox) cmi.getContent();
+                if (list.contains(item.getText())) {
+                    item.setSelected(true);
+                }
+            }
         }
     }
 }
