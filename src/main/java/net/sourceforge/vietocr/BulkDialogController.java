@@ -36,6 +36,8 @@ public class BulkDialogController implements Initializable {
     @FXML
     private Button btnCancel;
     @FXML
+    private Button btnOptions;
+    @FXML
     private MenuButton mbOutputFormat;
 
     /**
@@ -59,6 +61,9 @@ public class BulkDialogController implements Initializable {
             ((Stage) btnRun.getScene().getWindow()).close();
         } else if (event.getSource() == btnCancel) {
             ((Stage) btnCancel.getScene().getWindow()).close();
+        } else if (event.getSource() == btnOptions) {
+//            ((GuiWithBulkOCR) this.getParent()).jMenuItemOptionsActionPerformed(evt);
+//            ((Button) btnOptions.getScene().lookup("#miOptions")).fire();
         }
     }
 
@@ -76,7 +81,7 @@ public class BulkDialogController implements Initializable {
             }
 
         }
-        return list.stream().map(n -> String.valueOf(n)).collect(Collectors.joining(","));
+        return list.stream().collect(Collectors.joining(","));
     }
 
     /**

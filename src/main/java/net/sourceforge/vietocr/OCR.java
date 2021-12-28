@@ -26,12 +26,15 @@ public abstract class OCR<T> {
     final static String CONFIGVARS_FILE = "tess_configvars";
     final static String CONFIG_PATH = "tessdata/configs/";
     final static String TESSDATA = "tessdata";
+    final static double MINIMUM_DESKEW_THRESHOLD = 0.05d;
 
     protected Rectangle rect = null;
     protected String pageSegMode = "3"; // Fully automatic page segmentation, but no OSD (default)
+    protected String ocrEngineMode = "3"; // Default, based on what is available
     protected String language = "eng";
-    protected String outputFormat = "text";
-    protected String datapath = "./";
+    protected String outputFormats = "text";
+    protected String datapath = "tessdata";
+    protected ProcessingOptions options;
 
     /**
      * Recognizes files or images.
@@ -95,17 +98,17 @@ public abstract class OCR<T> {
     }
 
     /**
-     * @return the outputFormat
+     * @return the outputFormats
      */
-    public String getOutputFormat() {
-        return outputFormat;
+    public String getOutputFormats() {
+        return outputFormats;
     }
 
     /**
-     * @param outputFormat the outputFormat to set; possible values: txt, hocr, pdf
+     * @param outputFormat the outputFormats to set; possible values: txt, hocr, pdf
      */
-    public void setOutputFormat(String outputFormat) {
-        this.outputFormat = outputFormat;
+    public void setOutputFormats(String outputFormat) {
+        this.outputFormats = outputFormat;
     }
 
     /**
@@ -138,5 +141,12 @@ public abstract class OCR<T> {
      */
     public void setDatapath(String datapath) {
         this.datapath = datapath;
+    }
+    
+    /**
+     * @param options the Processing Options to set
+     */
+    public void setProcessingOptions(ProcessingOptions options) {
+        this.options = options;
     }
 }

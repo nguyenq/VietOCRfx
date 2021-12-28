@@ -37,10 +37,8 @@ import net.sourceforge.vietocr.util.Utils;
 public class OCRImages extends OCR<IIOImage> {
 
     private final Tesseract instance;
-    private final String tessPath;
 
-    public OCRImages(String tessPath) {
-        this.tessPath = tessPath;
+    public OCRImages() {
         instance = new Tesseract();
     }
 
@@ -57,6 +55,7 @@ public class OCRImages extends OCR<IIOImage> {
         instance.setDatapath(datapath);
         instance.setLanguage(language);
         instance.setPageSegMode(Integer.parseInt(pageSegMode));
+        instance.setOcrEngineMode(Integer.parseInt(ocrEngineMode));
 
         File configsFilePath = new File(datapath, CONFIG_PATH + CONFIGS_FILE);
         if (configsFilePath.exists()) {
@@ -122,8 +121,14 @@ public class OCRImages extends OCR<IIOImage> {
         instance.setDatapath(datapath);
         instance.setLanguage(language);
         instance.setPageSegMode(Integer.parseInt(pageSegMode));
-        List<RenderedFormat> formats = new ArrayList<RenderedFormat>();
-        formats.add(RenderedFormat.valueOf(outputFormat.toUpperCase()));
-        instance.createDocuments(inputImage.getPath(), Utils.stripExtension(outputFile.getPath()), formats);
+        instance.setOcrEngineMode(Integer.parseInt(ocrEngineMode));
+        
+        List<RenderedFormat> renderedFormats = new ArrayList<>();
+
+        for (String format : outputFormats.toUpperCase().split(",")) {
+            renderedFormats.add(RenderedFormat.valueOf(format));
+        }
+
+        instance.createDocuments(inputImage.getPath(), Utils.stripExtension(outputFile.getPath()), renderedFormats);
     }
 }

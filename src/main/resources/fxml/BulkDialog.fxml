@@ -2,16 +2,18 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="304.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.BulkDialogController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="304.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.BulkDialogController">
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
@@ -31,8 +33,18 @@
         <MenuButton fx:id="mbOutputFormat" maxWidth="-Infinity" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
         <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-        <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" style="-fx-padding: 10 0 0 0;" >
+        <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" style="-fx-padding: 10 0 0 0;" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
             <children>
+                <Button fx:id="btnOptions" mnemonicParsing="false" onAction="#handleAction" >
+                   <graphic>
+                      <ImageView pickOnBounds="true" preserveRatio="true">
+                         <image>
+                            <Image url="@../com/fatcow/icons/tools.png" />
+                         </image>
+                      </ImageView>
+                   </graphic>
+                </Button>
+                <Region HBox.hgrow="ALWAYS" />
                 <Button fx:id="btnRun" mnemonicParsing="false" onAction="#handleAction" text="Run" />
                 <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#handleAction" text="Cancel" />
             </children>

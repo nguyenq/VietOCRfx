@@ -18,8 +18,6 @@ public class GuiWithPostprocess extends GuiWithOCR {
     private final String strRemoveHyphensEnabled = "RemoveHyphensEnabled";
     protected String dangAmbigsPath;
     protected boolean dangAmbigsOn;
-    protected boolean replaceHyphensEnabled;
-    protected boolean removeHyphensEnabled;
     
     @FXML
     private Button btnPostProcess;
@@ -30,8 +28,8 @@ public class GuiWithPostprocess extends GuiWithOCR {
         
         dangAmbigsPath = prefs.get(strDangAmbigsPath, new File(baseDir, "data").getPath());
         dangAmbigsOn = prefs.getBoolean(strDangAmbigs, true);
-        replaceHyphensEnabled = prefs.getBoolean(strReplaceHyphensEnabled, false);
-        removeHyphensEnabled = prefs.getBoolean(strRemoveHyphensEnabled, false);
+        options.setReplaceHyphens(prefs.getBoolean(strReplaceHyphensEnabled, false));
+        options.setRemoveHyphens(prefs.getBoolean(strRemoveHyphensEnabled, false));
     }
     
     @FXML
@@ -49,7 +47,7 @@ public class GuiWithPostprocess extends GuiWithOCR {
                     updateMessage(bundle.getString("Correcting_errors..."));
                     String selectedText = textarea.getSelectedText();
                     // use only the first language if multiple are selected
-                    result = Processor.postProcess(!selectedText.trim().equals("") ? selectedText : textarea.getText(), curLangCode.split("\\+")[0], dangAmbigsPath, dangAmbigsOn, replaceHyphensEnabled);
+                    result = Processor.postProcess(!selectedText.trim().equals("") ? selectedText : textarea.getText(), curLangCode.split("\\+")[0], dangAmbigsPath, dangAmbigsOn, options.isReplaceHyphens());
                     return null;
                 }
                 
@@ -83,8 +81,8 @@ public class GuiWithPostprocess extends GuiWithOCR {
     public void savePrefs() {
         prefs.put(strDangAmbigsPath, dangAmbigsPath);
         prefs.putBoolean(strDangAmbigs, dangAmbigsOn);
-        prefs.putBoolean(strReplaceHyphensEnabled, replaceHyphensEnabled);
-        prefs.putBoolean(strRemoveHyphensEnabled, removeHyphensEnabled);
+        prefs.putBoolean(strReplaceHyphensEnabled, options.isReplaceHyphens());
+        prefs.putBoolean(strRemoveHyphensEnabled, options.isRemoveHyphens());
         
         super.savePrefs();
     }

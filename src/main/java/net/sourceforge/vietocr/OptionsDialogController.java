@@ -29,11 +29,6 @@ import javafx.stage.Stage;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.vietocr.controls.OuputFormatCheckBoxActionListener;
 
-/**
- * FXML Controller class
- *
- * @author Quan
- */
 public class OptionsDialogController implements Initializable {
 
     @FXML
@@ -44,7 +39,21 @@ public class OptionsDialogController implements Initializable {
     private MenuButton mbOutputFormat;
     @FXML
     private CheckBox chbEnable;
-    
+    @FXML
+    private CheckBox chbPostProcessing;
+    @FXML
+    private CheckBox chbCorrectLetterCases;
+    @FXML
+    private CheckBox chbRemoveLineBreaks;
+    @FXML
+    private CheckBox chbDeskew;
+    @FXML
+    private CheckBox chbRemoveLines;
+    @FXML
+    private CheckBox chbReplaceHyphens;
+    @FXML
+    private CheckBox chbRemoveHyphens;
+
     /**
      * Initializes the controller class.
      */
@@ -69,8 +78,8 @@ public class OptionsDialogController implements Initializable {
             ((Stage) btnCancel.getScene().getWindow()).close();
         }
     }
-    
-        /**
+
+    /**
      * @return the selectedFormats
      */
     public String getSelectedOutputFormats() {
@@ -100,5 +109,34 @@ public class OptionsDialogController implements Initializable {
                 }
             }
         }
+    }
+
+    /**
+     * @return the processingOptions
+     */
+    public ProcessingOptions getProcessingOptions() {
+        ProcessingOptions processingOptions = new ProcessingOptions();
+        processingOptions.setDeskew(this.chbDeskew.isSelected());
+        processingOptions.setPostProcessing(this.chbPostProcessing.isSelected());
+        processingOptions.setRemoveLines(this.chbRemoveLines.isSelected());
+        processingOptions.setRemoveLineBreaks(this.chbRemoveLineBreaks.isSelected());
+        processingOptions.setCorrectLetterCases(this.chbCorrectLetterCases.isSelected());
+        processingOptions.setRemoveHyphens(this.chbRemoveHyphens.isSelected());
+        processingOptions.setReplaceHyphens(this.chbReplaceHyphens.isSelected());
+
+        return processingOptions;
+    }
+
+    /**
+     * @param processingOptions the processingOptions to set
+     */
+    public void setProcessingOptions(ProcessingOptions processingOptions) {
+        this.chbDeskew.setSelected(processingOptions.isDeskew());
+        this.chbPostProcessing.setSelected(processingOptions.isPostProcessing());
+        this.chbRemoveLines.setSelected(processingOptions.isRemoveLines());
+        this.chbRemoveLineBreaks.setSelected(processingOptions.isRemoveLineBreaks());
+        this.chbCorrectLetterCases.setSelected(processingOptions.isCorrectLetterCases());
+        this.chbRemoveHyphens.setSelected(processingOptions.isRemoveHyphens());
+        this.chbReplaceHyphens.setSelected(processingOptions.isReplaceHyphens());
     }
 }

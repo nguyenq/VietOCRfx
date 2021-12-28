@@ -206,7 +206,7 @@ public class MenuCommandController implements Initializable {
         protected Void call() throws Exception {
             String lang = entity.getLanguage();
 
-            OCR<IIOImage> ocrEngine = new OCRImages(tessPath); // for Tess4J
+            OCR<IIOImage> ocrEngine = new OCRImages(); // for Tess4J
             ocrEngine.setDatapath(datapath);
             ocrEngine.setPageSegMode(selectedPSM);
             ocrEngine.setLanguage(lang);

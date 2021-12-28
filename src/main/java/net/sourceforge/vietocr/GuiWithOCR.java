@@ -107,6 +107,7 @@ public class GuiWithOCR extends GuiWithImageOps {
     private static final String strTessDir = "TesseractDirectory";
     Task ocrWorker;
     protected String selectedPSM = "3"; // 3 - Fully automatic page segmentation, but no OSD (default)
+    protected ProcessingOptions options;
 
     private final static Logger logger = Logger.getLogger(GuiWithOCR.class.getName());
 
@@ -129,6 +130,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         btnSegmentedRegions.visibleProperty().addListener((observable) -> {
             setSegmentedRegions();
         });
+        options = new ProcessingOptions();
     }
 
     /**
@@ -213,7 +215,7 @@ public class GuiWithOCR extends GuiWithImageOps {
                 }
             }
 
-            String result = TextUtilities.removeLineBreaks(textarea.getSelectedText());
+            String result = TextUtilities.removeLineBreaks(textarea.getSelectedText(), options.isRemoveHyphens());
 
             int start = textarea.getSelection().getStart();
             textarea.replaceSelection(result);
@@ -385,7 +387,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         }
 
         try {
-            OCR<IIOImage> ocrEngine = new OCRImages(tessPath); // for Tess4J
+            OCR<IIOImage> ocrEngine = new OCRImages(); // for Tess4J
             ocrEngine.setDatapath(datapath);
             HashMap<Color, List<Rectangle>> map = selectionBox.getSegmentedRegions();
             if (map == null) {
@@ -477,7 +479,7 @@ public class GuiWithOCR extends GuiWithImageOps {
             updateMessage(bundle.getString("OCR_running..."));
             String lang = entity.getLanguage();
 
-            OCR<IIOImage> ocrEngine = new OCRImages(tessPath); // for Tess4J
+            OCR<IIOImage> ocrEngine = new OCRImages(); // for Tess4J
             ocrEngine.setDatapath(datapath);
             ocrEngine.setPageSegMode(selectedPSM);
             ocrEngine.setLanguage(lang);

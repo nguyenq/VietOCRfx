@@ -3,8 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane prefHeight="200.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.OptionsDialogController">
+<BorderPane prefHeight="200.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.OptionsDialogController">
     <center>
         <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
@@ -68,6 +68,46 @@
                   </GridPane>
                </content>
                 </Tab>
+            <Tab text="Bulk/Batch Options">
+               <content>
+                  <GridPane>
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <CheckBox fx:id="chbPostProcessing" mnemonicParsing="false" text="Post Processing" />
+                        <CheckBox fx:id="chbCorrectLetterCases" mnemonicParsing="false" text="Correct Letter Cases" GridPane.rowIndex="1" />
+                        <CheckBox fx:id="chbRemoveLineBreaks" layoutX="10.0" layoutY="61.0" mnemonicParsing="false" text="Remove Line Breaks" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="chbDeskew" mnemonicParsing="false" text="Deskew" GridPane.columnIndex="1" />
+                        <CheckBox fx:id="chbRemoveLines" mnemonicParsing="false" text="Remove Lines" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+               </content>
+            </Tab>
+            <Tab text="Hyphen">
+               <content>
+                  <GridPane>
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <CheckBox fx:id="chbReplaceHyphens" mnemonicParsing="false" text="Replace hyphens with soft hyphens" />
+                        <CheckBox fx:id="chbRemoveHyphens" mnemonicParsing="false" text="Remove soft hyphens" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+               </content>
+            </Tab>
             </tabs>
         </TabPane>
     </center>
