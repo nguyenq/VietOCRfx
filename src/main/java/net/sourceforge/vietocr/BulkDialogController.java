@@ -15,16 +15,21 @@
  */
 package net.sourceforge.vietocr;
 
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import net.sourceforge.tess4j.ITesseract.RenderedFormat;
 import net.sourceforge.vietocr.controls.OuputFormatCheckBoxActionListener;
@@ -39,6 +44,19 @@ public class BulkDialogController implements Initializable {
     private Button btnOptions;
     @FXML
     private MenuButton mbOutputFormat;
+    @FXML
+    private TextField tfInputFolder;
+    @FXML
+    private TextField tfOutputFolder;
+    @FXML
+    private Button btnBrowseInputFolder;
+    @FXML
+    private Button btnBrowseOutputFolder;
+
+    protected String inDirectory;
+    protected String outDirectory;
+    private DirectoryChooser dirChoooser;
+    final Preferences prefs = GuiController.prefs;
 
     /**
      * Initializes the controller class.
@@ -53,17 +71,51 @@ public class BulkDialogController implements Initializable {
             menuItem.setHideOnClick(false);
             mbOutputFormat.getItems().add(menuItem);
         }
+
+        inDirectory = prefs.get("inDirectory", new File(System.getProperty("user.dir"), ".").getPath());
+        if (!Files.exists(Paths.get(inDirectory))) {
+            inDirectory = System.getProperty("user.home");
+        }
+        tfInputFolder.setText(inDirectory);
+        tfInputFolder.setStyle("-fx-focus-color: transparent;");
+        
+        outDirectory = prefs.get("outDirectory", new File(System.getProperty("user.dir"), ".").getPath());
+        if (!Files.exists(Paths.get(outDirectory))) {
+            outDirectory = System.getProperty("user.home");
+        }
+        
+        tfOutputFolder.setText(outDirectory);
+        tfOutputFolder.setStyle("-fx-focus-color: transparent;");
+        
+        dirChoooser = new DirectoryChooser();
     }
 
     @FXML
     private void handleAction(ActionEvent event) {
         if (event.getSource() == btnRun) {
+            savePrefs();
             ((Stage) btnRun.getScene().getWindow()).close();
         } else if (event.getSource() == btnCancel) {
             ((Stage) btnCancel.getScene().getWindow()).close();
         } else if (event.getSource() == btnOptions) {
 //            ((GuiWithBulkOCR) this.getParent()).jMenuItemOptionsActionPerformed(evt);
 //            ((Button) btnOptions.getScene().lookup("#miOptions")).fire();
+        } else if (event.getSource() == btnBrowseInputFolder) {
+            dirChoooser.setTitle("Set Location of Input Files");
+            dirChoooser.setInitialDirectory(new File(inDirectory));
+            File dir = dirChoooser.showDialog(btnBrowseInputFolder.getScene().getWindow());
+            if (dir != null) {
+                inDirectory = dir.getPath();
+                tfInputFolder.setText(inDirectory);
+            }
+        } else if (event.getSource() == btnBrowseOutputFolder) {
+            dirChoooser.setTitle("Set Location of Output Files");
+            dirChoooser.setInitialDirectory(new File(outDirectory));
+            File dir = dirChoooser.showDialog(btnBrowseOutputFolder.getScene().getWindow());
+            if (dir != null) {
+                outDirectory = dir.getPath();
+                tfOutputFolder.setText(outDirectory);
+            }
         }
     }
 
@@ -96,6 +148,15 @@ public class BulkDialogController implements Initializable {
                     item.setSelected(true);
                 }
             }
+        }
+    }
+
+    void savePrefs() {
+        if (inDirectory != null) {
+            prefs.put("inDirectory", inDirectory);
+        }
+        if (outDirectory != null) {
+            prefs.put("outDirectory", outDirectory);
         }
     }
 }

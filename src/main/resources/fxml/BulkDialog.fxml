@@ -28,14 +28,14 @@
     <children>
         <Label text="Input Folder:" />
         <Label text="Output Folder:" GridPane.rowIndex="1" />
-        <TextField GridPane.columnIndex="1" />
-        <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <TextField fx:id="tfInputFolder" editable="false" GridPane.columnIndex="1" />
+        <TextField fx:id="tfOutputFolder" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
         <MenuButton fx:id="mbOutputFormat" maxWidth="-Infinity" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
-        <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
+        <Button fx:id="btnBrowseInputFolder" mnemonicParsing="false" onAction="#handleAction" text="..." GridPane.columnIndex="2" />
+        <Button fx:id="btnBrowseOutputFolder" mnemonicParsing="false" onAction="#handleAction" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
         <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" style="-fx-padding: 10 0 0 0;" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
             <children>
-                <Button fx:id="btnOptions" mnemonicParsing="false" onAction="#handleAction" >
+                <Button fx:id="btnOptions" mnemonicParsing="false" onAction="#handleAction">
                    <graphic>
                       <ImageView pickOnBounds="true" preserveRatio="true">
                          <image>
