@@ -1,32 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
-    <action>
-        <actionName>run</actionName>
-        <packagings>
-            <packaging>jar</packaging>
-        </packagings>
-        <goals>
-            <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.6.0:java</goal>
-        </goals>
-        <properties>
-            <exec.args>-classpath %classpath net.sourceforge.vietocr.VietOCR</exec.args>
-            <exec.executable>java</exec.executable>
-        </properties>
-    </action>
-    <action>
-        <actionName>debug</actionName>
-        <packagings>
-            <packaging>jar</packaging>
-        </packagings>
-        <goals>
-            <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.6.0:java</goal>
-        </goals>
-        <properties>
-            <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath net.sourceforge.vietocr.VietOCR</exec.args>
-            <exec.executable>java</exec.executable>
+	<action>
+		<actionName>run</actionName>
+		<goals>
+			<goal>clean</goal>
+			<goal>javafx:run</goal>
+		</goals>
+	</action>
+	<action>
+		<actionName>jlink</actionName>
+		<goals>
+			<goal>clean</goal>
+			<goal>javafx:jlink</goal>
+		</goals>
+	</action>
+	<action>
+		<actionName>debug</actionName>
+		<goals>
+			<goal>clean</goal>
+			<goal>javafx:run@debug</goal>
+		</goals>
+		<properties>
             <jpda.listen>true</jpda.listen>
         </properties>
-    </action>
+	</action>
 </actions>
