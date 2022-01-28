@@ -2,6 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.TextField?>
@@ -13,44 +15,35 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="304.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.BulkDialogController">
-    <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="50.0" />
-    </columnConstraints>
-    <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-    </rowConstraints>
-    <children>
-        <Label text="Input Folder:" />
-        <Label text="Output Folder:" GridPane.rowIndex="1" />
-        <TextField fx:id="tfInputFolder" editable="false" GridPane.columnIndex="1" />
-        <TextField fx:id="tfOutputFolder" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-        <MenuButton fx:id="mbOutputFormat" maxWidth="-Infinity" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-        <Button fx:id="btnBrowseInputFolder" mnemonicParsing="false" onAction="#handleAction" text="..." GridPane.columnIndex="2" />
-        <Button fx:id="btnBrowseOutputFolder" mnemonicParsing="false" onAction="#handleAction" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-        <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" style="-fx-padding: 10 0 0 0;" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
+
+<DialogPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <content>
+        <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="120.0" prefWidth="304.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="50.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
             <children>
-                <Button fx:id="btnOptions" mnemonicParsing="false" onAction="#handleAction">
-                   <graphic>
-                      <ImageView pickOnBounds="true" preserveRatio="true">
-                         <image>
-                            <Image url="@../com/fatcow/icons/tools.png" />
-                         </image>
-                      </ImageView>
-                   </graphic>
-                </Button>
-                <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="btnRun" mnemonicParsing="false" onAction="#handleAction" text="Run" />
-                <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#handleAction" text="Cancel" />
+                <Label text="Input Folder:" />
+                <Label text="Output Folder:" GridPane.rowIndex="1" />
+                <TextField fx:id="tfInputFolder" editable="false" GridPane.columnIndex="1" />
+                <TextField fx:id="tfOutputFolder" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <MenuButton fx:id="mbOutputFormat" maxWidth="-Infinity" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Button fx:id="btnBrowseInputFolder" mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
+                <Button fx:id="btnBrowseOutputFolder" mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
             </children>
-        </HBox>
-    </children>
-    <padding>
-        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-    </padding>
-</GridPane>
+        </GridPane>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:id="optionsButtonType" buttonData="LEFT"/>
+        <ButtonType fx:id="okButtonType" text="Run" buttonData="OK_DONE"/>
+        <ButtonType fx:id="cancelButtonType" text="Cancel" buttonData="CANCEL_CLOSE"/>
+    </buttonTypes>
+</DialogPane>

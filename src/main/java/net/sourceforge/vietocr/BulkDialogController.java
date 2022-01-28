@@ -27,21 +27,20 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import net.sourceforge.tess4j.ITesseract.RenderedFormat;
 import net.sourceforge.vietocr.controls.OuputFormatCheckBoxActionListener;
 
-public class BulkDialogController implements Initializable {
+public class BulkDialogController extends Dialog<ButtonType> implements Initializable {
 
-    @FXML
-    private Button btnRun;
-    @FXML
-    private Button btnCancel;
-    @FXML
-    private Button btnOptions;
     @FXML
     private MenuButton mbOutputFormat;
     @FXML
@@ -52,17 +51,33 @@ public class BulkDialogController implements Initializable {
     private Button btnBrowseInputFolder;
     @FXML
     private Button btnBrowseOutputFolder;
+    @FXML
+    private ButtonType optionsButtonType;
+    @FXML
+    private ButtonType okButtonType;
+    @FXML
+    private ButtonType cancelButtonType;
 
-    protected String inDirectory;
-    protected String outDirectory;
+    private String inDirectory;
+    private String outDirectory;
     private DirectoryChooser dirChoooser;
     final Preferences prefs = GuiController.prefs;
 
     /**
      * Initializes the controller class.
+     *
+     * @param owner
      */
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public BulkDialogController(Window owner) throws Exception {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/BulkDialog.fxml"));
+        fxmlLoader.setController(this);
+        DialogPane pane = fxmlLoader.load();
+        initOwner(owner);
+        initModality(Modality.APPLICATION_MODAL);
+        setResizable(true);
+        setTitle("Bulk OCR");
+        setDialogPane(pane);
+
         for (RenderedFormat value : RenderedFormat.values()) {
             CheckBox chb = new CheckBox(value.name());
             chb.setOnAction(new OuputFormatCheckBoxActionListener(mbOutputFormat));
@@ -78,43 +93,42 @@ public class BulkDialogController implements Initializable {
         }
         tfInputFolder.setText(inDirectory);
         tfInputFolder.setStyle("-fx-focus-color: transparent;");
-        
+
         outDirectory = prefs.get("outDirectory", new File(System.getProperty("user.dir"), ".").getPath());
         if (!Files.exists(Paths.get(outDirectory))) {
             outDirectory = System.getProperty("user.home");
         }
-        
+
         tfOutputFolder.setText(outDirectory);
         tfOutputFolder.setStyle("-fx-focus-color: transparent;");
-        
+
         dirChoooser = new DirectoryChooser();
+        Button leftBtn = (Button) this.getDialogPane().lookupButton(optionsButtonType);
+        leftBtn.setGraphic(new ImageView(getClass().getResource("/com/fatcow/icons/tools.png").toExternalForm()));  
     }
 
-    @FXML
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        btnBrowseInputFolder.setOnAction(e -> handleAction(e));
+        btnBrowseOutputFolder.setOnAction(e -> handleAction(e));
+    }
+
     private void handleAction(ActionEvent event) {
-        if (event.getSource() == btnRun) {
-            savePrefs();
-            ((Stage) btnRun.getScene().getWindow()).close();
-        } else if (event.getSource() == btnCancel) {
-            ((Stage) btnCancel.getScene().getWindow()).close();
-        } else if (event.getSource() == btnOptions) {
-//            ((GuiWithBulkOCR) this.getParent()).jMenuItemOptionsActionPerformed(evt);
-//            ((Button) btnOptions.getScene().lookup("#miOptions")).fire();
-        } else if (event.getSource() == btnBrowseInputFolder) {
+        if (event.getSource() == btnBrowseInputFolder) {
             dirChoooser.setTitle("Set Location of Input Files");
-            dirChoooser.setInitialDirectory(new File(inDirectory));
+            dirChoooser.setInitialDirectory(new File(getInDirectory()));
             File dir = dirChoooser.showDialog(btnBrowseInputFolder.getScene().getWindow());
             if (dir != null) {
-                inDirectory = dir.getPath();
-                tfInputFolder.setText(inDirectory);
+                setInDirectory(dir.getPath());
+                tfInputFolder.setText(getInDirectory());
             }
         } else if (event.getSource() == btnBrowseOutputFolder) {
             dirChoooser.setTitle("Set Location of Output Files");
-            dirChoooser.setInitialDirectory(new File(outDirectory));
+            dirChoooser.setInitialDirectory(new File(getOutDirectory()));
             File dir = dirChoooser.showDialog(btnBrowseOutputFolder.getScene().getWindow());
             if (dir != null) {
-                outDirectory = dir.getPath();
-                tfOutputFolder.setText(outDirectory);
+                setOutDirectory(dir.getPath());
+                tfOutputFolder.setText(getOutDirectory());
             }
         }
     }
@@ -151,12 +165,40 @@ public class BulkDialogController implements Initializable {
         }
     }
 
-    void savePrefs() {
-        if (inDirectory != null) {
-            prefs.put("inDirectory", inDirectory);
+    public void savePrefs() {
+        if (getInDirectory() != null) {
+            prefs.put("inDirectory", getInDirectory());
         }
-        if (outDirectory != null) {
-            prefs.put("outDirectory", outDirectory);
+        if (getOutDirectory() != null) {
+            prefs.put("outDirectory", getOutDirectory());
         }
+    }
+
+    /**
+     * @return the inDirectory
+     */
+    public String getInDirectory() {
+        return inDirectory;
+    }
+
+    /**
+     * @param inDirectory the inDirectory to set
+     */
+    public void setInDirectory(String inDirectory) {
+        this.inDirectory = inDirectory;
+    }
+
+    /**
+     * @return the outDirectory
+     */
+    public String getOutDirectory() {
+        return outDirectory;
+    }
+
+    /**
+     * @param outDirectory the outDirectory to set
+     */
+    public void setOutDirectory(String outDirectory) {
+        this.outDirectory = outDirectory;
     }
 }

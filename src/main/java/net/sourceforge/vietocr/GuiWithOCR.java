@@ -81,7 +81,7 @@ public class GuiWithOCR extends GuiWithImageOps {
     private CheckMenuItem chbParagraph;
 
     static GuiWithOCR instance;
-    
+
     private static final String strSegmentedRegionsPara = "SegmentedRegionsPara";
     private static final String strSegmentedRegionsTextLine = "SegmentedRegionsTextLine";
     private static final String strSegmentedRegionsSymbol = "SegmentedRegionsSymbol";
@@ -96,7 +96,6 @@ public class GuiWithOCR extends GuiWithImageOps {
 
     private final String DATAFILE_SUFFIX = ".traineddata";
     protected final File baseDir = Utils.getBaseDir(GuiWithOCR.this);
-    protected String datapath;
     protected String tessPath;
     protected Properties lookupISO639;
     protected Properties lookupISO_3_1_Codes;
@@ -106,8 +105,8 @@ public class GuiWithOCR extends GuiWithImageOps {
     private static final String strLangCode = "langCode";
     private static final String strTessDir = "TesseractDirectory";
     Task ocrWorker;
-    protected String selectedPSM = "3"; // 3 - Fully automatic page segmentation, but no OSD (default)
     protected ProcessingOptions options;
+    protected TesseractParameters tesseractParameters;
 
     private final static Logger logger = Logger.getLogger(GuiWithOCR.class.getName());
 
@@ -116,7 +115,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         super.initialize(url, rb);
 
         instance = this;
-        
+
         this.chbParagraph.setSelected(prefs.getBoolean(strSegmentedRegionsPara, false));
         this.chbCharacter.setSelected(prefs.getBoolean(strSegmentedRegionsSymbol, false));
         this.chbTextLine.setSelected(prefs.getBoolean(strSegmentedRegionsTextLine, false));
@@ -124,13 +123,14 @@ public class GuiWithOCR extends GuiWithImageOps {
         this.chbWord.setSelected(prefs.getBoolean(strSegmentedRegionsWord, false));
 
         btnCancelOCR.managedProperty().bind(btnCancelOCR.visibleProperty());
+        options = new ProcessingOptions();
+        tesseractParameters = new TesseractParameters();
         getInstalledLanguagePacks();
         populateOCRLanguageBox();
         new VietKeyListener(textarea);
         btnSegmentedRegions.visibleProperty().addListener((observable) -> {
             setSegmentedRegions();
         });
-        options = new ProcessingOptions();
     }
 
     /**
@@ -274,10 +274,10 @@ public class GuiWithOCR extends GuiWithImageOps {
     private void getInstalledLanguagePacks() {
         if (WINDOWS) {
             tessPath = baseDir.getPath();
-            datapath = tessPath + "/tessdata";
+            tesseractParameters.setDatapath(tessPath + "/tessdata");
         } else {
             tessPath = prefs.get(strTessDir, "/usr/bin");
-            datapath = "/usr/share/tesseract-ocr/4.00/tessdata";
+            tesseractParameters.setDatapath("/usr/share/tesseract-ocr/4.00/tessdata");
         }
 
         lookupISO639 = new Properties();
@@ -295,7 +295,7 @@ public class GuiWithOCR extends GuiWithImageOps {
                     }
                 }
                 tessdataDir = new File(TESSDATA_PREFIX, TESSDATA);
-                datapath = TESSDATA_PREFIX;
+                tesseractParameters.setDatapath(TESSDATA_PREFIX);
             }
 
             installedLanguageCodes = tessdataDir.list(new FilenameFilter() {
@@ -342,7 +342,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         final List<String> selectedOCRLangs = new ArrayList<>();
         final List<String> selectedLangCodes = new ArrayList<>();
         BooleanProperty isViet = new SimpleBooleanProperty();
-        
+
         for (int i = 0; i < installedLanguages.length; i++) {
             String lang = installedLanguages[i];
             CheckMenuItem item = new CheckMenuItem(lang);
@@ -358,14 +358,14 @@ public class GuiWithOCR extends GuiWithImageOps {
 
                 curLangCode = String.join("+", selectedLangCodes);
                 mbtnOCRLanguage.setText(String.join("+", selectedOCRLangs));
-                
+
                 isViet.set(curLangCode.contains("vie"));
                 VietKeyListener.setVietModeEnabled(isViet.get());
             });
 
             mbtnOCRLanguage.getItems().add(item);
         }
-        
+
         // Show Viet Input Method submenu if selected OCR language is Vietnamese
         Menu settingsMenu = (Menu) menuBar.getMenus().get(4);
         settingsMenu.getItems().get(0).visibleProperty().bind(isViet);
@@ -388,7 +388,7 @@ public class GuiWithOCR extends GuiWithImageOps {
 
         try {
             OCR<IIOImage> ocrEngine = new OCRImages(); // for Tess4J
-            ocrEngine.setDatapath(datapath);
+            ocrEngine.setDatapath(tesseractParameters.getDatapath());
             HashMap<Color, List<Rectangle>> map = selectionBox.getSegmentedRegions();
             if (map == null) {
                 map = new HashMap<Color, List<Rectangle>>();
@@ -480,8 +480,8 @@ public class GuiWithOCR extends GuiWithImageOps {
             String lang = entity.getLanguage();
 
             OCR<IIOImage> ocrEngine = new OCRImages(); // for Tess4J
-            ocrEngine.setDatapath(datapath);
-            ocrEngine.setPageSegMode(selectedPSM);
+            ocrEngine.setDatapath(tesseractParameters.getDatapath());
+            ocrEngine.setPageSegMode(tesseractParameters.getPsm());
             ocrEngine.setLanguage(lang);
             imageList = entity.getSelectedOimages();
 

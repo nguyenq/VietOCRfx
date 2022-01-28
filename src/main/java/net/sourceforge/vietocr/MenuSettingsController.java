@@ -67,7 +67,7 @@ public class MenuSettingsController implements Initializable {
     private final String strInputMethod = "inputMethod";
     private final String strUILanguage = "UILanguage";
     private final String strBatchOutputFormat = "BatchOutputFormat";
-    protected String selectedPSM = "3"; // 3 - Fully automatic page segmentation, but no OSD (default)
+    protected String selectedPSM;
     private String selectedInputMethod;
     private String selectedUILang = "en";
     protected String outputFormats;
@@ -78,7 +78,7 @@ public class MenuSettingsController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        selectedPSM = prefs.get(strPSM, "3");
+        selectedPSM = prefs.get(strPSM, "3"); // 3 - Fully automatic page segmentation, but no OSD (default)
         outputFormats = prefs.get(strBatchOutputFormat, "text");
 //        Label labelPSMValue = (Label) menuBar.getScene().lookup("#labelPSMValue");
 //        labelPSMValue.setText(enumOf(selectedPSM));
@@ -97,6 +97,7 @@ public class MenuSettingsController implements Initializable {
             public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
                 if (newToggle != null) {
                     selectedPSM = newToggle.getUserData().toString();
+                    GuiWithOCR.getInstance().tesseractParameters.setPsm(selectedPSM);
                     Label labelPSMValue = (Label) menuBar.getScene().lookup("#labelPSMValue");
                     labelPSMValue.setText(enumOf(selectedPSM));
                 }
@@ -200,7 +201,7 @@ public class MenuSettingsController implements Initializable {
                 controller.setLookupISO639(GuiWithOCR.getInstance().lookupISO639);
                 controller.setLookupISO_3_1_Codes(GuiWithOCR.getInstance().lookupISO_3_1_Codes);
                 controller.setInstalledLanguages(GuiWithOCR.getInstance().installedLanguages);
-                controller.setTessdataDir(new File(GuiWithOCR.getInstance().datapath, GuiWithOCR.TESSDATA));
+                controller.setTessdataDir(new File(GuiWithOCR.getInstance().tesseractParameters.getDatapath(), GuiWithOCR.TESSDATA));
                 Stage downloadDialog = new Stage();
                 downloadDialog.setOnShowing((WindowEvent e) -> {
                     controller.loadListView();

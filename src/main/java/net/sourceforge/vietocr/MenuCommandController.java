@@ -15,12 +15,13 @@
  */
 package net.sourceforge.vietocr;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,12 +29,10 @@ import java.util.prefs.Preferences;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
@@ -41,9 +40,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javax.imageio.IIOImage;
+import net.sourceforge.vietocr.util.Utils;
 
 public class MenuCommandController implements Initializable {
 
@@ -58,6 +56,14 @@ public class MenuCommandController implements Initializable {
     @FXML
     private MenuItem miBulkOCR;
 
+    private final String strInputFolder = "InputFolder";
+    private final String strBulkOutputFolder = "BulkOutputFolder";
+    private final String strBulkOutputFormat = "BulkOutputFormat";
+
+    private String inputFolder;
+    private String outputFolder;
+    private String outputFormats;
+
     private TextArea textarea;
     private ProgressBar progressBar1;
     private Label labelStatus;
@@ -68,19 +74,15 @@ public class MenuCommandController implements Initializable {
 
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
 
-    private BulkDialogController controller;
-    private Stage bulkDialog;
+    private BulkDialogController dialogController;
     private double scaleX, scaleY;
     List<IIOImage> iioImageList;
     String inputfilename, curLangCode;
     int imageIndex;
-    String tessPath, datapath;
+    String datapath;
     String selectedPSM;
     private OCRImageEntity entity;
-    private OcrWorker ocrWorker;
-    private final String strBulkOutputFormat = "BulkOutputFormat";
-    private String outputFormats;
-
+    
     protected ResourceBundle bundle;
 
     private final static Logger logger = Logger.getLogger(MenuCommandController.class.getName());
@@ -120,113 +122,79 @@ public class MenuCommandController implements Initializable {
             ((Button) menuBar.getScene().lookup("#btnPostProcess")).fire();
         } else if (event.getSource() == miBulkOCR) {
             try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/BulkDialog.fxml"));
-                Parent root = fxmlLoader.load();
-                controller = fxmlLoader.getController();
-                controller.setSelectedOutputFormats(outputFormats);
-                if (bulkDialog == null) {
-                    bulkDialog = new Stage();
-                    bulkDialog.setResizable(false);
-                    bulkDialog.initStyle(StageStyle.UTILITY);
-                    bulkDialog.setAlwaysOnTop(true);
-//            bulkDialog.setX(prefs.getDouble(strChangeCaseX, changeCaseDialog.getX()));
-//            bulkDialog.setY(prefs.getDouble(strChangeCaseY, changeCaseDialog.getY()));
-                    Scene scene1 = new Scene(root);
-                    bulkDialog.setScene(scene1);
-                    bulkDialog.setTitle("Bulk OCR");                    
+                if (dialogController == null) {
+                    dialogController = new BulkDialogController(scene.getWindow());
+                    dialogController.setSelectedOutputFormats(outputFormats);
                 }
 
-                bulkDialog.toFront();
-                bulkDialog.show();
+                Optional<ButtonType> result = dialogController.showAndWait();
+                if (result.isPresent()) {
+                    if (result.get().getButtonData() == ButtonData.OK_DONE) {
+                        inputFolder = dialogController.getInDirectory();
+                        outputFolder = dialogController.getOutDirectory();
+                        outputFormats = dialogController.getSelectedOutputFormats();
+                        List<File> files = new ArrayList<File>();
+                        Utils.listImageFiles(files, new File(inputFolder));
+
+                        // instantiate Task for OCR
+                        BulkOcrWorker ocrWorker = new BulkOcrWorker(files);
+                        progressBar1.progressProperty().bind(ocrWorker.progressProperty());
+                        labelStatus.textProperty().bind(ocrWorker.messageProperty());
+                        new Thread(ocrWorker).start();
+                    } else if (result.get().getButtonData() == ButtonData.LEFT) {
+                        // open Options dialog
+                        
+                    }
+                }
             } catch (Exception e) {
 
             }
         }
     }
 
-    /**
-     * Perform OCR on images represented by IIOImage.
-     *
-     * @param iioImageList list of IIOImage
-     * @param inputfilename input filename
-     * @param index Index of page to be OCRed: -1 for all pages
-     * @param rect region of interest
-     */
-    void performOCR(final List<IIOImage> iioImageList, String inputfilename, final int index, Rectangle rect) {
-        if (curLangCode.trim().length() == 0) {
-            new Alert(Alert.AlertType.NONE, bundle.getString("Please_select_a_language."), ButtonType.OK).showAndWait();
-            return;
-        }
-
-        labelStatus.setText(bundle.getString("OCR_running..."));
-        progressBar1.setVisible(true);
-        //Cursor.WAIT_CURSOR));
-        this.btnOCR.setDisable(true);
-        this.miOCR.setDisable(true);
-        this.miOCRAll.setDisable(true);
-
-        entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, this.chmiDoubleSidedPage.isSelected(), curLangCode);
-        entity.setScreenshotMode(this.chmiScreenshotMode.isSelected());
-
-        // instantiate Task for OCR
-        ocrWorker = new OcrWorker(entity);
-        new Thread(ocrWorker).start();
-    }
-
-    void btnCancelOCRActionPerformed(java.awt.event.ActionEvent evt) {
-        if (ocrWorker != null && !ocrWorker.isDone()) {
-            // Cancel current OCR op to begin a new one. You want only one OCR op at a time.
-            ocrWorker.cancel(true);
-            ocrWorker = null;
-        }
-
-        this.btnCancelOCR.setDisable(true);
-    }
-
     void savePrefs() {
-        if (bulkDialog != null) {
-            prefs.put(strBulkOutputFormat, controller.getSelectedOutputFormats());
+        if (dialogController != null) {
+            prefs.put(strBulkOutputFormat, dialogController.getSelectedOutputFormats());
+            prefs.put(strInputFolder, dialogController.getInDirectory());
+            prefs.put(strBulkOutputFolder, dialogController.getOutDirectory());
         }
     }
 
     /**
-     * A worker class for managing OCR process.
+     * A worker class for managing bulk OCR process.
      */
-    class OcrWorker extends Task<Void> {
+    class BulkOcrWorker extends Task<Void> {
 
-        OCRImageEntity entity;
-        List<File> workingFiles;
-        List<IIOImage> imageList; // Option for Tess4J
+        long startTime;
+        List<File> files;
 
-        OcrWorker(OCRImageEntity entity) {
-            this.entity = entity;
+        BulkOcrWorker(List<File> files) {
+            this.files = files;
+            startTime = System.currentTimeMillis();
         }
 
         @Override
         protected Void call() throws Exception {
-            String lang = entity.getLanguage();
-
-            OCR<IIOImage> ocrEngine = new OCRImages(); // for Tess4J
-            ocrEngine.setDatapath(datapath);
-            ocrEngine.setPageSegMode(selectedPSM);
-            ocrEngine.setLanguage(lang);
-            imageList = entity.getSelectedOimages();
-
-            for (int i = 0; i < imageList.size(); i++) {
+            for (File imageFile : files) {
                 if (!isCancelled()) {
-                    String result = ocrEngine.recognizeText(imageList.subList(i, i + 1), entity.getInputfilename(), entity.getRect());
-//                    publish(result); // interim result
+                    updateMessage(imageFile.getPath()); // interim result
+                    try {
+                        String outputFilename = imageFile.getPath().substring(inputFolder.length() + 1);
+                        OCRHelper.performOCR(imageFile, new File(outputFolder, outputFilename), datapath, curLangCode, selectedPSM, outputFormats, GuiWithOCR.instance.options);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, e.getMessage(), e);
+                        updateMessage("\t** " + bundle.getString("Cannotprocess") + " " + imageFile.getName() + " **");
+                    }
                 }
             }
-
             return null;
         }
 
         protected void process(List<String> results) {
-            for (String str : results) {
-                textarea.appendText(str);
-                textarea.selectPositionCaret(textarea.getLength());
-            }
+//            for (String str : results) {
+//                textarea.appendText(str);
+//                textarea.selectPositionCaret(textarea.getLength());
+//            }
         }
 
         @Override
@@ -270,15 +238,7 @@ public class MenuCommandController implements Initializable {
                 miOCR.setDisable(false);
                 miOCRAll.setDisable(false);
                 btnCancelOCR.setVisible(false);
-
-                // clean up temporary image files
-                if (workingFiles != null) {
-                    for (File tempImageFile : workingFiles) {
-                        tempImageFile.delete();
-                    }
-                }
             }
         }
     }
-
 }
