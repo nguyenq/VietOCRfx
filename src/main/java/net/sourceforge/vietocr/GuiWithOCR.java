@@ -99,7 +99,7 @@ public class GuiWithOCR extends GuiWithImageOps {
     protected String tessPath;
     protected Properties lookupISO639;
     protected Properties lookupISO_3_1_Codes;
-    protected String curLangCode = "eng";
+    protected String curLangCode;
     private String[] installedLanguageCodes;
     protected String[] installedLanguages;
     private static final String strLangCode = "langCode";
@@ -123,6 +123,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         this.chbWord.setSelected(prefs.getBoolean(strSegmentedRegionsWord, false));
 
         btnCancelOCR.managedProperty().bind(btnCancelOCR.visibleProperty());
+        curLangCode = prefs.get(strLangCode, "eng");
         options = new ProcessingOptions();
         tesseractParameters = new TesseractParameters();
         getInstalledLanguagePacks();

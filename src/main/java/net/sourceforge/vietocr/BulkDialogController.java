@@ -30,11 +30,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 import net.sourceforge.tess4j.ITesseract.RenderedFormat;
 import net.sourceforge.vietocr.controls.OuputFormatCheckBoxActionListener;
@@ -87,14 +85,14 @@ public class BulkDialogController extends Dialog<ButtonType> implements Initiali
             mbOutputFormat.getItems().add(menuItem);
         }
 
-        inDirectory = prefs.get("inDirectory", new File(System.getProperty("user.dir"), ".").getPath());
+        inDirectory = prefs.get("InputFolder", new File(System.getProperty("user.dir"), ".").getPath());
         if (!Files.exists(Paths.get(inDirectory))) {
             inDirectory = System.getProperty("user.home");
         }
         tfInputFolder.setText(inDirectory);
         tfInputFolder.setStyle("-fx-focus-color: transparent;");
 
-        outDirectory = prefs.get("outDirectory", new File(System.getProperty("user.dir"), ".").getPath());
+        outDirectory = prefs.get("BulkOutputFolder", new File(System.getProperty("user.dir"), ".").getPath());
         if (!Files.exists(Paths.get(outDirectory))) {
             outDirectory = System.getProperty("user.home");
         }

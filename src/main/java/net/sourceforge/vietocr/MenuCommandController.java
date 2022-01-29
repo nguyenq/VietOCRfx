@@ -16,16 +16,16 @@
 package net.sourceforge.vietocr;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -65,7 +65,7 @@ public class MenuCommandController implements Initializable {
     private String outputFormats;
 
     private TextArea textarea;
-    private ProgressBar progressBar1;
+    private ProgressBar progressBar;
     private Label labelStatus;
     private Button btnCancelOCR;
     private Button btnOCR;
@@ -75,6 +75,7 @@ public class MenuCommandController implements Initializable {
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
 
     private BulkDialogController dialogController;
+    private StatusDialogController statusDialogController;
     private double scaleX, scaleY;
     List<IIOImage> iioImageList;
     String inputfilename, curLangCode;
@@ -82,7 +83,7 @@ public class MenuCommandController implements Initializable {
     String datapath;
     String selectedPSM;
     private OCRImageEntity entity;
-    
+
     protected ResourceBundle bundle;
 
     private final static Logger logger = Logger.getLogger(MenuCommandController.class.getName());
@@ -95,7 +96,10 @@ public class MenuCommandController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        outputFormats = prefs.get(strBulkOutputFormat, "text");
+        bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
+        outputFormats = prefs.get(strBulkOutputFormat, "TEXT");
+        inputFolder = prefs.get(strInputFolder, System.getProperty("user.home"));
+        outputFolder = prefs.get(strBulkOutputFolder, System.getProperty("user.home"));
     }
 
     void setMenuBar(MenuBar menuBar) {
@@ -108,7 +112,7 @@ public class MenuCommandController implements Initializable {
         Scene scene = menuBar.getScene();
 
         textarea = (TextArea) scene.lookup("#textarea");
-        progressBar1 = (ProgressBar) scene.lookup("#progressBar1");
+        progressBar = (ProgressBar) scene.lookup("#progressBar");
         labelStatus = (Label) scene.lookup("#labelStatus");
         btnCancelOCR = (Button) scene.lookup("#btnCancelOCR");
         btnOCR = (Button) scene.lookup("#btnOCR");
@@ -127,6 +131,10 @@ public class MenuCommandController implements Initializable {
                     dialogController.setSelectedOutputFormats(outputFormats);
                 }
 
+                if (statusDialogController == null) {
+                    statusDialogController = new StatusDialogController(scene.getWindow());
+                }
+
                 Optional<ButtonType> result = dialogController.showAndWait();
                 if (result.isPresent()) {
                     if (result.get().getButtonData() == ButtonData.OK_DONE) {
@@ -136,14 +144,17 @@ public class MenuCommandController implements Initializable {
                         List<File> files = new ArrayList<File>();
                         Utils.listImageFiles(files, new File(inputFolder));
 
+                        statusDialogController.show();
+                        statusDialogController.getTextArea().appendText("\t-- " + bundle.getString("Beginning_of_task") + " --\n");
+
                         // instantiate Task for OCR
                         BulkOcrWorker ocrWorker = new BulkOcrWorker(files);
-                        progressBar1.progressProperty().bind(ocrWorker.progressProperty());
+                        progressBar.progressProperty().bind(ocrWorker.progressProperty());
                         labelStatus.textProperty().bind(ocrWorker.messageProperty());
                         new Thread(ocrWorker).start();
                     } else if (result.get().getButtonData() == ButtonData.LEFT) {
                         // open Options dialog
-                        
+
                     }
                 }
             } catch (Exception e) {
@@ -167,6 +178,7 @@ public class MenuCommandController implements Initializable {
 
         long startTime;
         List<File> files;
+        TextArea textareaMonitor = statusDialogController.getTextArea();
 
         BulkOcrWorker(List<File> files) {
             this.files = files;
@@ -179,8 +191,14 @@ public class MenuCommandController implements Initializable {
                 if (!isCancelled()) {
                     updateMessage(imageFile.getPath()); // interim result
                     try {
+                        Platform.runLater(() -> {
+                            textareaMonitor.appendText(imageFile.getPath() + "\n");
+                            textareaMonitor.selectPositionCaret(textarea.getLength());
+                        });
                         String outputFilename = imageFile.getPath().substring(inputFolder.length() + 1);
-                        OCRHelper.performOCR(imageFile, new File(outputFolder, outputFilename), datapath, curLangCode, selectedPSM, outputFormats, GuiWithOCR.instance.options);
+                        TesseractParameters tesseractParameters = GuiWithOCR.instance.tesseractParameters;
+                        OCRHelper.performOCR(imageFile, new File(outputFolder, outputFilename), tesseractParameters.getDatapath(), tesseractParameters.getLangCode(), tesseractParameters.getPsm(), outputFormats, GuiWithOCR.instance.options);
+
                     } catch (Exception e) {
                         logger.log(Level.WARNING, e.getMessage(), e);
                         updateMessage("\t** " + bundle.getString("Cannotprocess") + " " + imageFile.getName() + " **");
@@ -190,55 +208,54 @@ public class MenuCommandController implements Initializable {
             return null;
         }
 
-        protected void process(List<String> results) {
-//            for (String str : results) {
-//                textarea.appendText(str);
-//                textarea.selectPositionCaret(textarea.getLength());
-//            }
+        @Override
+        protected void succeeded() {
+            super.succeeded();
+            updateMessage(bundle.getString("OCR_completed."));
+            updateProgress(1, 1);
+
+            Platform.runLater(() -> {
+                progressBar.progressProperty().unbind();
+                statusDialogController.getTextArea().appendText("\t-- " + bundle.getString("End_of_task") + " --\n");
+                reset();
+            });
         }
 
         @Override
-        protected void done() {
+        protected void cancelled() {
+            super.cancelled();
+            updateMessage("OCR " + bundle.getString("canceled"));
+            updateProgress(0, 1);
 
-            try {
-                get(); // dummy method
-                labelStatus.setText(bundle.getString("OCR_completed."));
-            } catch (InterruptedException ignore) {
-                logger.log(Level.WARNING, ignore.getMessage(), ignore);
-            } catch (java.util.concurrent.ExecutionException e) {
-                String why;
-                Throwable cause = e.getCause();
-                if (cause != null) {
-                    if (cause instanceof IOException) {
-                        why = bundle.getString("Cannot_find_Tesseract._Please_set_its_path.");
-                    } else if (cause instanceof FileNotFoundException) {
-                        why = bundle.getString("An_exception_occurred_in_Tesseract_engine_while_recognizing_this_image.");
-                    } else if (cause instanceof OutOfMemoryError) {
-                        why = cause.getMessage();
-                    } else if (cause instanceof ClassCastException) {
-                        why = cause.getMessage();
-                        why += "\nConsider converting the image to binary or grayscale before OCR again.";
-                    } else {
-                        why = cause.getMessage();
-                    }
-                } else {
-                    why = e.getMessage();
-                }
+            Platform.runLater(() -> {
+                reset();
+            });
+        }
 
-                logger.log(Level.SEVERE, why, e);
-                labelStatus.setText(null);
-                //JOptionPane.showMessageDialog(null, why, "OCR Operation", JOptionPane.ERROR_MESSAGE);
-            } catch (java.util.concurrent.CancellationException e) {
-                logger.log(Level.WARNING, e.getMessage(), e);
-                labelStatus.setText("OCR " + bundle.getString("canceled"));
-            } finally {
-                //Cursor.DEFAULT_CURSOR));
-                btnOCR.setVisible(true);
-                btnOCR.setDisable(false);
-                miOCR.setDisable(false);
-                miOCRAll.setDisable(false);
-                btnCancelOCR.setVisible(false);
-            }
+        @Override
+        protected void failed() {
+            super.failed();
+            updateMessage("Failed!");
+            updateProgress(0, 1);
+            Platform.runLater(() -> {
+                reset();
+            });
+        }
+
+        private void reset() {
+            btnOCR.setVisible(true);
+            btnOCR.setDisable(false);
+            btnCancelOCR.setVisible(false);
+            progressBar.setDisable(true);
+//            splitPane.setCursor(Cursor.DEFAULT);
+//            statusBar.setCursor(Cursor.DEFAULT);
+            long millis = System.currentTimeMillis() - startTime;
+            String elapsedTime = String.format("%02d:%02d:%02d",
+                    TimeUnit.MILLISECONDS.toHours(millis),
+                    TimeUnit.MILLISECONDS.toMinutes(millis),
+                    TimeUnit.MILLISECONDS.toSeconds(millis)
+                    - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+            textareaMonitor.appendText("\t" + bundle.getString("Elapsed_time") + ": " + elapsedTime + "\n");
         }
     }
 }
