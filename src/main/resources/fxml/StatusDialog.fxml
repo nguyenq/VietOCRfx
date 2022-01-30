@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.TextArea?>
 
-<DialogPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-   <content>
+<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.StatusDialogController">
+   <center>
       <TextArea fx:id="textArea" editable="false" />
-   </content>
-</DialogPane>
+   </center>
+</BorderPane>

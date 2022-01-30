@@ -29,7 +29,9 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -40,6 +42,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javax.imageio.IIOImage;
 import net.sourceforge.vietocr.util.Utils;
 
@@ -71,6 +75,7 @@ public class MenuCommandController implements Initializable {
     private Button btnOCR;
     private CheckMenuItem chmiScreenshotMode;
     private CheckMenuItem chmiDoubleSidedPage;
+    private Stage statusDialog;
 
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
 
@@ -132,7 +137,15 @@ public class MenuCommandController implements Initializable {
                 }
 
                 if (statusDialogController == null) {
-                    statusDialogController = new StatusDialogController(scene.getWindow());
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/StatusDialog.fxml"));
+                    Parent root = fxmlLoader.load();
+                    statusDialogController = fxmlLoader.getController();
+                    statusDialog = new Stage();
+//            dialog.setX(prefs.getDouble(strChangeCaseX, dialog.getX()));
+//            dialog.setY(prefs.getDouble(strChangeCaseY, dialog.getY()));
+                    Scene scene1 = new Scene(root);
+                    statusDialog.setScene(scene1);
+                    statusDialog.setTitle("Bulk Status");
                 }
 
                 Optional<ButtonType> result = dialogController.showAndWait();
@@ -143,8 +156,9 @@ public class MenuCommandController implements Initializable {
                         outputFormats = dialogController.getSelectedOutputFormats();
                         List<File> files = new ArrayList<File>();
                         Utils.listImageFiles(files, new File(inputFolder));
-
-                        statusDialogController.show();
+                        
+                        statusDialog.toFront();
+                        statusDialog.show();
                         statusDialogController.getTextArea().appendText("\t-- " + bundle.getString("Beginning_of_task") + " --\n");
 
                         // instantiate Task for OCR
@@ -193,7 +207,6 @@ public class MenuCommandController implements Initializable {
                     try {
                         Platform.runLater(() -> {
                             textareaMonitor.appendText(imageFile.getPath() + "\n");
-                            textareaMonitor.selectPositionCaret(textarea.getLength());
                         });
                         String outputFilename = imageFile.getPath().substring(inputFolder.length() + 1);
                         TesseractParameters tesseractParameters = GuiWithOCR.instance.tesseractParameters;
