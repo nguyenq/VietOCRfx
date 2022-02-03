@@ -69,7 +69,9 @@ public class MenuToolsController implements Initializable {
     protected ResourceBundle bundle;
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
     private final String strImageFolder = "ImageFolder";
+    private final String strPdfFolder = "PdfFolder";
     File imageFolder;
+    File pdfFolder;
     ExtensionFilter selectedFilter;
 
     private final static Logger logger = Logger.getLogger(MenuToolsController.class.getName());
@@ -81,6 +83,7 @@ public class MenuToolsController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
         imageFolder = new File(prefs.get(strImageFolder, System.getProperty("user.home")));
+        pdfFolder = new File(prefs.get(strPdfFolder, System.getProperty("user.home")));
     }
 
     void setMenuBar(MenuBar menuBar) {
@@ -290,11 +293,12 @@ public class MenuToolsController implements Initializable {
         } else if (event.getSource() == miSplitPDF) {
             try {
                 SplitPdfDialogController controller = new SplitPdfDialogController(menuBar.getScene().getWindow());
+                controller.setCurrentDirectory(pdfFolder);
 
                 Optional<SplitPdfArgs> result = controller.showAndWait();
-                if (result.isPresent() && result.get() != null) {
-                    // split PDF
+                if (result.isPresent()) {
                     final SplitPdfArgs args = result.get();
+                    pdfFolder = controller.getCurrentDirectory();
 
                     labelStatus.setText(bundle.getString("SplitPDF_running..."));
                     progressBar.setVisible(true);
@@ -367,8 +371,7 @@ public class MenuToolsController implements Initializable {
                 logger.log(Level.SEVERE, e.getMessage(), e);
             }
 
-        } else if (event.getSource()
-                == miConvertPDF) {
+        } else if (event.getSource() == miConvertPDF) {
             FileChooser fc = new FileChooser();
             fc.setTitle(bundle.getString("Select_Input_PDF"));
             fc.setInitialDirectory(imageFolder);
@@ -436,5 +439,6 @@ public class MenuToolsController implements Initializable {
      */
     protected void savePrefs() {
         prefs.put(strImageFolder, imageFolder.getPath());
+        prefs.put(strPdfFolder, pdfFolder.getPath());
     }
 }

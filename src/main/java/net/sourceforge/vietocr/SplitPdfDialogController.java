@@ -59,6 +59,9 @@ public class SplitPdfDialogController extends Dialog<SplitPdfArgs> implements In
     @FXML
     private ButtonType cancelButtonType;
 
+    private SplitPdfArgs args;
+    private File currentDirectory;
+
     protected ResourceBundle bundle;
 
     public SplitPdfDialogController(Window owner) throws Exception {
@@ -69,13 +72,34 @@ public class SplitPdfDialogController extends Dialog<SplitPdfArgs> implements In
         initOwner(owner);
         setTitle("Split PDF");
         setDialogPane(pane);
-        
+        args = new SplitPdfArgs();
+
         Button okButton = (Button) getDialogPane().lookupButton(okButtonType);
-        okButton.addEventFilter(ActionEvent.ACTION, ae -> {
-            if (this.tfInputFile.getText().length() == 0) {
+        okButton.addEventFilter(ActionEvent.ACTION, e -> {
+            args.setInputFilename(this.tfInputFile.getText());
+            args.setOutputFilename(this.tfOutputFile.getText());
+            args.setFromPage(this.tfFrom.getText());
+            args.setToPage(this.tfTo.getText());
+            args.setNumOfPages(this.tfNumOfPages.getText());
+            args.setPages(this.radioButtonPages.isSelected());
+            if (!new File(args.getInputFilename()).exists()) {
                 new Alert(Alert.AlertType.ERROR, bundle.getString("File_not_exist")).show();
-                ae.consume(); //not valid
+            } else if (args.getInputFilename().length() > 0 && args.getOutputFilename().length() > 0
+                    && ((this.radioButtonPages.isSelected() && args.getFromPage().length() > 0)
+                    || (this.radioButtonFiles.isSelected() && args.getNumOfPages().length() > 0))) {
+
+                Pattern regexNums = Pattern.compile("^\\d+$");
+
+                if ((this.radioButtonPages.isSelected() && regexNums.matcher(args.getFromPage()).matches() && (args.getToPage().length() > 0 ? regexNums.matcher(args.getToPage()).matches() : true)) || (this.radioButtonFiles.isSelected() && regexNums.matcher(args.getNumOfPages()).matches())) {
+                    return;
+                } else {
+                    new Alert(Alert.AlertType.ERROR, bundle.getString("Input_invalid")).show();
+                }
+            } else {
+                new Alert(Alert.AlertType.ERROR, bundle.getString("Input_incomplete")).show();
             }
+            
+            e.consume();
         });
     }
 
@@ -87,32 +111,13 @@ public class SplitPdfDialogController extends Dialog<SplitPdfArgs> implements In
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N 
         btnBrowseInput.setOnAction(e -> handleAction(e));
         btnBrowseOutput.setOnAction(e -> handleAction(e));
+        tfFrom.disableProperty().bind(radioButtonFiles.selectedProperty());
+        tfTo.disableProperty().bind(radioButtonFiles.selectedProperty());
+        tfNumOfPages.disableProperty().bind(radioButtonPages.selectedProperty());
 
         setResultConverter(dialogButton -> {
             if (dialogButton == okButtonType) {
-                SplitPdfArgs args = new SplitPdfArgs();
-                args.setInputFilename(this.tfInputFile.getText());
-                args.setOutputFilename(this.tfOutputFile.getText());
-                args.setFromPage(this.tfFrom.getText());
-                args.setToPage(this.tfTo.getText());
-                args.setNumOfPages(this.tfNumOfPages.getText());
-                args.setPages(this.radioButtonPages.isSelected());
-                if (!new File(args.getInputFilename()).exists()) {
-                    new Alert(Alert.AlertType.ERROR, bundle.getString("File_not_exist")).show();
-                } else if (args.getInputFilename().length() > 0 && args.getOutputFilename().length() > 0
-                        && ((this.radioButtonPages.isSelected() && args.getFromPage().length() > 0)
-                        || (this.radioButtonFiles.isSelected() && args.getNumOfPages().length() > 0))) {
-
-                    Pattern regexNums = Pattern.compile("^\\d+$");
-
-                    if ((this.radioButtonPages.isSelected() && regexNums.matcher(args.getFromPage()).matches() && (args.getToPage().length() > 0 ? regexNums.matcher(args.getToPage()).matches() : true)) || (this.radioButtonFiles.isSelected() && regexNums.matcher(args.getNumOfPages()).matches())) {
-                        return args;
-                    } else {
-                        new Alert(Alert.AlertType.ERROR, bundle.getString("Input_invalid")).show();
-                    }
-                } else {
-                    new Alert(Alert.AlertType.ERROR, bundle.getString("Input_incomplete")).show();
-                }
+                return args;
             }
 
             return null;
@@ -123,15 +128,18 @@ public class SplitPdfDialogController extends Dialog<SplitPdfArgs> implements In
     private void handleAction(ActionEvent event) {
         if (event.getSource() == btnBrowseInput) {
             FileChooser fc = new FileChooser();
+            fc.setInitialDirectory(currentDirectory);
             fc.setTitle(bundle.getString("Open"));
             FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF", "*.pdf");
             fc.getExtensionFilters().add(pdfFilter);
             File selectedFile = fc.showOpenDialog(btnBrowseInput.getScene().getWindow());
             if (selectedFile != null) {
+                currentDirectory = new File(selectedFile.getPath()).getParentFile();
                 this.tfInputFile.setText(selectedFile.getPath());
             }
         } else if (event.getSource() == btnBrowseOutput) {
             FileChooser fc = new FileChooser();
+            fc.setInitialDirectory(currentDirectory);
             fc.setTitle(bundle.getString("Save"));
             FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF", "*.pdf");
             fc.getExtensionFilters().add(pdfFilter);
@@ -144,5 +152,19 @@ public class SplitPdfDialogController extends Dialog<SplitPdfArgs> implements In
                 }
             }
         }
+    }
+    
+    /**
+     * @return the currentDirectory
+     */
+    public File getCurrentDirectory() {
+        return currentDirectory;
+    }
+
+    /**
+     * @param currentDirectory the currentDirectory to set
+     */
+    public void setCurrentDirectory(File currentDirectory) {
+        this.currentDirectory = currentDirectory;
     }
 }
