@@ -20,6 +20,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +35,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -286,99 +289,86 @@ public class MenuToolsController implements Initializable {
             }
         } else if (event.getSource() == miSplitPDF) {
             try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/SplitPdfDialog.fxml"));
-                Parent root = fxmlLoader.load();
-                SplitPdfDialogController controller = fxmlLoader.getController();
-                Stage dialog = new Stage();
-                dialog.setResizable(false);
-                dialog.initStyle(StageStyle.UTILITY);
-                dialog.setAlwaysOnTop(true);
-//            dialog.setX(prefs.getDouble(strChangeCaseX, dialog.getX()));
-//            dialog.setY(prefs.getDouble(strChangeCaseY, dialog.getY()));
-                Scene scene1 = new Scene(root);
-                dialog.setScene(scene1);
-                dialog.setTitle("Split PDF");
-                dialog.toFront();
-                dialog.show();
-            } catch (Exception e) {
+                SplitPdfDialogController controller = new SplitPdfDialogController(menuBar.getScene().getWindow());
 
+                Optional<SplitPdfArgs> result = controller.showAndWait();
+                if (result.isPresent() && result.get() != null) {
+                    // split PDF
+                    final SplitPdfArgs args = result.get();
+
+                    labelStatus.setText(bundle.getString("SplitPDF_running..."));
+                    progressBar.setVisible(true);
+                    labelStatus.setVisible(true);
+                    labelStatus.getScene().setCursor(Cursor.WAIT);
+
+                    Task<String> worker = new Task<String>() {
+                        String outputFilename;
+
+                        @Override
+                        protected String call() throws Exception {
+                            File inputFile = new File(args.getInputFilename());
+                            outputFilename = args.getOutputFilename();
+                            File outputFile = new File(outputFilename);
+
+                            if (args.isPages()) {
+                                PdfUtilities.splitPdf(inputFile, outputFile, Integer.parseInt(args.getFromPage()), Integer.parseInt(args.getToPage()));
+                            } else {
+                                if (outputFilename.endsWith(".pdf")) {
+                                    outputFilename = outputFilename.substring(0, outputFilename.lastIndexOf(".pdf"));
+                                }
+
+                                int pageCount = PdfUtilities.getPdfPageCount(inputFile);
+                                if (pageCount == 0) {
+                                    throw new RuntimeException("Split PDF failed.");
+                                }
+
+                                int pageRange = Integer.parseInt(args.getNumOfPages());
+                                int startPage = 1;
+
+                                while (startPage <= pageCount) {
+                                    int endPage = startPage + pageRange - 1;
+                                    outputFile = new File(outputFilename + startPage + ".pdf");
+                                    PdfUtilities.splitPdf(inputFile, outputFile, startPage, endPage);
+                                    startPage = endPage + 1;
+                                }
+                            }
+
+                            return outputFilename;
+                        }
+
+                        @Override
+                        protected void succeeded() {
+                            super.succeeded();
+                            updateMessage(bundle.getString("SplitPDF_completed."));
+                            updateProgress(1, 1);
+                            String msg = bundle.getString("SplitPDF_completed.") + bundle.getString("check_output_in") + new File(outputFilename).getParent();
+                            new Alert(Alert.AlertType.NONE, msg, ButtonType.OK).showAndWait();
+                            progressBar.setVisible(false);
+                            labelStatus.setVisible(false);
+                            labelStatus.getScene().setCursor(Cursor.DEFAULT);
+                        }
+
+                        @Override
+                        protected void failed() {
+                            super.failed();
+                            updateMessage(null);
+                            Throwable ex = getException();
+                            logger.log(Level.SEVERE, ex.getMessage(), ex);
+                            new Alert(Alert.AlertType.NONE, ex.getMessage(), ButtonType.OK).showAndWait();
+                            progressBar.setVisible(false);
+                            labelStatus.setVisible(false);
+                            labelStatus.getScene().setCursor(Cursor.DEFAULT);
+                        }
+                    };
+
+                    new Thread(worker).start();
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, e.getMessage(), e);
             }
 
-//            if (dialog.showDialog() == JOptionPane.OK_OPTION) {
-//                final SplitPdfArgs args = dialog.getArgs();
-//
-//                labelStatus.setText(bundle.getString("SplitPDF_running..."));
-//                progressBar.setVisible(true);
-//                labelStatus.setVisible(true);
-////                labelStatus.getScene().setCursor(Cursor.WAIT));
-//
-//                Task<String> worker = new Task<String>() {
-//
-//                    @Override
-//                    protected String call() throws Exception {
-//                        File inputFile = new File(args.getInputFilename());
-//                        String outputFilename = args.getOutputFilename();
-//                        File outputFile = new File(outputFilename);
-//
-//                        if (args.isPages()) {
-//                            PdfUtilities.splitPdf(inputFile, outputFile, Integer.parseInt(args.getFromPage()), Integer.parseInt(args.getToPage()));
-//                        } else {
-//                            if (outputFilename.endsWith(".pdf")) {
-//                                outputFilename = outputFilename.substring(0, outputFilename.lastIndexOf(".pdf"));
-//                            }
-//
-//                            int pageCount = PdfUtilities.getPdfPageCount(inputFile);
-//                            if (pageCount == 0) {
-//                                throw new RuntimeException("Split PDF failed.");
-//                            }
-//
-//                            int pageRange = Integer.parseInt(args.getNumOfPages());
-//                            int startPage = 1;
-//
-//                            while (startPage <= pageCount) {
-//                                int endPage = startPage + pageRange - 1;
-//                                outputFile = new File(outputFilename + startPage + ".pdf");
-//                                PdfUtilities.splitPdf(inputFile, outputFile, startPage, endPage);
-//                                startPage = endPage + 1;
-//                            }
-//                        }
-//
-//                        return outputFilename;
-//                    }
-//
-//                    @Override
-//                    protected void succeeded() {
-//                        labelStatus.setText(bundle.getString("SplitPDF_completed."));
-//
-//                        try {
-//                            String result = get();
-//                            //JOptionPane.showMessageDialog(GuiWithTools.this, bundle.getString("SplitPDF_completed.") + bundle.getString("check_output_in") + new File(result).getParent());
-//                        } catch (InterruptedException ignore) {
-//                            logger.log(Level.WARNING, ignore.getMessage(), ignore);
-//                        } catch (java.util.concurrent.ExecutionException e) {
-//                            String why;
-//                            Throwable cause = e.getCause();
-//                            if (cause != null) {
-//                                if (cause instanceof OutOfMemoryError) {
-//                                    why = bundle.getString("OutOfMemoryError");
-//                                } else {
-//                                    why = cause.getMessage();
-//                                }
-//                            } else {
-//                                why = e.getMessage();
-//                            }
-//                            logger.log(Level.SEVERE, why, e);
-//                            //JOptionPane.showMessageDialog(GuiWithTools.this, why, APP_NAME, JOptionPane.ERROR_MESSAGE);
-//                        } finally {
-//                            progressBar.setVisible(false);
-//                            labelStatus.getScene().setCursor(Cursor.DEFAULT));
-//                        }
-//                    }
-//                };
-//
-//                worker.execute();
-//            }
-        } else if (event.getSource() == miConvertPDF) {
+        } else if (event.getSource()
+                == miConvertPDF) {
             FileChooser fc = new FileChooser();
             fc.setTitle(bundle.getString("Select_Input_PDF"));
             fc.setInitialDirectory(imageFolder);
@@ -403,7 +393,7 @@ public class MenuToolsController implements Initializable {
                             String targetFile = Utils.stripExtension(inputFile.getPath()) + ".tif";
                             Files.move(outputTiffFile.toPath(), new File(targetFile).toPath(), REPLACE_EXISTING);
                         }
-                        
+
                         return imageFolder;
                     }
 

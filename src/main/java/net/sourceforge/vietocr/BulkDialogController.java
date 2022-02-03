@@ -70,9 +70,8 @@ public class BulkDialogController extends Dialog<ButtonType> implements Initiali
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/BulkDialog.fxml"));
         fxmlLoader.setController(this);
         DialogPane pane = fxmlLoader.load();
+        initModality(Modality.WINDOW_MODAL);
         initOwner(owner);
-        initModality(Modality.APPLICATION_MODAL);
-        setResizable(true);
         setTitle("Bulk OCR");
         setDialogPane(pane);
 
@@ -102,7 +101,10 @@ public class BulkDialogController extends Dialog<ButtonType> implements Initiali
 
         dirChoooser = new DirectoryChooser();
         Button leftBtn = (Button) this.getDialogPane().lookupButton(optionsButtonType);
-        leftBtn.setGraphic(new ImageView(getClass().getResource("/com/fatcow/icons/tools.png").toExternalForm()));  
+        leftBtn.setGraphic(new ImageView(getClass().getResource("/com/fatcow/icons/tools.png").toExternalForm()));
+        leftBtn.addEventFilter(ActionEvent.ACTION, e -> {
+            e.consume();
+        });
     }
 
     @Override

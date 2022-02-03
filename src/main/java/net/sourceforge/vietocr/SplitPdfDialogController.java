@@ -21,13 +21,20 @@ import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Window;
 
-public class SplitPdfDialogController implements Initializable {
+public class SplitPdfDialogController extends Dialog<SplitPdfArgs> implements Initializable {
 
     @FXML
     private Button btnBrowseInput;
@@ -38,10 +45,6 @@ public class SplitPdfDialogController implements Initializable {
     @FXML
     private TextField tfOutputFile;
     @FXML
-    private Button btnSplit;
-    @FXML
-    private Button btnCancel;
-    @FXML
     private RadioButton radioButtonFiles;
     @FXML
     private RadioButton radioButtonPages;
@@ -51,8 +54,30 @@ public class SplitPdfDialogController implements Initializable {
     private TextField tfNumOfPages;
     @FXML
     private TextField tfTo;
+    @FXML
+    private ButtonType okButtonType;
+    @FXML
+    private ButtonType cancelButtonType;
 
     protected ResourceBundle bundle;
+
+    public SplitPdfDialogController(Window owner) throws Exception {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/SplitPdfDialog.fxml"));
+        fxmlLoader.setController(this);
+        DialogPane pane = fxmlLoader.load();
+        initModality(Modality.WINDOW_MODAL);
+        initOwner(owner);
+        setTitle("Split PDF");
+        setDialogPane(pane);
+        
+        Button okButton = (Button) getDialogPane().lookupButton(okButtonType);
+        okButton.addEventFilter(ActionEvent.ACTION, ae -> {
+            if (this.tfInputFile.getText().length() == 0) {
+                new Alert(Alert.AlertType.ERROR, bundle.getString("File_not_exist")).show();
+                ae.consume(); //not valid
+            }
+        });
+    }
 
     /**
      * Initializes the controller class.
@@ -60,6 +85,38 @@ public class SplitPdfDialogController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N 
+        btnBrowseInput.setOnAction(e -> handleAction(e));
+        btnBrowseOutput.setOnAction(e -> handleAction(e));
+
+        setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                SplitPdfArgs args = new SplitPdfArgs();
+                args.setInputFilename(this.tfInputFile.getText());
+                args.setOutputFilename(this.tfOutputFile.getText());
+                args.setFromPage(this.tfFrom.getText());
+                args.setToPage(this.tfTo.getText());
+                args.setNumOfPages(this.tfNumOfPages.getText());
+                args.setPages(this.radioButtonPages.isSelected());
+                if (!new File(args.getInputFilename()).exists()) {
+                    new Alert(Alert.AlertType.ERROR, bundle.getString("File_not_exist")).show();
+                } else if (args.getInputFilename().length() > 0 && args.getOutputFilename().length() > 0
+                        && ((this.radioButtonPages.isSelected() && args.getFromPage().length() > 0)
+                        || (this.radioButtonFiles.isSelected() && args.getNumOfPages().length() > 0))) {
+
+                    Pattern regexNums = Pattern.compile("^\\d+$");
+
+                    if ((this.radioButtonPages.isSelected() && regexNums.matcher(args.getFromPage()).matches() && (args.getToPage().length() > 0 ? regexNums.matcher(args.getToPage()).matches() : true)) || (this.radioButtonFiles.isSelected() && regexNums.matcher(args.getNumOfPages()).matches())) {
+                        return args;
+                    } else {
+                        new Alert(Alert.AlertType.ERROR, bundle.getString("Input_invalid")).show();
+                    }
+                } else {
+                    new Alert(Alert.AlertType.ERROR, bundle.getString("Input_incomplete")).show();
+                }
+            }
+
+            return null;
+        });
     }
 
     @FXML
@@ -86,39 +143,6 @@ public class SplitPdfDialogController implements Initializable {
                     this.tfOutputFile.setText(this.tfOutputFile.getText() + ".pdf");
                 }
             }
-        } else if (event.getSource() == btnSplit) {
-            SplitPdfArgs args = new SplitPdfArgs();
-            args.setInputFilename(this.tfInputFile.getText());
-            args.setOutputFilename(this.tfOutputFile.getText());
-            args.setFromPage(this.tfFrom.getText());
-            args.setToPage(this.tfTo.getText());
-            args.setNumOfPages(this.tfNumOfPages.getText());
-            args.setPages(this.radioButtonPages.isSelected());
-
-            if (!new File(args.getInputFilename()).exists()) {
-//                JOptionPane.showMessageDialog(this, bundle.getString("File_not_exist"), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);
-            } else if (args.getInputFilename().length() > 0 && args.getOutputFilename().length() > 0
-                    && ((this.radioButtonPages.isSelected() && args.getFromPage().length() > 0)
-                    || (this.radioButtonFiles.isSelected() && args.getNumOfPages().length() > 0))) {
-
-                Pattern regexNums = Pattern.compile("^\\d+$");
-
-                if ((this.radioButtonPages.isSelected() && regexNums.matcher(args.getFromPage()).matches() && (args.getToPage().length() > 0 ? regexNums.matcher(args.getToPage()).matches() : true)) || (this.radioButtonFiles.isSelected() && regexNums.matcher(args.getNumOfPages()).matches())) {
-//                    this.args = args;
-//                    actionSelected = JOptionPane.OK_OPTION;
-//                    this.setVisible(false);
-                } else {
-//                    JOptionPane.showMessageDialog(this, bundle.getString("Input_invalid"), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);
-//                    actionSelected = JOptionPane.DEFAULT_OPTION;
-                }
-            } else {
-//                JOptionPane.showMessageDialog(this, bundle.getString("Input_incomplete"), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);
-//                actionSelected = JOptionPane.DEFAULT_OPTION;
-            }
-
-//            MenuToolsController.getInstance().splitPdf(args);
-        } else if (event.getSource() == btnCancel) {
-            btnCancel.getScene().getWindow().hide();
         }
     }
 }

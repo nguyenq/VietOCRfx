@@ -43,7 +43,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javax.imageio.IIOImage;
 import net.sourceforge.vietocr.util.Utils;
 
@@ -156,7 +155,6 @@ public class MenuCommandController implements Initializable {
                         outputFormats = dialogController.getSelectedOutputFormats();
                         List<File> files = new ArrayList<File>();
                         Utils.listImageFiles(files, new File(inputFolder));
-                        
                         statusDialog.toFront();
                         statusDialog.show();
                         statusDialogController.getTextArea().appendText("\t-- " + bundle.getString("Beginning_of_task") + " --\n");
