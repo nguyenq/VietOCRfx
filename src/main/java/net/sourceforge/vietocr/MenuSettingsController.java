@@ -18,6 +18,7 @@ package net.sourceforge.vietocr;
 import java.io.File;
 import java.net.URL;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 import javafx.application.Platform;
@@ -61,16 +62,35 @@ public class MenuSettingsController implements Initializable {
     private Menu miUILanguage;
 
     private OptionsDialogController controller;
-    private Stage optionsDialog;
 
     private final String strPSM = "PageSegMode";
     private final String strInputMethod = "inputMethod";
     private final String strUILanguage = "UILanguage";
+
+    private final String strWatchFolder = "WatchFolder";
+    private final String strOutputFolder = "OutputFolder";
+    private final String strWatchEnabled = "WatchEnabled";
+    private final String strDeskewEnabled = "DeskewEnabled";
+    private final String strPostProcessingEnabled = "PostProcessingEnabled";
+    private final String strCorrectLetterCasesEnabled = "CorrectLetterCasesEnabled";
+    private final String strRemoveLinesEnabled = "RemoveLinesEnabled";
+    private final String strRemoveLineBreaksEnabled = "RemoveLineBreaksEnabled";
     private final String strBatchOutputFormat = "BatchOutputFormat";
+    private final String strDangAmbigsPath = "DangAmbigsPath";
+    private final String strDangAmbigs = "DangAmbigs";
+    private final String strReplaceHyphensEnabled = "ReplaceHyphensEnabled";
+    private final String strRemoveHyphensEnabled = "RemoveHyphensEnabled";
+
     protected String selectedPSM;
     private String selectedInputMethod;
     private String selectedUILang = "en";
     protected String outputFormats;
+    protected String dangAmbigsPath;
+    protected boolean dangAmbigsOn;
+    protected String watchFolder;
+    protected String outputFolder;
+    protected boolean watchEnabled;
+    protected ProcessingOptions options;
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr3");
 
     /**
@@ -79,7 +99,26 @@ public class MenuSettingsController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         selectedPSM = prefs.get(strPSM, "3"); // 3 - Fully automatic page segmentation, but no OSD (default)
+        watchFolder = prefs.get(strWatchFolder, System.getProperty("user.home"));
+        if (!new File(watchFolder).exists()) {
+            watchFolder = System.getProperty("user.home");
+        }
+        outputFolder = prefs.get(strOutputFolder, System.getProperty("user.home"));
+        if (!new File(outputFolder).exists()) {
+            outputFolder = System.getProperty("user.home");
+        }
+        watchEnabled = prefs.getBoolean(strWatchEnabled, false);
         outputFormats = prefs.get(strBatchOutputFormat, "text");
+        options = new ProcessingOptions();
+        dangAmbigsPath = prefs.get(strDangAmbigsPath, new File(System.getProperty("user.home"), "data").getPath());
+        dangAmbigsOn = prefs.getBoolean(strDangAmbigs, true);
+        options.setDeskew(prefs.getBoolean(strDeskewEnabled, false));
+        options.setPostProcessing(prefs.getBoolean(strPostProcessingEnabled, false));
+        options.setCorrectLetterCases(prefs.getBoolean(strCorrectLetterCasesEnabled, false));
+        options.setRemoveLines(prefs.getBoolean(strRemoveLinesEnabled, false));
+        options.setRemoveLineBreaks(prefs.getBoolean(strRemoveLineBreaksEnabled, false));
+        options.setReplaceHyphens(prefs.getBoolean(strReplaceHyphensEnabled, false));
+        options.setRemoveHyphens(prefs.getBoolean(strRemoveHyphensEnabled, false));
 //        Label labelPSMValue = (Label) menuBar.getScene().lookup("#labelPSMValue");
 //        labelPSMValue.setText(enumOf(selectedPSM));
         // build PageSegMode submenu
@@ -221,25 +260,28 @@ public class MenuSettingsController implements Initializable {
             }
         } else if (event.getSource() == miOptions) {
             try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/OptionsDialog.fxml"));
-                Parent root = fxmlLoader.load();
-                controller = fxmlLoader.getController();
+                controller = new OptionsDialogController(menuBar.getScene().getWindow());
+                controller.setWatchFolder(watchFolder);
+                controller.setOutputFolder(outputFolder);
+                controller.setWatchEnabled(watchEnabled);
+                controller.setProcessingOptions(options);
+                controller.setDangAmbigsPath(dangAmbigsPath);
+                controller.setDangAmbigsEnabled(dangAmbigsOn);
+                controller.setCurLangCode("*");
+                controller.setProcessingOptions(options);
                 controller.setSelectedOutputFormats(outputFormats);
 
-                if (optionsDialog == null) {
-                    optionsDialog = new Stage();
-                    optionsDialog.setResizable(false);
-                    optionsDialog.initStyle(StageStyle.UTILITY);
-                    optionsDialog.setAlwaysOnTop(true);
-//            optionsDialog.setX(prefs.getDouble(strChangeCaseX, changeCaseDialog.getX()));
-//            optionsDialog.setY(prefs.getDouble(strChangeCaseY, changeCaseDialog.getY()));
-                    Scene scene1 = new Scene(root);
-                    optionsDialog.setScene(scene1);
-                    optionsDialog.setTitle("Options");
+                Optional<ProcessingOptions> result = controller.showAndWait();
+                if (result.isPresent()) {
+                    options = result.get();
+                    watchFolder = controller.getWatchFolder();
+                    outputFolder = controller.getOutputFolder();
+                    watchEnabled = controller.isWatchEnabled();
+                    options = controller.getProcessingOptions();
+                    dangAmbigsPath = controller.getDangAmbigsPath();
+                    dangAmbigsOn = controller.isDangAmbigsEnabled();
+                    outputFormats = controller.getSelectedOutputFormats();
                 }
-
-                optionsDialog.toFront();
-                optionsDialog.show();
             } catch (Exception e) {
 
             }
@@ -260,8 +302,21 @@ public class MenuSettingsController implements Initializable {
         prefs.put(strPSM, selectedPSM);
         prefs.put(strUILanguage, selectedUILang);
 
-        if (optionsDialog != null) {
+        if (controller != null) {
             prefs.put(strBatchOutputFormat, controller.getSelectedOutputFormats());
         }
+
+        prefs.put(strDangAmbigsPath, dangAmbigsPath);
+        prefs.putBoolean(strDangAmbigs, dangAmbigsOn);
+        prefs.putBoolean(strReplaceHyphensEnabled, options.isReplaceHyphens());
+        prefs.putBoolean(strRemoveHyphensEnabled, options.isRemoveHyphens());
+        prefs.put(strWatchFolder, watchFolder);
+        prefs.put(strOutputFolder, outputFolder);
+        prefs.putBoolean(strWatchEnabled, watchEnabled);
+        prefs.putBoolean(strDeskewEnabled, options.isDeskew());
+        prefs.putBoolean(strPostProcessingEnabled, options.isPostProcessing());
+        prefs.putBoolean(strCorrectLetterCasesEnabled, options.isCorrectLetterCases());
+        prefs.putBoolean(strRemoveLinesEnabled, options.isRemoveLines());
+        prefs.putBoolean(strRemoveLineBreaksEnabled, options.isRemoveLineBreaks());
     }
 }

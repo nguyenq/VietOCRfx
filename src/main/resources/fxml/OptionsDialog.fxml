@@ -2,7 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonType?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.Tab?>
@@ -11,115 +13,111 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane prefHeight="200.0" prefWidth="365.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.OptionsDialogController">
-    <center>
-        <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-            <tabs>
-                <Tab text="DangAmbigs.txt">
-               <content>
-                  <GridPane hgap="5.0" vgap="5.0">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="91.33331298828125" minWidth="10.0" prefWidth="52.333343505859375" />
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="207.66668701171875" minWidth="10.0" prefWidth="193.66665649414062" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="93.66668701171875" minWidth="10.0" prefWidth="44.33331298828125" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <Label text="Path:" />
-                        <TextField GridPane.columnIndex="1" />
-                        <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
-                        <CheckBox mnemonicParsing="false" text="Enable" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                     </children>
-                  </GridPane>
-               </content>
-                </Tab>
-                <Tab text="Watch">
-               <content>
-                  <GridPane hgap="5.0" vgap="5.0">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="118.0" minWidth="10.0" prefWidth="106.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="187.0" minWidth="10.0" prefWidth="187.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="45.33331298828125" minWidth="10.0" prefWidth="37.33331298828125" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <Label text="Watch Folder:" />
-                        <Label text="Output Folder:" GridPane.rowIndex="1" />
-                        <TextField GridPane.columnIndex="1" />
-                        <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
-                        <Button mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <MenuButton fx:id="mbOutputFormat" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <CheckBox fx:id="chbEnable" mnemonicParsing="false" text="Enable" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                     </children>
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
-                  </GridPane>
-               </content>
-                </Tab>
-            <Tab text="Bulk/Batch Options">
-               <content>
-                  <GridPane>
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <CheckBox fx:id="chbPostProcessing" mnemonicParsing="false" text="Post Processing" />
-                        <CheckBox fx:id="chbCorrectLetterCases" mnemonicParsing="false" text="Correct Letter Cases" GridPane.rowIndex="1" />
-                        <CheckBox fx:id="chbRemoveLineBreaks" layoutX="10.0" layoutY="61.0" mnemonicParsing="false" text="Remove Line Breaks" GridPane.rowIndex="2" />
-                        <CheckBox fx:id="chbDeskew" mnemonicParsing="false" text="Deskew" GridPane.columnIndex="1" />
-                        <CheckBox fx:id="chbRemoveLines" mnemonicParsing="false" text="Remove Lines" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                     </children>
-                  </GridPane>
-               </content>
-            </Tab>
-            <Tab text="Hyphen">
-               <content>
-                  <GridPane>
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                     <children>
-                        <CheckBox fx:id="chbReplaceHyphens" mnemonicParsing="false" text="Replace hyphens with soft hyphens" />
-                        <CheckBox fx:id="chbRemoveHyphens" mnemonicParsing="false" text="Remove soft hyphens" GridPane.rowIndex="1" />
-                     </children>
-                  </GridPane>
-               </content>
-            </Tab>
-            </tabs>
-        </TabPane>
-    </center>
-    <bottom>
-        <HBox alignment="CENTER_RIGHT" prefHeight="51.0" prefWidth="325.0" spacing="10.0" BorderPane.alignment="CENTER">
-            <children>
-                <Button fx:id="btnOK" mnemonicParsing="false" onAction="#handleAction" text="OK" />
-                <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#handleAction" text="Cancel" />
-            </children>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-        </HBox>
-    </bottom>
-</BorderPane>
+<DialogPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <content>
+        <BorderPane prefHeight="200.0" prefWidth="365.0">
+            <center>
+                <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+                    <tabs>
+                        <Tab text="DangAmbigs.txt">
+                            <content>
+                                <GridPane hgap="5.0" vgap="5.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="91.33331298828125" minWidth="10.0" prefWidth="52.333343505859375" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="207.66668701171875" minWidth="10.0" prefWidth="193.66665649414062" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="93.66668701171875" minWidth="10.0" prefWidth="44.33331298828125" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                    <children>
+                                        <Label text="Path:" />
+                                        <TextField fx:id="tfDangAmbigsPath" GridPane.columnIndex="1" />
+                                        <Button fx:id="btnDangAmbigs" mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
+                                        <CheckBox fx:id="chbDangAmbigs" mnemonicParsing="false" text="Enable" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    </children>
+                                </GridPane>
+                            </content>
+                        </Tab>
+                        <Tab text="Watch">
+                            <content>
+                                <GridPane hgap="5.0" vgap="5.0">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="118.0" minWidth="10.0" prefWidth="106.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="187.0" minWidth="10.0" prefWidth="187.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="45.33331298828125" minWidth="10.0" prefWidth="37.33331298828125" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                    <children>
+                                        <Label text="Watch Folder:" />
+                                        <Label text="Output Folder:" GridPane.rowIndex="1" />
+                                        <TextField fx:id="tfWatch" GridPane.columnIndex="1" />
+                                        <TextField fx:id="tfOutput" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <Button fx:id="btnWatch" mnemonicParsing="false" text="..." GridPane.columnIndex="2" />
+                                        <Button fx:id="btnOutput" mnemonicParsing="false" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                        <MenuButton fx:id="mbOutputFormat" text="Output Format" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <CheckBox fx:id="chbEnable" mnemonicParsing="false" text="Enable" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                                    </children>
+                                    <padding>
+                                        <Insets top="5.0" />
+                                    </padding>
+                                </GridPane>
+                            </content>
+                        </Tab>
+                        <Tab text="Bulk/Batch Options">
+                            <content>
+                                <GridPane>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                    <children>
+                                        <CheckBox fx:id="chbPostProcessing" mnemonicParsing="false" text="Post Processing" />
+                                        <CheckBox fx:id="chbCorrectLetterCases" mnemonicParsing="false" text="Correct Letter Cases" GridPane.rowIndex="1" />
+                                        <CheckBox fx:id="chbRemoveLineBreaks" layoutX="10.0" layoutY="61.0" mnemonicParsing="false" text="Remove Line Breaks" GridPane.rowIndex="2" />
+                                        <CheckBox fx:id="chbDeskew" mnemonicParsing="false" text="Deskew" GridPane.columnIndex="1" />
+                                        <CheckBox fx:id="chbRemoveLines" mnemonicParsing="false" text="Remove Lines" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    </children>
+                                </GridPane>
+                            </content>
+                        </Tab>
+                        <Tab text="Hyphen">
+                            <content>
+                                <GridPane>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                    <children>
+                                        <CheckBox fx:id="chbReplaceHyphens" mnemonicParsing="false" text="Replace hyphens with soft hyphens" />
+                                        <CheckBox fx:id="chbRemoveHyphens" mnemonicParsing="false" text="Remove soft hyphens" GridPane.rowIndex="1" />
+                                    </children>
+                                </GridPane>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+            </center>
+        </BorderPane>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:id="okButtonType" buttonData="OK_DONE" text="OK" />
+        <ButtonType fx:id="cancelButtonType" buttonData="CANCEL_CLOSE" text="Cancel" />
+    </buttonTypes>
+</DialogPane>

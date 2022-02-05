@@ -15,6 +15,7 @@
  */
 package net.sourceforge.vietocr;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,20 +24,27 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.Window;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.vietocr.controls.OuputFormatCheckBoxActionListener;
 
-public class OptionsDialogController implements Initializable {
+public class OptionsDialogController extends Dialog<ProcessingOptions> implements Initializable {
 
     @FXML
-    private Button btnOK;
-    @FXML
-    private Button btnCancel;
-    @FXML
     private MenuButton mbOutputFormat;
+    @FXML
+    private CheckBox chbDangAmbigs;
+    @FXML
+    private TextField tfDangAmbigsPath;
+    @FXML
+    private TextField tfWatch;
+    @FXML
+    private TextField tfOutput;
     @FXML
     private CheckBox chbEnable;
     @FXML
@@ -53,12 +61,42 @@ public class OptionsDialogController implements Initializable {
     private CheckBox chbReplaceHyphens;
     @FXML
     private CheckBox chbRemoveHyphens;
+    @FXML
+    private Button btnDangAmbigs;
+    @FXML
+    private Button btnWatch;
+    @FXML
+    private Button btnOutput;
+    @FXML
+    private ButtonType okButtonType;
+    @FXML
+    private ButtonType cancelButtonType;
+
+    private String curLangCode;
+    private DirectoryChooser dirChoooser;
+    private ResourceBundle bundle;
+
+    public OptionsDialogController(Window owner) throws Exception {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/OptionsDialog.fxml"));
+        fxmlLoader.setController(this);
+        DialogPane pane = fxmlLoader.load();
+        initModality(Modality.WINDOW_MODAL);
+        initOwner(owner);
+        setTitle("Options");
+        setDialogPane(pane);
+        dirChoooser = new DirectoryChooser();
+    }
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        bundle = ResourceBundle.getBundle("net/sourceforge/vietocr/OptionsDialog");
+        btnWatch.setOnAction(e -> handleAction(e));
+        btnOutput.setOnAction(e -> handleAction(e));
+        btnDangAmbigs.setOnAction(e -> handleAction(e));
+
         for (ITesseract.RenderedFormat value : ITesseract.RenderedFormat.values()) {
             CheckBox chb = new CheckBox(value.name());
             chb.setOnAction(new OuputFormatCheckBoxActionListener(mbOutputFormat));
@@ -67,15 +105,38 @@ public class OptionsDialogController implements Initializable {
             menuItem.setHideOnClick(false);
             mbOutputFormat.getItems().add(menuItem);
         }
+
+        setResultConverter(dialogButton -> {
+            if (dialogButton == okButtonType) {
+                return getProcessingOptions();
+            }
+
+            return null;
+        });
     }
 
-    @FXML
     private void handleAction(ActionEvent event) {
-        if (event.getSource() == btnOK) {
-
-            ((Stage) btnOK.getScene().getWindow()).close();
-        } else if (event.getSource() == btnCancel) {
-            ((Stage) btnCancel.getScene().getWindow()).close();
+        if (event.getSource() == btnWatch) {
+            dirChoooser.setTitle(bundle.getString("Set_Watch_Folder"));
+            dirChoooser.setInitialDirectory(new File(this.tfWatch.getText()));
+            File dir = dirChoooser.showDialog(btnWatch.getScene().getWindow());
+            if (dir != null) {
+                this.tfWatch.setText(dir.getPath());
+            }
+        } else if (event.getSource() == btnOutput) {
+            dirChoooser.setTitle(bundle.getString("Set_Output_Folder"));
+            dirChoooser.setInitialDirectory(new File(this.tfOutput.getText()));
+            File dir = dirChoooser.showDialog(btnOutput.getScene().getWindow());
+            if (dir != null) {
+                this.tfOutput.setText(dir.getPath());
+            }
+        } else if (event.getSource() == btnDangAmbigs) {
+            dirChoooser.setTitle(bundle.getString("Path_to") + " " + curLangCode + ".DangAmbigs.txt");
+            dirChoooser.setInitialDirectory(new File(this.tfDangAmbigsPath.getText()));
+            File dir = dirChoooser.showDialog(btnDangAmbigs.getScene().getWindow());
+            if (dir != null) {
+                this.tfDangAmbigsPath.setText(dir.getPath());
+            }
         }
     }
 
@@ -138,5 +199,82 @@ public class OptionsDialogController implements Initializable {
         this.chbCorrectLetterCases.setSelected(processingOptions.isCorrectLetterCases());
         this.chbRemoveHyphens.setSelected(processingOptions.isRemoveHyphens());
         this.chbReplaceHyphens.setSelected(processingOptions.isReplaceHyphens());
+    }
+
+    /**
+     * @return the watchFolder
+     */
+    public String getWatchFolder() {
+        return this.tfWatch.getText();
+    }
+
+    /**
+     * @param watchFolder the watchFolder to set
+     */
+    public void setWatchFolder(String watchFolder) {
+        this.tfWatch.setText(watchFolder);
+    }
+
+    /**
+     * @return the outputFolder
+     */
+    public String getOutputFolder() {
+        return this.tfOutput.getText();
+    }
+
+    /**
+     * @param outputFolder the outputFolder to set
+     */
+    public void setOutputFolder(String outputFolder) {
+        this.tfOutput.setText(outputFolder);
+    }
+
+    /**
+     * @return the watchEnabled
+     */
+    public boolean isWatchEnabled() {
+        return chbEnable.isSelected();
+    }
+
+    /**
+     * @param watchEnabled the watchEnabled to set
+     */
+    public void setWatchEnabled(boolean watchEnabled) {
+        this.chbEnable.setSelected(watchEnabled);
+    }
+
+    /**
+     * @return the dangAmbigsPath
+     */
+    public String getDangAmbigsPath() {
+        return tfDangAmbigsPath.getText();
+    }
+
+    /**
+     * @param dangAmbigsPath the dangAmbigsPath to set
+     */
+    public void setDangAmbigsPath(String dangAmbigsPath) {
+        this.tfDangAmbigsPath.setText(dangAmbigsPath);
+    }
+
+    /**
+     * @param curLangCode the curLangCode to set
+     */
+    public void setCurLangCode(String curLangCode) {
+        this.curLangCode = curLangCode;
+    }
+
+    /**
+     * @return the dangAmbigsOn
+     */
+    public boolean isDangAmbigsEnabled() {
+        return this.chbDangAmbigs.isSelected();
+    }
+
+    /**
+     * @param dangAmbigsOn the dangAmbigsOn to set
+     */
+    public void setDangAmbigsEnabled(boolean dangAmbigsOn) {
+        this.chbDangAmbigs.setSelected(dangAmbigsOn);;
     }
 }
