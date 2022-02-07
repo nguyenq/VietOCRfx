@@ -15,8 +15,6 @@
  */
 package net.sourceforge.vietocr;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,23 +33,24 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.stage.Stage;
-import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
+import javafx.stage.Window;
 import net.sourceforge.vietocr.util.FileExtractor;
 import net.sourceforge.vietocr.util.Utils;
 
 public class DownloadDialogController implements Initializable {
-    
+
     @FXML
     private Button btnDownload;
     @FXML
@@ -64,7 +63,7 @@ public class DownloadDialogController implements Initializable {
     private Label labelStatus;
     @FXML
     private ProgressBar progressBar;
-    
+
     final static int BUFFER_SIZE = 1024;
     final static String DICTIONARY_FOLDER = "dict";
     final static String TESSDATA_FOLDER = "tessdata";
@@ -75,12 +74,13 @@ public class DownloadDialogController implements Initializable {
     private Properties lookupISO639;
     private String[] installedLanguages;
     File baseDir;
-    List<SwingWorker<File, Integer>> downloadTracker;
+    List<Task<File>> downloadTracker;
     long contentLength, byteCount;
     int numberOfDownloads, numOfConcurrentTasks;
     ResourceBundle bundle;
     private File tessdataDir;
-    
+    Window window;
+
     private final static Logger logger = Logger.getLogger(DownloadDialogController.class.getName());
 
     /**
@@ -89,12 +89,12 @@ public class DownloadDialogController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         bundle = ResourceBundle.getBundle("net/sourceforge/vietocr/DownloadDialog");
-        
+
         baseDir = Utils.getBaseDir(DownloadDialogController.this);
-        downloadTracker = new ArrayList<SwingWorker<File, Integer>>();
+        downloadTracker = new ArrayList<Task<File>>();
         availableLanguageCodes = new Properties();
         availableDictionaries = new Properties();
-        
+
         try {
             File xmlFile = new File(baseDir, "data/TessLangDataURL.xml");
             availableLanguageCodes.loadFromXML(new FileInputStream(xmlFile));
@@ -103,11 +103,11 @@ public class DownloadDialogController implements Initializable {
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
-        
+
         listViewLang.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         btnDownload.disableProperty().bind(listViewLang.getSelectionModel().selectedItemProperty().isNull());
     }
-    
+
     void loadListView() {
         String[] available = availableLanguageCodes.keySet().toArray(new String[0]);
         List<String> languageNames = new ArrayList<String>();
@@ -117,22 +117,25 @@ public class DownloadDialogController implements Initializable {
         Collections.sort(languageNames, Collator.getInstance());
         listViewLang.setItems(FXCollections.observableArrayList(languageNames));
     }
-    
+
     @FXML
     private void handleAction(ActionEvent event) {
+        window = btnDownload.getScene().getWindow();
+
         if (event.getSource() == btnDownload) {
             if (this.listViewLang.getSelectionModel().getSelectedIndex() == -1) {
                 return;
             }
-            
-            boolean isWriteAccess = CheckDirectoryWriteAccess(tessdataDir);
-            
+
+            boolean isWriteAccess = checkDirectoryWriteAccess(tessdataDir);
+
             if (!isWriteAccess) {
                 String msg = String.format(bundle.getString("Access_denied"), tessdataDir.getPath());
-                JOptionPane.showMessageDialog(null, msg, VietOCR.APP_NAME, JOptionPane.WARNING_MESSAGE);
+                Alert alertBox = new Alert(Alert.AlertType.WARNING, msg);
+                alertBox.initOwner(window);
+                alertBox.show();
                 return;
             }
-            
             this.btnDownload.setDisable(true);
             this.btnCancel.setDisable(false);
             this.labelStatus.setText(bundle.getString("Downloading..."));
@@ -140,11 +143,11 @@ public class DownloadDialogController implements Initializable {
             this.progressBar.setProgress(0);
             this.progressBar.setVisible(true);
             labelStatus.getScene().setCursor(Cursor.WAIT);
-            
+
             downloadTracker.clear();
             contentLength = byteCount = 0;
             numOfConcurrentTasks = this.listViewLang.getSelectionModel().getSelectedIndices().size();
-            
+
             for (Object value : this.listViewLang.getSelectionModel().getSelectedItems()) {
                 String key = FindKey(lookupISO639, value.toString()); // Vietnamese -> vie
                 if (key != null) {
@@ -166,7 +169,7 @@ public class DownloadDialogController implements Initializable {
                 }
             }
         } else if (event.getSource() == btnCancel) {
-            for (SwingWorker<File, Integer> downloadWorker : downloadTracker) {
+            for (Task<File> downloadWorker : downloadTracker) {
                 if (downloadWorker != null && !downloadWorker.isDone()) {
                     downloadWorker.cancel(true);
                     downloadWorker = null;
@@ -175,9 +178,12 @@ public class DownloadDialogController implements Initializable {
             this.btnCancel.setDisable(true);
         } else if (event.getSource() == btnClose) {
             if (numberOfDownloads > 0) {
-                //JOptionPane.showMessageDialog(DownloadDialogController.this, bundle.getString("Please_restart"), Gui.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
+                Alert alertBox = new Alert(Alert.AlertType.INFORMATION, bundle.getString("Please_restart"));
+                alertBox.setTitle(VietOCR.APP_NAME);
+                alertBox.initOwner(window);
+                alertBox.showAndWait();
             }
-            ((Stage) btnClose.getScene().getWindow()).close();
+            ((Stage) window).close();
         }
     }
 
@@ -187,9 +193,9 @@ public class DownloadDialogController implements Initializable {
      * @param directory
      * @return
      */
-    private boolean CheckDirectoryWriteAccess(File directory) {
+    private boolean checkDirectoryWriteAccess(File directory) {
         boolean writeAccess = false;
-        
+
         if (directory.exists()) {
             try {
                 File tempFile = File.createTempFile("tmp", null, directory);
@@ -201,10 +207,10 @@ public class DownloadDialogController implements Initializable {
                 logger.log(Level.WARNING, e.getMessage(), e);
             }
         }
-        
+
         return writeAccess;
     }
-    
+
     String FindKey(Properties lookup, String value) {
         for (Enumeration e = lookup.keys(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
@@ -228,17 +234,16 @@ public class DownloadDialogController implements Initializable {
         connection.setReadTimeout(15000);
         connection.connect();
         contentLength += connection.getContentLength(); // filesize
-        SwingWorker<File, Integer> downloadWorker = new SwingWorker<File, Integer>() {
-            
+        Task<File> downloadWorker = new Task<File>() {
             @Override
-            public File doInBackground() throws Exception {
+            protected File call() throws Exception {
                 InputStream inputStream = connection.getInputStream();
                 File outputFile = new File(tmpdir, new File(remoteFile.getFile()).getName());
                 FileOutputStream fos = new FileOutputStream(outputFile);
                 BufferedOutputStream bout = new BufferedOutputStream(fos);
                 byte[] buffer = new byte[BUFFER_SIZE];
                 int bytesRead;
-                
+
                 while ((bytesRead = inputStream.read(buffer, 0, BUFFER_SIZE)) > -1) {
                     if (isCancelled()) {
                         break;
@@ -250,91 +255,161 @@ public class DownloadDialogController implements Initializable {
                         if (progressPercent > 100) {
                             progressPercent = 100;
                         }
-                        setProgress(progressPercent);
+                        updateProgress(progressPercent, 100);
                     }
                 }
-                
+
                 bout.close();
                 inputStream.close();
                 return outputFile;
             }
-            
-            @Override
-            public void done() {
-                try {
-                    File downloadedFile = get();
-                    
-                    File destFolderPath;
-                    if (destFolder.equals(DICTIONARY_FOLDER)) {
-                        destFolderPath = new File(baseDir, destFolder);
-                    } else {
-                        destFolderPath = tessdataDir;
-                    }
-                    FileExtractor.extractCompressedFile(downloadedFile.getPath(), destFolderPath.getPath());
-                    if (destFolder.equals(TESSDATA_FOLDER)) {
-                        numberOfDownloads++;
-                    }
-                    
-                    if (--numOfConcurrentTasks <= 0) {
-                        labelStatus.setText(bundle.getString("Download_completed"));
-                        progressBar.setVisible(false);
-                    }
-                } catch (InterruptedException e) {
-                    logger.log(Level.WARNING, e.getMessage(), e);
-                    numOfConcurrentTasks = 0;
-                } catch (java.util.concurrent.ExecutionException e) {
-                    String why;
-                    Throwable cause = e.getCause();
-                    if (cause != null) {
-                        if (cause instanceof UnsupportedOperationException) {
-                            why = cause.getMessage();
-                        } else if (cause instanceof RuntimeException) {
-                            why = cause.getMessage();
-                        } else if (cause instanceof FileNotFoundException) {
-                            why = bundle.getString("Resource_does_not_exist") + cause.getMessage();
-                        } else {
-                            why = cause.getMessage();
-                        }
-                    } else {
-                        why = e.getMessage();
-                    }
-                    logger.log(Level.SEVERE, why, e);
-                    JOptionPane.showMessageDialog(null, why, VietOCR.APP_NAME, JOptionPane.ERROR_MESSAGE);
-                    progressBar.setVisible(false);
-                    labelStatus.setText(null);
-                    --numOfConcurrentTasks;
-                } catch (java.util.concurrent.CancellationException e) {
-                    logger.log(Level.WARNING, e.getMessage(), e);
-                    labelStatus.setText(bundle.getString("Download_cancelled"));
+
+//            @Override
+//            public void done() {
+//                try {
+//                    File downloadedFile = get();
+//
+//                    File destFolderPath;
+//                    if (destFolder.equals(DICTIONARY_FOLDER)) {
+//                        destFolderPath = new File(baseDir, destFolder);
+//                    } else {
+//                        destFolderPath = tessdataDir;
+//                    }
+//                    FileExtractor.extractCompressedFile(downloadedFile.getPath(), destFolderPath.getPath());
+//                    if (destFolder.equals(TESSDATA_FOLDER)) {
+//                        numberOfDownloads++;
+//                    }
+//
+//                    if (--numOfConcurrentTasks <= 0) {
+//                        labelStatus.setText(bundle.getString("Download_completed"));
+//                        progressBar.setVisible(false);
+//                    }
+//                } catch (InterruptedException e) {
+//                    logger.log(Level.WARNING, e.getMessage(), e);
+//                    numOfConcurrentTasks = 0;
+//                } catch (java.util.concurrent.ExecutionException e) {
+//                    String why;
+//                    Throwable cause = e.getCause();
+//                    if (cause != null) {
+//                        if (cause instanceof UnsupportedOperationException) {
+//                            why = cause.getMessage();
+//                        } else if (cause instanceof RuntimeException) {
+//                            why = cause.getMessage();
+//                        } else if (cause instanceof FileNotFoundException) {
+//                            why = bundle.getString("Resource_does_not_exist") + cause.getMessage();
+//                        } else {
+//                            why = cause.getMessage();
+//                        }
+//                    } else {
+//                        why = e.getMessage();
+//                    }
+//                    logger.log(Level.SEVERE, why, e);
+//                    new Alert(Alert.AlertType.ERROR, why).show();
 //                    progressBar.setVisible(false);
-                    numOfConcurrentTasks = 0;
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
-                    JOptionPane.showMessageDialog(null, e.getMessage(), VietOCR.APP_NAME, JOptionPane.ERROR_MESSAGE);
-                    progressBar.setVisible(false);
-                    labelStatus.setText(bundle.getString("Unable_to_install"));
-                    --numOfConcurrentTasks;
-                } finally {
-                    if (numOfConcurrentTasks <= 0) {
-                        btnDownload.setDisable(false);
-                        btnCancel.setDisable(true);
-                        labelStatus.getScene().setCursor(Cursor.DEFAULT);
-                    }
+//                    labelStatus.setText(null);
+//                    --numOfConcurrentTasks;
+//                } catch (java.util.concurrent.CancellationException e) {
+//                    logger.log(Level.WARNING, e.getMessage(), e);
+//                    labelStatus.setText(bundle.getString("Download_cancelled"));
+////                    progressBar.setVisible(false);
+//                    numOfConcurrentTasks = 0;
+//                } catch (Exception e) {
+//                    logger.log(Level.SEVERE, e.getMessage(), e);
+//                    new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
+//                    progressBar.setVisible(false);
+//                    labelStatus.setText(bundle.getString("Unable_to_install"));
+//                    --numOfConcurrentTasks;
+//                } finally {
+//                    if (numOfConcurrentTasks <= 0) {
+//                        btnDownload.setDisable(false);
+//                        btnCancel.setDisable(true);
+//                        labelStatus.getScene().setCursor(Cursor.DEFAULT);
+//                    }
+//                }
+//            }
+            @Override
+            protected void succeeded() {
+                super.succeeded();
+
+                File downloadedFile = getValue();
+                File destFolderPath;
+                if (destFolder.equals(DICTIONARY_FOLDER)) {
+                    destFolderPath = new File(baseDir, destFolder);
+                } else {
+                    destFolderPath = tessdataDir;
                 }
+                try {
+                    FileExtractor.extractCompressedFile(downloadedFile.getPath(), destFolderPath.getPath());
+                } catch (Exception ex) {
+                    Logger.getLogger(DownloadDialogController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                if (destFolder.equals(TESSDATA_FOLDER)) {
+                    numberOfDownloads++;
+                }
+
+                if (--numOfConcurrentTasks <= 0) {
+                    updateMessage(bundle.getString("Download_completed"));
+                    progressBar.setVisible(false);
+                }
+
+                reset();
+            }
+
+            @Override
+            protected void cancelled() {
+                super.cancelled();
+
+                updateMessage(bundle.getString("Download_cancelled"));
+                numOfConcurrentTasks = 0;
+                reset();
+            }
+
+            @Override
+            protected void failed() {
+                super.failed();
+
+                String why;
+                Throwable cause = getException();
+                if (cause != null) {
+                    if (cause instanceof UnsupportedOperationException) {
+                        why = cause.getMessage();
+                    } else if (cause instanceof RuntimeException) {
+                        why = cause.getMessage();
+                    } else if (cause instanceof FileNotFoundException) {
+                        why = bundle.getString("Resource_does_not_exist") + cause.getMessage();
+                    } else {
+                        why = cause.getMessage();
+                    }
+                } else {
+                    why = cause.getMessage();
+                }
+                logger.log(Level.SEVERE, why, cause);
+                Alert alertBox = new Alert(Alert.AlertType.ERROR, why);
+                alertBox.initOwner(window);
+                alertBox.show();
+                progressBar.setVisible(false);
+                updateMessage(bundle.getString("Unable_to_install"));
+                --numOfConcurrentTasks;
+                reset();
             }
         };
-        
-        downloadWorker.addPropertyChangeListener(new PropertyChangeListener() {
-            
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if ("progress".equals(evt.getPropertyName())) {
-                    progressBar.setProgress((Integer) evt.getNewValue());
-                }
-            }
-        });
+
+        progressBar.progressProperty().bind(downloadWorker.progressProperty());
+        btnDownload.disableProperty().bind(downloadWorker.runningProperty());
+        labelStatus.textProperty().bind(downloadWorker.messageProperty());
         downloadTracker.add(downloadWorker);
-        downloadWorker.execute();
+        new Thread(downloadWorker).start();
+    }
+
+    void reset() {
+        if (numOfConcurrentTasks <= 0) {
+            btnDownload.disableProperty().unbind();
+            btnDownload.setDisable(false);
+            btnCancel.setDisable(true);
+            labelStatus.textProperty().unbind();
+            progressBar.progressProperty().unbind();
+            labelStatus.getScene().setCursor(Cursor.DEFAULT);
+        }
     }
 
     /**

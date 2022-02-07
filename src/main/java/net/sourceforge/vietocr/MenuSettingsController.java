@@ -240,7 +240,7 @@ public class MenuSettingsController implements Initializable {
                 controller.setLookupISO639(GuiWithOCR.getInstance().lookupISO639);
                 controller.setLookupISO_3_1_Codes(GuiWithOCR.getInstance().lookupISO_3_1_Codes);
                 controller.setInstalledLanguages(GuiWithOCR.getInstance().installedLanguages);
-                controller.setTessdataDir(new File(GuiWithOCR.getInstance().tesseractParameters.getDatapath(), GuiWithOCR.TESSDATA));
+                controller.setTessdataDir(new File(GuiWithOCR.getInstance().tesseractParameters.getDatapath()));
                 Stage downloadDialog = new Stage();
                 downloadDialog.setOnShowing((WindowEvent e) -> {
                     controller.loadListView();

@@ -10,12 +10,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260.0" prefWidth="330.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.DownloadDialogController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260.0" prefWidth="330.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.sourceforge.vietocr.DownloadDialogController">
    <bottom>
       <HBox prefHeight="22.0" prefWidth="536.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Label text="Status" />
-            <ProgressBar prefWidth="160.0" progress="0.0" />
+            <Label fx:id="labelStatus" text="Status" />
+            <ProgressBar fx:id="progressBar" prefWidth="160.0" progress="0.0" />
          </children>
          <padding>
             <Insets bottom="15.0" left="5.0" right="5.0" top="5.0" />
