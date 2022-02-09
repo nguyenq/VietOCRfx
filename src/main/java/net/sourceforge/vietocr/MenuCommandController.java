@@ -140,8 +140,6 @@ public class MenuCommandController implements Initializable {
                     Parent root = fxmlLoader.load();
                     statusDialogController = fxmlLoader.getController();
                     statusDialog = new Stage();
-//            dialog.setX(prefs.getDouble(strChangeCaseX, dialog.getX()));
-//            dialog.setY(prefs.getDouble(strChangeCaseY, dialog.getY()));
                     Scene scene1 = new Scene(root);
                     statusDialog.setScene(scene1);
                     statusDialog.setTitle("Bulk Status");

@@ -16,11 +16,18 @@
 package net.sourceforge.vietocr;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -40,7 +47,9 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 import net.sourceforge.vietocr.util.FormLocalizer;
+import net.sourceforge.vietocr.util.Watcher;
 import net.sourceforge.vietpad.inputmethod.InputMethods;
 import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 
@@ -61,7 +70,7 @@ public class MenuSettingsController implements Initializable {
     @FXML
     private Menu miUILanguage;
 
-    private OptionsDialogController controller;
+    private OptionsDialogController optionsController;
 
     private final String strPSM = "PageSegMode";
     private final String strInputMethod = "inputMethod";
@@ -91,13 +100,24 @@ public class MenuSettingsController implements Initializable {
     protected String outputFolder;
     protected boolean watchEnabled;
     protected ProcessingOptions options;
+
+    private Stage statusDialog;
+    private StatusDialogController statusDialogController;
+
+    private Watcher watcher;
+    private Timeline timeline;
+
+    protected ResourceBundle bundle;
+
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr3");
+    private final static Logger logger = Logger.getLogger(MenuSettingsController.class.getName());
 
     /**
-     * Initializes the controller class.
+     * Initializes the downloadController class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        bundle = ResourceBundle.getBundle("net.sourceforge.vietocr.Gui"); // NOI18N
         selectedPSM = prefs.get(strPSM, "3"); // 3 - Fully automatic page segmentation, but no OSD (default)
         watchFolder = prefs.get(strWatchFolder, System.getProperty("user.home"));
         if (!new File(watchFolder).exists()) {
@@ -194,6 +214,76 @@ public class MenuSettingsController implements Initializable {
             radioItem.setToggleGroup(groupUILang);
             miUILanguage.getItems().add(radioItem);
         }
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/StatusDialog.fxml"));
+            Parent root = fxmlLoader.load();
+            statusDialogController = fxmlLoader.getController();
+            statusDialog = new Stage();
+            Scene scene1 = new Scene(root);
+            statusDialog.setScene(scene1);
+            statusDialog.setTitle("Batch Status");
+        } catch (IOException e) {
+            // ignore
+        }
+
+        // watch for new image files
+        final Queue<File> queue = new LinkedList<>();
+        watcher = new Watcher(queue, new File(watchFolder));
+        watcher.setEnabled(watchEnabled);
+
+        Thread t = new Thread(watcher);
+        t.start();
+
+        // autoOCR if there are files in the queue
+        timeline = new Timeline(
+                new KeyFrame(
+                        Duration.ZERO,
+                        actionEvent -> {
+                            final File imageFile = queue.poll();
+                            performOCR(imageFile);
+                        }
+                ),
+                new KeyFrame(
+                        Duration.seconds(10)
+                )
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+
+        if (watchEnabled) {
+            timeline.play();
+        }
+    }
+
+    private void performOCR(final File imageFile) {
+        if (imageFile != null && imageFile.exists()) {
+            if (!statusDialog.isShowing()) {
+                statusDialog.show();
+            }
+            
+            if (statusDialog.isIconified()) {
+                statusDialog.setIconified(false);
+            } 
+
+            statusDialogController.getTextArea().appendText(imageFile.getPath() + "\n");
+            TesseractParameters tesseractParameters = GuiWithOCR.instance.tesseractParameters;
+            if (tesseractParameters.getLangCode() == null) {
+                statusDialogController.getTextArea().appendText("\t** " + bundle.getString("Please_select_a_language.") + " **\n");
+//                        queue.clear();
+                return;
+            }
+
+            Platform.runLater(() -> {
+                try {
+//                        OCRHelper.performOCR(imageFile, new File(outputFolder, imageFile.getName()), tesseractParameters.getDatapath(), tesseractParameters.getLangCode(), tesseractParameters.getPsm(), outputFormats, GuiWithOCR.instance.options);
+                    OCRHelper.performOCR(imageFile, new File(outputFolder, imageFile.getName()), tesseractParameters.getDatapath(), tesseractParameters.getLangCode(), selectedPSM, outputFormats, options);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, e.getMessage(), e);
+                    statusDialogController.getTextArea().appendText("\t** " + bundle.getString("Cannotprocess") + " " + imageFile.getName() + " **\n");
+                }
+            });
+        }
     }
 
     void setMenuBar(MenuBar menuBar) {
@@ -219,14 +309,9 @@ public class MenuSettingsController implements Initializable {
             return; // no change in locale
         }
         Locale.setDefault(locale);
-        ResourceBundle bundle = java.util.ResourceBundle.getBundle("net.sourceforge.vietocr.Gui");
-        Platform.runLater(new Runnable() {
-
-            @Override
-            public void run() {
-                FormLocalizer localizer = new FormLocalizer((Stage) menuBar.getScene().getWindow(), GuiController.class);
-                localizer.ApplyCulture(bundle);
-            }
+        Platform.runLater(() -> {
+            FormLocalizer localizer = new FormLocalizer((Stage) menuBar.getScene().getWindow(), GuiController.class);
+            localizer.ApplyCulture(bundle);
         });
     }
 
@@ -236,14 +321,14 @@ public class MenuSettingsController implements Initializable {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/DownloadDialog.fxml"));
                 Parent root = fxmlLoader.load();
-                DownloadDialogController controller = fxmlLoader.getController();
-                controller.setLookupISO639(GuiWithOCR.getInstance().lookupISO639);
-                controller.setLookupISO_3_1_Codes(GuiWithOCR.getInstance().lookupISO_3_1_Codes);
-                controller.setInstalledLanguages(GuiWithOCR.getInstance().installedLanguages);
-                controller.setTessdataDir(new File(GuiWithOCR.getInstance().tesseractParameters.getDatapath()));
+                DownloadDialogController downloadController = fxmlLoader.getController();
+                downloadController.setLookupISO639(GuiWithOCR.getInstance().lookupISO639);
+                downloadController.setLookupISO_3_1_Codes(GuiWithOCR.getInstance().lookupISO_3_1_Codes);
+                downloadController.setInstalledLanguages(GuiWithOCR.getInstance().installedLanguages);
+                downloadController.setTessdataDir(new File(GuiWithOCR.getInstance().tesseractParameters.getDatapath()));
                 Stage downloadDialog = new Stage();
                 downloadDialog.setOnShowing((WindowEvent e) -> {
-                    controller.loadListView();
+                    downloadController.loadListView();
                 });
                 downloadDialog.setResizable(false);
                 downloadDialog.initStyle(StageStyle.UTILITY);
@@ -260,31 +345,42 @@ public class MenuSettingsController implements Initializable {
             }
         } else if (event.getSource() == miOptions) {
             try {
-                controller = new OptionsDialogController(menuBar.getScene().getWindow());
-                controller.setWatchFolder(watchFolder);
-                controller.setOutputFolder(outputFolder);
-                controller.setWatchEnabled(watchEnabled);
-                controller.setProcessingOptions(options);
-                controller.setDangAmbigsPath(dangAmbigsPath);
-                controller.setDangAmbigsEnabled(dangAmbigsOn);
-                controller.setCurLangCode("*");
-                controller.setProcessingOptions(options);
-                controller.setSelectedOutputFormats(outputFormats);
+                optionsController = new OptionsDialogController(menuBar.getScene().getWindow());
+                optionsController.setWatchFolder(watchFolder);
+                optionsController.setOutputFolder(outputFolder);
+                optionsController.setWatchEnabled(watchEnabled);
+                optionsController.setProcessingOptions(options);
+                optionsController.setDangAmbigsPath(dangAmbigsPath);
+                optionsController.setDangAmbigsEnabled(dangAmbigsOn);
+                optionsController.setCurLangCode("*");
+                optionsController.setProcessingOptions(options);
+                optionsController.setSelectedOutputFormats(outputFormats);
 
-                Optional<ProcessingOptions> result = controller.showAndWait();
+                Optional<ProcessingOptions> result = optionsController.showAndWait();
                 if (result.isPresent()) {
                     options = result.get();
-                    watchFolder = controller.getWatchFolder();
-                    outputFolder = controller.getOutputFolder();
-                    watchEnabled = controller.isWatchEnabled();
-                    options = controller.getProcessingOptions();
-                    dangAmbigsPath = controller.getDangAmbigsPath();
-                    dangAmbigsOn = controller.isDangAmbigsEnabled();
-                    outputFormats = controller.getSelectedOutputFormats();
+                    watchFolder = optionsController.getWatchFolder();
+                    outputFolder = optionsController.getOutputFolder();
+                    watchEnabled = optionsController.isWatchEnabled();
+                    options = optionsController.getProcessingOptions();
+                    dangAmbigsPath = optionsController.getDangAmbigsPath();
+                    dangAmbigsOn = optionsController.isDangAmbigsEnabled();
+                    outputFormats = optionsController.getSelectedOutputFormats();
+                    updateWatch(watchFolder, watchEnabled);
                 }
             } catch (Exception e) {
 
             }
+        }
+    }
+
+    void updateWatch(String watchFolder, boolean watchEnabled) {
+        watcher.setPath(new File(watchFolder));
+        watcher.setEnabled(watchEnabled);
+        if (watchEnabled) {
+            timeline.play();
+        } else {
+            timeline.stop();
         }
     }
 
@@ -302,8 +398,8 @@ public class MenuSettingsController implements Initializable {
         prefs.put(strPSM, selectedPSM);
         prefs.put(strUILanguage, selectedUILang);
 
-        if (controller != null) {
-            prefs.put(strBatchOutputFormat, controller.getSelectedOutputFormats());
+        if (optionsController != null) {
+            prefs.put(strBatchOutputFormat, optionsController.getSelectedOutputFormats());
         }
 
         prefs.put(strDangAmbigsPath, dangAmbigsPath);
