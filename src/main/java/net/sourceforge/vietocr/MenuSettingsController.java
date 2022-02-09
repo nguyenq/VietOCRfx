@@ -261,7 +261,7 @@ public class MenuSettingsController implements Initializable {
             if (!statusDialog.isShowing()) {
                 statusDialog.show();
             }
-            
+            statusDialog.toFront();
             if (statusDialog.isIconified()) {
                 statusDialog.setIconified(false);
             } 
@@ -273,11 +273,12 @@ public class MenuSettingsController implements Initializable {
 //                        queue.clear();
                 return;
             }
+            tesseractParameters.setPsm(selectedPSM);
 
             Platform.runLater(() -> {
                 try {
 //                        OCRHelper.performOCR(imageFile, new File(outputFolder, imageFile.getName()), tesseractParameters.getDatapath(), tesseractParameters.getLangCode(), tesseractParameters.getPsm(), outputFormats, GuiWithOCR.instance.options);
-                    OCRHelper.performOCR(imageFile, new File(outputFolder, imageFile.getName()), tesseractParameters.getDatapath(), tesseractParameters.getLangCode(), selectedPSM, outputFormats, options);
+                    OCRHelper.performOCR(imageFile, new File(outputFolder, imageFile.getName()), tesseractParameters.getDatapath(), tesseractParameters.getLangCode(), tesseractParameters.getPsm(), outputFormats, options);
                 } catch (Exception e) {
                     logger.log(Level.WARNING, e.getMessage(), e);
                     statusDialogController.getTextArea().appendText("\t** " + bundle.getString("Cannotprocess") + " " + imageFile.getName() + " **\n");

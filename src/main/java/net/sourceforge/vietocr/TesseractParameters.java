@@ -20,7 +20,7 @@ import javafx.beans.property.StringProperty;
 
 public class TesseractParameters {
 
-    private final StringProperty datapath = new SimpleStringProperty("./");
+    private final StringProperty datapath = new SimpleStringProperty();
 
     public final String getDatapath() {
         return datapath.get();
@@ -34,7 +34,7 @@ public class TesseractParameters {
         return datapath;
     }
     
-    private final StringProperty langCode = new SimpleStringProperty("eng");
+    private final StringProperty langCode = new SimpleStringProperty();
 
     public final String getLangCode() {
         return langCode.get();
@@ -48,7 +48,7 @@ public class TesseractParameters {
         return langCode;
     }
     
-    private final StringProperty psm = new SimpleStringProperty("3"); // 3 - Fully automatic page segmentation, but no OSD (default)
+    private final StringProperty psm = new SimpleStringProperty();
 
     public final String getPsm() {
         return psm.get();

@@ -129,6 +129,6 @@ public class OCRImages extends OCR<IIOImage> {
             renderedFormats.add(RenderedFormat.valueOf(format));
         }
 
-        instance.createDocuments(inputImage.getPath(), Utils.stripExtension(outputFile.getPath()), renderedFormats);
+        instance.createDocuments(inputImage.getPath(), outputFile.getPath(), renderedFormats);
     }
 }

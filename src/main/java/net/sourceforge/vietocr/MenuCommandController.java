@@ -84,8 +84,6 @@ public class MenuCommandController implements Initializable {
     List<IIOImage> iioImageList;
     String inputfilename, curLangCode;
     int imageIndex;
-    String datapath;
-    String selectedPSM;
     private OCRImageEntity entity;
 
     protected ResourceBundle bundle;
@@ -155,6 +153,9 @@ public class MenuCommandController implements Initializable {
                         Utils.listImageFiles(files, new File(inputFolder));
                         statusDialog.toFront();
                         statusDialog.show();
+                        if (statusDialog.isIconified()) {
+                            statusDialog.setIconified(false);
+                        }
                         statusDialogController.getTextArea().appendText("\t-- " + bundle.getString("Beginning_of_task") + " --\n");
 
                         // instantiate Task for OCR

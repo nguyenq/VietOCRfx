@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -47,6 +48,7 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javax.imageio.IIOImage;
 import net.sourceforge.tess4j.ITessAPI;
+import static net.sourceforge.vietocr.MenuSettingsController.prefs;
 import net.sourceforge.vietocr.util.Utils;
 import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 import net.sourceforge.vietpad.utilities.TextUtilities;
@@ -87,7 +89,8 @@ public class GuiWithOCR extends GuiWithImageOps {
     private static final String strSegmentedRegionsSymbol = "SegmentedRegionsSymbol";
     private static final String strSegmentedRegionsBlock = "SegmentedRegionsBlock";
     private static final String strSegmentedRegionsWord = "SegmentedRegionsWord";
-
+    private final String strPSM = "PageSegMode";
+    
     protected final File supportDir = new File(System.getProperty("user.home")
             + (MAC_OS_X ? "/Library/Application Support/" + VietOCR.APP_NAME : "/." + VietOCR.APP_NAME.toLowerCase()));
     static final String UTF8 = "UTF-8";
@@ -126,6 +129,9 @@ public class GuiWithOCR extends GuiWithImageOps {
         curLangCode = prefs.get(strLangCode, "eng");
         options = new ProcessingOptions();
         tesseractParameters = new TesseractParameters();
+        tesseractParameters.setLangCode(curLangCode);
+        tesseractParameters.setPsm(prefs.get(strPSM, "3"));
+        
         getInstalledLanguagePacks();
         populateOCRLanguageBox();
         new VietKeyListener(textarea);
@@ -358,6 +364,7 @@ public class GuiWithOCR extends GuiWithImageOps {
                 }
 
                 curLangCode = String.join("+", selectedLangCodes);
+                tesseractParameters.setLangCode(curLangCode);
                 mbtnOCRLanguage.setText(String.join("+", selectedOCRLangs));
 
                 isViet.set(curLangCode.contains("vie"));
