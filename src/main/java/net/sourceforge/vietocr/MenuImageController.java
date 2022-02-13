@@ -1,5 +1,5 @@
 /**
- * Copyright @ 2016 Quan Nguyen
+ * Copyright @ 2022 Quan Nguyen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,19 +29,14 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javax.imageio.IIOImage;
 import javax.swing.UIManager;
 import static net.sourceforge.vietocr.MenuToolsController.prefs;
@@ -123,21 +118,9 @@ public class MenuImageController implements Initializable {
 
         if (event.getSource() == miMetadata) {
             try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/ImageInfoDialog.fxml"));
-                Parent root = fxmlLoader.load();
-                ImageInfoDialogController controller = fxmlLoader.getController();
+                ImageInfoDialogController controller = new ImageInfoDialogController(menuBar.getScene().getWindow());
                 controller.setImage(iioImageList.get(imageIndex));
-                Stage imageInfoDialog = new Stage();
-                imageInfoDialog.setResizable(false);
-                imageInfoDialog.initStyle(StageStyle.UTILITY);
-                imageInfoDialog.setAlwaysOnTop(true);
-//            imageInfoDialog.setX(prefs.getDouble(strChangeCaseX, imageInfoDialog.getX()));
-//            imageInfoDialog.setY(prefs.getDouble(strChangeCaseY, imageInfoDialog.getY()));
-                Scene scene1 = new Scene(root);
-                imageInfoDialog.setScene(scene1);
-                imageInfoDialog.setTitle("Image Properties");
-                imageInfoDialog.toFront();
-                imageInfoDialog.show();
+                controller.show();
             } catch (Exception e) {
 
             }

@@ -21,17 +21,20 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import javafx.stage.Modality;
+import javafx.stage.Window;
 import javax.imageio.IIOImage;
 import net.sourceforge.tess4j.util.ImageIOHelper;
 
-public class ImageInfoDialogController implements Initializable {
+public class ImageInfoDialogController extends Dialog implements Initializable {
 
     @FXML
     private TextField tfBitDepth;
@@ -51,6 +54,16 @@ public class ImageInfoDialogController implements Initializable {
     private ChoiceBox<String> cbHeight;
     IIOImage oimage;
     boolean isProgrammatic;
+
+    public ImageInfoDialogController(Window owner) throws Exception {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/ImageInfoDialog.fxml"));
+        fxmlLoader.setController(this);
+        DialogPane pane = fxmlLoader.load();
+        initModality(Modality.WINDOW_MODAL);
+        initOwner(owner);
+        setTitle("Image Properties");
+        setDialogPane(pane);
+    }
 
     /**
      * Initializes the controller class.
@@ -82,15 +95,8 @@ public class ImageInfoDialogController implements Initializable {
                 }
             }
         });
-        
-//        btnOK.requestFocus();
-    }
 
-    @FXML
-    private void handleAction(ActionEvent event) {
-        if (event.getSource() == btnOK) {
-            ((Stage) btnOK.getScene().getWindow()).close();
-        }
+//        btnOK.requestFocus();
     }
 
     /**
