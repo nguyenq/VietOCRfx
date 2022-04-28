@@ -13,8 +13,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClass>net.sourceforge.vietocr.VietOCR</mainClass>
         <shadedClassifierName>executable</shadedClassifierName>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>18</maven.compiler.source>
+        <maven.compiler.target>18</maven.compiler.target>
     </properties>
 
     <organization>
@@ -157,32 +157,32 @@
         <dependency>
             <groupId>net.sourceforge.tess4j</groupId>
             <artifactId>tess4j</artifactId>
-            <version>5.2.0</version>
+            <version>5.2.1</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
-            <version>5.10.0</version>
+            <version>5.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>17.0.2</version>
+            <version>18.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>17.0.2</version>
+            <version>18.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>17.0.2</version>
+            <version>18.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>17.0.2</version>
+            <version>18.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
