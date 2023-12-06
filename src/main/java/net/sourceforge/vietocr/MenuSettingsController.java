@@ -208,7 +208,7 @@ public class MenuSettingsController implements Initializable {
 
         String[] uiLangs = getInstalledUILangs();
         for (String uiLang : uiLangs) {
-            Locale locale = new Locale(uiLang);
+            Locale locale = Locale.of(uiLang);
             RadioMenuItem radioItem = new RadioMenuItem(locale.getDisplayLanguage());
             radioItem.setUserData(locale.getLanguage());
             radioItem.setSelected(selectedUILang.equals(locale.getLanguage()));
@@ -298,7 +298,7 @@ public class MenuSettingsController implements Initializable {
     }
 
     private Locale getLocale(String selectedUILang) {
-        return new Locale(selectedUILang);
+        return Locale.of(selectedUILang);
     }
 
     /**

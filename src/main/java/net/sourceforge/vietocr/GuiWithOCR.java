@@ -184,7 +184,7 @@ public class GuiWithOCR extends GuiWithImageOps {
                     //move this part to the image entity
 //                ArrayList<IIOImage> tempList = new ArrayList<IIOImage>();
 //                tempList.add(new IIOImage(bi, null, null));
-                    performOCR(iioImageList, inputfilename, imageIndex, rect);
+                    performOCR(iioImageList, inputfilename, imageIndex, Arrays.asList(Arrays.asList(rect)));
                 } catch (RasterFormatException rfe) {
                     logger.log(Level.SEVERE, rfe.getMessage(), rfe);
                     //JOptionPane.showMessageDialog(this, rfe.getMessage(), APP_NAME, JOptionPane.ERROR_MESSAGE);
@@ -244,7 +244,7 @@ public class GuiWithOCR extends GuiWithImageOps {
      * @param index Index of page to be OCRed: -1 for all pages
      * @param rect region of interest
      */
-    void performOCR(final List<IIOImage> iioImageList, String inputfilename, final int index, Rectangle rect) {
+    void performOCR(final List<IIOImage> iioImageList, String inputfilename, final int index, final List<List<Rectangle>> roiss) {
         if (curLangCode.trim().length() == 0) {
             new Alert(Alert.AlertType.INFORMATION, bundle.getString("Please_select_a_language.")).show();
             return;
@@ -257,7 +257,7 @@ public class GuiWithOCR extends GuiWithImageOps {
 //        this.miOCR.setDisable(true);
 //        this.miOCRAll.setDisable(true);
 
-        OCRImageEntity entity = new OCRImageEntity(iioImageList, inputfilename, index, rect, false, curLangCode);
+        OCRImageEntity entity = new OCRImageEntity(iioImageList, inputfilename, index, roiss, false, curLangCode);
 //        entity.setScreenshotMode(this.checkBoxMenuItemScreenshotMode.isSelected());
 
         // instantiate Task for OCR
@@ -497,7 +497,7 @@ public class GuiWithOCR extends GuiWithImageOps {
                 if (isCancelled()) {
                     break;
                 }
-                String result = ocrEngine.recognizeText(imageList.subList(i, i + 1), entity.getInputfilename(), entity.getRect());
+                String result = ocrEngine.recognizeText(imageList.subList(i, i + 1), entity.getInputfilename(), entity.getROIss());
                 updateValue(result); // interim result
             }
             return null;

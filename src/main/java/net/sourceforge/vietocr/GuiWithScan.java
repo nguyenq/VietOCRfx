@@ -18,6 +18,7 @@ package net.sourceforge.vietocr;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
@@ -124,7 +125,7 @@ public class GuiWithScan extends GuiWithThumbnail implements ScannerListener {
             BufferedImage scannedImage = metadata.getImage();
 
             try {
-                iioImageList = ImageIOHelper.getIIOImageList(scannedImage);
+                iioImageList = Arrays.asList(ImageIOHelper.getIIOImage(scannedImage));
                 imageList = Utils.getImageList(iioImageList);
                 loadImage();
 //                setTitle("Scanned image - " + VietOCR.APP_NAME);

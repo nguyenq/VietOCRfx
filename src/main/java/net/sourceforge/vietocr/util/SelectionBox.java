@@ -50,6 +50,19 @@ public class SelectionBox {
     public Rectangle getRect() {
         return selectionBox;
     }
+    
+        /**
+     * Gets all ROIs. (As of now, only one or none. Will consider support for
+     * drawing multiple ROIs.)
+     *
+     * @return
+     */
+    public java.util.List<Rectangle> getROIs() {
+        if (selectionBox == null) {
+            return new ArrayList<>();
+        }
+        return Arrays.asList(selectionBox);
+    }
 
     /**
      * Deselects selection box.

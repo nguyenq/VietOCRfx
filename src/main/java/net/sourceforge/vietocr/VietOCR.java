@@ -13,7 +13,7 @@ public class VietOCR extends Application {
 
     public final static String APP_NAME = "VietOCR";
     public final static boolean MAC_OS_X = System.getProperty("os.name").startsWith("Mac");
-    final static Locale VIETNAM = new Locale("vi", "VN");
+    final static Locale VIETNAM = Locale.of("vi", "VN");
     protected static Locale systemDefault;
     protected boolean localeVietOn;
     protected final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");

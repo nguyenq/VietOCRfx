@@ -45,9 +45,9 @@ public class OCRImageEntity {
     private String inputfilename;
 
     /**
-     * bounding rectangle
+     * list of list of regions of interest
      */
-    private Rectangle rect;
+    private final List<List<Rectangle>> roiss;
     
     /**
      * double-sided page
@@ -87,27 +87,27 @@ public class OCRImageEntity {
      * @param oimages a list of <code>IIOImage</code> objects
      * @param inputfilename input filename
      * @param index index of images
-     * @param rect the bounding rectangle defines the region of the image to be
-     * recognized. A rectangle of zero dimension or <code>null</code> indicates
-     * the whole image.
+     * @param roiss list of lists of the bounding rectangle defines the regions of the
+     * image to be recognized. A rectangle of zero dimension or
+     * <code>null</code> indicates the whole image.
      * @param doublesided single- or double-sided page
      * @param lang language code, which follows ISO 639-3 standard
      */
-    public OCRImageEntity(List<IIOImage> oimages, String inputfilename, int index, Rectangle rect, boolean doublesided, String lang) {
+    public OCRImageEntity(List<IIOImage> oimages, String inputfilename, int index, List<List<Rectangle>> roiss, boolean doublesided, String lang) {
         this.oimages = oimages;
         this.inputfilename = inputfilename;
         this.index.set(index);
-        this.rect = rect;
+        this.roiss = roiss;
         this.doublesided = doublesided;
         this.language.set(lang);
     }
 
-    public OCRImageEntity(ArrayList<BufferedImage> images, String inputfilename, int index, Rectangle rect, boolean doublesided, String lang) {
-        this(convertBufferedImageToIIOImage(images), inputfilename, index, rect, doublesided, lang);
+    public OCRImageEntity(ArrayList<BufferedImage> images, String inputfilename, int index, List<List<Rectangle>> roiss, boolean doublesided, String lang) {
+        this(convertBufferedImageToIIOImage(images), inputfilename, index, roiss, doublesided, lang);
     }
 
     static List<IIOImage> convertBufferedImageToIIOImage(List<BufferedImage> bis) {
-        List<IIOImage> oimages = new ArrayList<IIOImage>();
+        List<IIOImage> oimages = new ArrayList<>();
         for (BufferedImage bi : bis) {
             oimages.add(new IIOImage(bi, null, null));
         }
@@ -115,23 +115,23 @@ public class OCRImageEntity {
         return oimages;
     }
 
-    /**
-     * Constructor.
-     *
-     * @param imageFile an image file
-     * @param index index of images
-     * @param rect the bounding rectangle defines the region of the image to be
-     * recognized. A rectangle of zero dimension or <code>null</code> indicates
-     * the whole image.
-     * @param lang language code, which follows ISO 639-3 standard
-     */
-    public OCRImageEntity(File imageFile, int index, Rectangle rect, String lang) {
-        this.imageFile = imageFile;
-        this.inputfilename = imageFile.getPath();
-        this.index.set(index);
-        this.rect = rect;
-        this.language.set(lang);
-    }
+//    /**
+//     * Constructor.
+//     *
+//     * @param imageFile an image file
+//     * @param index index of images
+//     * @param rect the bounding rectangle defines the region of the image to be
+//     * recognized. A rectangle of zero dimension or <code>null</code> indicates
+//     * the whole image.
+//     * @param lang language code, which follows ISO 639-3 standard
+//     */
+//    public OCRImageEntity(File imageFile, int index, Rectangle rect, String lang) {
+//        this.imageFile = imageFile;
+//        this.inputfilename = imageFile.getPath();
+//        this.index.set(index);
+//        this.rect = rect;
+//        this.language.set(lang);
+//    }
 
     /**
      * Gets oimages.
@@ -227,22 +227,34 @@ public class OCRImageEntity {
     public int getIndex() {
         return index.get();
     }
-    
-    void setIndex(int index) {
-        this.index.set(index);
-    }
-
+          
     /**
-     * Gets bounding rectangle.
+     * Gets list of lists of regions of interest.
      *
-     * @return the bounding rectangle
+     * @return the bounding rectangles
      */
-    public Rectangle getRect() {
-        return rect;
-    }
-
-    void setRect(Rectangle rect) {
-        this.rect = rect;
+    public List<List<Rectangle>> getROIss() {
+        if (roiss != null) {
+            return roiss; // drawn ROIs on images
+        } else if (doublesided) {
+            // create ROIs for double-sided pages, which consist of two equal-sized side-by-side rectangles for each page
+            List<List<Rectangle>> lists = new ArrayList<>();
+            for (IIOImage image : oimages) {
+                List<Rectangle> list = new ArrayList<>();
+                RenderedImage ri = image.getRenderedImage();
+                int width = ri.getWidth();
+                int height = ri.getHeight();
+                Rectangle rect = new Rectangle(width / 2, height);
+                list.add(rect);
+                rect = (Rectangle) rect.clone();
+                rect.x = width / 2;
+                list.add(rect);
+                lists.add(list);
+            }
+            return lists;
+        }
+        
+        return null;
     }
 
     /**
