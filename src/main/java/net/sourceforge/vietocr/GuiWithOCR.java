@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -48,7 +48,6 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javax.imageio.IIOImage;
 import net.sourceforge.tess4j.ITessAPI;
-import static net.sourceforge.vietocr.MenuSettingsController.prefs;
 import net.sourceforge.vietocr.util.Utils;
 import net.sourceforge.vietpad.inputmethod.VietKeyListener;
 import net.sourceforge.vietpad.utilities.TextUtilities;
@@ -90,7 +89,7 @@ public class GuiWithOCR extends GuiWithImageOps {
     private static final String strSegmentedRegionsBlock = "SegmentedRegionsBlock";
     private static final String strSegmentedRegionsWord = "SegmentedRegionsWord";
     private final String strPSM = "PageSegMode";
-    
+
     protected final File supportDir = new File(System.getProperty("user.home")
             + (MAC_OS_X ? "/Library/Application Support/" + VietOCR.APP_NAME : "/." + VietOCR.APP_NAME.toLowerCase()));
     static final String UTF8 = "UTF-8";
@@ -131,7 +130,7 @@ public class GuiWithOCR extends GuiWithImageOps {
         tesseractParameters = new TesseractParameters();
         tesseractParameters.setLangCode(curLangCode);
         tesseractParameters.setPsm(prefs.get(strPSM, "3"));
-        
+
         getInstalledLanguagePacks();
         populateOCRLanguageBox();
         new VietKeyListener(textarea);
@@ -162,32 +161,38 @@ public class GuiWithOCR extends GuiWithImageOps {
                 return;
             }
 
-            javafx.scene.shape.Rectangle roi = selectionBox.getRect();
-            Rectangle rect = new Rectangle((int) roi.getX(), (int) roi.getY(), (int) roi.getWidth(), (int) roi.getHeight());
-
-            if (!rect.isEmpty()) {
+            List<javafx.scene.shape.Rectangle> rois = selectionBox.getROIs();
+            if (rois != null && !rois.isEmpty()) {
+                // ROIs applicable to current page only
                 try {
-                    Image ii = (Image) this.imageView.getImage();
-                    double offsetX = 0;
-                    double offsetY = 0;
-                    if (ii.getWidth() < this.scrollPaneImage.getWidth()) {
-                        offsetX = (this.scrollPaneImage.getViewportBounds().getWidth() - ii.getWidth()) / 2;
-                    }
-                    if (ii.getHeight() < this.scrollPaneImage.getHeight()) {
-                        offsetY = (this.scrollPaneImage.getViewportBounds().getHeight() - ii.getHeight()) / 2;
-                    }
-//                BufferedImage bi = ((BufferedImage) ii.getImage()).getSubimage((int) ((rect.x - offsetX) * scaleX), (int) ((rect.y - offsetY) * scaleY), (int) (rect.width * scaleX), (int) (rect.height * scaleY));
+                    int index = 0;
+                    for (javafx.scene.shape.Rectangle rect : rois) {
+                        if (rect == null) {
+                            index++;
+                            continue;
+                        }
+                        Image ii = (Image) this.imageView.getImage();
+                        double offsetX = 0;
+                        double offsetY = 0;
+                        if (ii.getWidth() < this.scrollPaneImage.getWidth()) {
+                            offsetX = (this.scrollPaneImage.getViewportBounds().getWidth() - ii.getWidth()) / 2;
+                        }
+                        if (ii.getHeight() < this.scrollPaneImage.getHeight()) {
+                            offsetY = (this.scrollPaneImage.getViewportBounds().getHeight() - ii.getHeight()) / 2;
+                        }
 
-//                // create a new rectangle with scale factors and offets factored in
-                    rect = new Rectangle((int) ((rect.x - offsetX) * scaleX), (int) ((rect.y - offsetY) * scaleY), (int) (rect.width * scaleX), (int) (rect.height * scaleY));
-
-                    //move this part to the image entity
-//                ArrayList<IIOImage> tempList = new ArrayList<IIOImage>();
-//                tempList.add(new IIOImage(bi, null, null));
-                    performOCR(iioImageList, inputfilename, imageIndex, Arrays.asList(Arrays.asList(rect)));
+                        // create a new rectangle with scale factors and offets factored in
+                        javafx.scene.shape.Rectangle recaledRect = new javafx.scene.shape.Rectangle(((rect.getX() - offsetX) * scaleX), ((rect.getY() - offsetY) * scaleY), (rect.getWidth() * scaleX), (rect.getHeight() * scaleY));
+                        rois.set(index++, recaledRect);
+                    }
+                    
+                    List<Rectangle> rects = rois.stream()
+                            .map(roi -> new Rectangle((int) roi.getX(), (int) roi.getY(), (int) roi.getWidth(), (int) roi.getHeight()))
+                            .collect(Collectors.toList());
+                    
+                    performOCR(iioImageList, inputfilename, imageIndex, Arrays.asList(rects));
                 } catch (RasterFormatException rfe) {
                     logger.log(Level.SEVERE, rfe.getMessage(), rfe);
-                    //JOptionPane.showMessageDialog(this, rfe.getMessage(), APP_NAME, JOptionPane.ERROR_MESSAGE);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, e.getMessage(), e);
                 }

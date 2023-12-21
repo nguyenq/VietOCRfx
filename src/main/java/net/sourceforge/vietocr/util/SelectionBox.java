@@ -51,7 +51,7 @@ public class SelectionBox {
         return selectionBox;
     }
     
-        /**
+    /**
      * Gets all ROIs. (As of now, only one or none. Will consider support for
      * drawing multiple ROIs.)
      *

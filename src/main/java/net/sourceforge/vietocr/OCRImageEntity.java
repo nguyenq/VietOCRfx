@@ -148,16 +148,8 @@ public class OCRImageEntity {
      * @return the list of selected oimages
      */
     public List<IIOImage> getSelectedOimages() {
-        if (doublesided) {
-            List<IIOImage> tempList = new ArrayList<IIOImage>();
-            for (IIOImage image : (index.get() == -1 ? oimages : oimages.subList(index.get(), index.get() + 1))) {
-                // split image in half
-                tempList.addAll(splitImage(image));
-            }
-            return tempList;
-        } else {
-            return index.get() == -1 ? oimages : oimages.subList(index.get(), index.get() + 1);
-        }
+        int i = index.get();
+        return i == -1 ? oimages : oimages.subList(i, i + 1);
     }
 
     /**
@@ -167,56 +159,6 @@ public class OCRImageEntity {
      */
     public File getImageFile() {
         return imageFile;
-    }
-
-    /**
-     * Gets cloned image files.
-     *
-     * @return the ClonedImageFiles
-     * @throws java.io.IOException
-     */
-    public List<File> getClonedImageFiles() throws IOException {
-        return null;
-//        if (oimages != null) {
-//            if (dpiX == 0 || dpiY == 0) {
-//                if (rect == null || rect.isEmpty()) {
-////                    return ImageIOHelper.createTiffFiles(oimages, index);
-//                } else {
-//                    // rectangular region
-////                    BufferedImage bi = ((BufferedImage) oimages.get(index).getRenderedImage()).getSubimage(rect.x, rect.y, rect.width, rect.height);
-//                    // On Linux, the standard getSubimage method has generated images that Tesseract does not like.
-//                    BufferedImage bi = ImageHelper.getSubImage((BufferedImage) oimages.get(index).getRenderedImage(), rect.x, rect.y, rect.width, rect.height);
-//                    List<IIOImage> tempList = new ArrayList<IIOImage>();
-//                    tempList.add(new IIOImage(bi, null, null));
-//                    return ImageIOHelper.createTiffFiles(tempList, 0);
-//                }
-//            } else // scaling
-//            {
-//                if (rect == null || rect.isEmpty()) {
-//                    List<IIOImage> tempList = new ArrayList<IIOImage>();
-//                    for (IIOImage oimage : (index == -1 ? oimages : oimages.subList(index, index + 1))) {
-//                        BufferedImage bi = (BufferedImage) oimage.getRenderedImage();
-//                        Map<String, String> metadata = ImageIOHelper.readImageData(oimage);
-//                        float scale = dpiX / Float.parseFloat(metadata.get("dpiX"));
-//                        bi = ImageHelper.getScaledInstance(bi, (int) (bi.getWidth() * scale), (int) (bi.getHeight() * scale));
-//                        tempList.add(new IIOImage(bi, null, null));
-//                    }
-//                    return ImageIOHelper.createTiffFiles(tempList, (index == -1 ? index : 0), dpiX, dpiY);
-//                } else {
-//                    // rectangular region
-//                    //Cut out the subimage first and rescale that
-//                    BufferedImage bi = ((BufferedImage) oimages.get(index).getRenderedImage()).getSubimage(rect.x, rect.y, rect.width, rect.height);
-//                    Map<String, String> metadata = ImageIOHelper.readImageData(oimages.get(index));
-//                    float scale = dpiX / Float.parseFloat(metadata.get("dpiX"));
-//                    bi = ImageHelper.getScaledInstance(bi, (int) (bi.getWidth() * scale), (int) (bi.getHeight() * scale));
-//                    List<IIOImage> tempList = new ArrayList<IIOImage>();
-//                    tempList.add(new IIOImage(bi, null, null));
-//                    return ImageIOHelper.createTiffFiles(tempList, 0, dpiX, dpiY);
-//                }
-//            }
-//        } else {
-//            return ImageIOHelper.createTiffFiles(imageFile, index);
-//        }
     }
 
     /**
@@ -299,24 +241,5 @@ public class OCRImageEntity {
      */
     public String getInputfilename() {
         return inputfilename;
-    }
-
-    /**
-     * Splits image in halves (as in double-sided pages).
-     * 
-     * @param image
-     * @return two half images
-     */
-    public List<IIOImage> splitImage(IIOImage image) {
-        List<IIOImage> tempList = new ArrayList<IIOImage>();
-        RenderedImage ri = image.getRenderedImage();
-        Rectangle cropRect = new Rectangle(0, 0, ri.getWidth() / 2, ri.getHeight());
-        BufferedImage bi = ImageHelper.getSubImage((BufferedImage) ri, cropRect.x, cropRect.y, cropRect.width, cropRect.height);
-        tempList.add(new IIOImage(bi, null, null));
-        cropRect = new Rectangle(ri.getWidth() / 2, 0, ri.getWidth() / 2, ri.getHeight());
-        bi = ImageHelper.getSubImage((BufferedImage) ri, cropRect.x, cropRect.y, cropRect.width, cropRect.height);
-        tempList.add(new IIOImage(bi, null, null));
-
-        return tempList;
     }
 }
