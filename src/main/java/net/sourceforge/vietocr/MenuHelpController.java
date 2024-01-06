@@ -18,6 +18,7 @@ package net.sourceforge.vietocr;
 
 import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -95,7 +96,7 @@ public class MenuHelpController implements Initializable {
                                         if (href.startsWith("readme")) {
                                             webEngine.load(getClass().getResource("/" + href).toExternalForm());
                                         } else {
-                                            linkActivated(new URL(href));
+                                            linkActivated(new URI(href).toURL());
                                         }
                                     } catch (Exception e) {
                                         logger.log(Level.WARNING, e.getMessage(), e);

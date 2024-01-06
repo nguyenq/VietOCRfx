@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.Collator;
@@ -152,13 +153,13 @@ public class DownloadDialogController implements Initializable {
                 String key = FindKey(lookupISO639, value.toString()); // Vietnamese -> vie
                 if (key != null) {
                     try {
-                        URL url = new URL(availableLanguageCodes.getProperty(key));
+                        URL url = new URI(availableLanguageCodes.getProperty(key)).toURL();
                         downloadDataFile(url, TESSDATA_FOLDER); // download language data pack. In Tesseract 3.02, data is packaged under tesseract-ocr/tessdata folder
 
                         if (lookupISO_3_1_Codes.containsKey(key)) {
                             String iso_3_1_Code = lookupISO_3_1_Codes.getProperty(key); // vie -> vi_VN
                             if (availableDictionaries.containsKey(iso_3_1_Code)) {
-                                url = new URL(availableDictionaries.getProperty(iso_3_1_Code));
+                                url = new URI(availableDictionaries.getProperty(iso_3_1_Code)).toURL();
                                 ++numOfConcurrentTasks;
                                 downloadDataFile(url, DICTIONARY_FOLDER); // download dictionary
                             }
