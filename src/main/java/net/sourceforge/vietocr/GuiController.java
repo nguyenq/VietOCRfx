@@ -25,6 +25,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -137,7 +138,7 @@ public class GuiController implements Initializable {
     static final Preferences prefs = Preferences.userRoot().node("/net/sourceforge/vietocr");
     protected ResourceBundle bundle;
     protected List<BufferedImage> imageList;
-    protected List<IIOImage> iioImageList;
+    protected List<IIOImage> iioImageList = new ArrayList<>();
     protected String inputfilename;
     protected OCRImageEntity entity;
     protected float scaleX = 1f;
@@ -149,6 +150,7 @@ public class GuiController implements Initializable {
     double prevDividerPosition;
     Glow glow;
     SelectionBox selectionBox;
+    private boolean isShiftDown;
 
     private final static Logger logger = Logger.getLogger(GuiController.class.getName());
 
@@ -168,7 +170,7 @@ public class GuiController implements Initializable {
                 prefs.getDouble("fontSize", 12));
         textarea.setFont(font);
         textarea.wrapTextProperty().bind(this.menuBarController.menuFormatController.chmiWordWrap.selectedProperty());
-  
+
         selectionBox = new SelectionBox(imagePane);
 
         btnSave.disableProperty().bind(textarea.textProperty().length().isEqualTo(0));
@@ -195,7 +197,7 @@ public class GuiController implements Initializable {
             public void handle(DragEvent event) {
                 Dragboard db = event.getDragboard();
                 if (db.hasFiles()) {
-                    File file = db.getFiles().get(0);
+                    File file = db.getFiles().getFirst();
                     boolean isAccepted = file.getName().matches(IMAGE_PATTERN) || file.getName().endsWith(".txt");
                     if (isAccepted) {
                         event.acceptTransferModes(TransferMode.COPY);
@@ -215,14 +217,14 @@ public class GuiController implements Initializable {
                 boolean success = false;
                 if (db.hasFiles()) {
                     success = true;
-                    openFile(db.getFiles().get(0));
+                    openFile(db.getFiles().getFirst());
                 }
 
                 event.setDropCompleted(success);
                 event.consume();
             }
         });
-
+           
         DropShadow shadow = new DropShadow();
         shadow.setColor(Color.GREEN);
         glow = new Glow();
@@ -243,7 +245,7 @@ public class GuiController implements Initializable {
                         node.setEffect(null);
                     });
 
-                    if (thumbnails.size() > 0) {
+                    if (!thumbnails.isEmpty()) {
                         thumbnails.get(imageIndex).setEffect(glow);
                     }
                 }
@@ -267,21 +269,22 @@ public class GuiController implements Initializable {
             fc.setTitle("Open Image File");
             File curDir = new File(currentDirectory);
             fc.setInitialDirectory(curDir.exists() ? curDir : new File(System.getProperty("user.home")));
-            FileChooser.ExtensionFilter allImageFilter = new FileChooser.ExtensionFilter(bundle.getString("All_Image_Files"), "*.bmp", "*.jpg", "*.jpeg", "*.png", "*.tif", "*.tiff");
+            FileChooser.ExtensionFilter allImageFilter = new FileChooser.ExtensionFilter(bundle.getString("All_Image_Files"), "*.bmp", "*.jpg", "*.jpeg", "*.png", "*.tif", "*.tiff", "*.pdf");
             FileChooser.ExtensionFilter pngFilter = new FileChooser.ExtensionFilter("PNG", "*.png");
             FileChooser.ExtensionFilter tiffFilter = new FileChooser.ExtensionFilter("TIFF", "*.tif", "*.tiff");
+            FileChooser.ExtensionFilter pdfFilter = new FileChooser.ExtensionFilter("PDF", "*.pdf");
 
             fileFilters = fc.getExtensionFilters();
-            fileFilters.addAll(allImageFilter, pngFilter, tiffFilter);
+            fileFilters.addAll(allImageFilter, pngFilter, tiffFilter, pdfFilter);
             if (filterIndex < fileFilters.size()) {
                 fc.setSelectedExtensionFilter(fileFilters.get(filterIndex));
             }
-
-            File file = fc.showOpenDialog(btnOpen.getScene().getWindow());
-            if (file != null) {
-                currentDirectory = file.getParent();
+            
+            List<File> files = fc.showOpenMultipleDialog(btnOpen.getScene().getWindow());
+            if (files != null) {
+                currentDirectory = files.getFirst().getParent();
                 filterIndex = fileFilters.indexOf(fc.getSelectedExtensionFilter());
-                openFile(file);
+                openFiles(files);
             }
         } else if (event.getSource() == btnSave) {
             saveAction();
@@ -303,6 +306,11 @@ public class GuiController implements Initializable {
     }
 
     public void openFile(final File selectedFile) {
+        openFiles(Arrays.asList(selectedFile));
+    }
+
+    void openFiles(final List<File> selectedFiles) {
+        final File selectedFile = selectedFiles.getFirst();
         if (!selectedFile.exists()) {
             Alert alert = new Alert(Alert.AlertType.ERROR, bundle.getString("File_not_exist"));
             alert.show();
@@ -331,11 +339,16 @@ public class GuiController implements Initializable {
         thumbnailBox.getChildren().clear();
 
         Task loadWorker = new Task<Void>() {
+            private final boolean shiftDown;
+
+            {
+                shiftDown = isShiftDown;
+            }
 
             @Override
             public Void call() throws Exception {
                 updateMessage(bundle.getString("Loading_image..."));
-                readImageFile(selectedFile);
+                readImageFile(selectedFiles, shiftDown);
                 return null;
             }
 
@@ -363,17 +376,28 @@ public class GuiController implements Initializable {
         new Thread(loadWorker).start();
     }
 
-    void readImageFile(File selectedFile) {
+    void readImageFile(List<File> selectedFiles, boolean shiftDown) {
         try {
+            if (!shiftDown) {
+                iioImageList.clear();
+            }
+            for (File file : selectedFiles) {
+                iioImageList.addAll(ImageIOHelper.getIIOImageList(file));
+            }
+
+            final File selectedFile = selectedFiles.getFirst();
             inputfilename = selectedFile.getPath();
-            iioImageList = ImageIOHelper.getIIOImageList(selectedFile);
             imageList = Utils.getImageList(iioImageList);
             if (imageList == null) {
                 new Alert(Alert.AlertType.ERROR, bundle.getString("Cannotloadimage")).show();
                 return;
             }
 
-            imageIndex = 0;
+            if (shiftDown) {
+                imageIndex = imageTotal;
+            } else {
+                imageIndex = 0;
+            }
             imageTotal = imageList.size();
 
             ObservableList pageNumbers = FXCollections.observableArrayList();
@@ -381,7 +405,7 @@ public class GuiController implements Initializable {
                 pageNumbers.add(String.valueOf(i + 1));
             }
 
-            ArrayList<BufferedImage> al = new ArrayList<BufferedImage>();
+            ArrayList<BufferedImage> al = new ArrayList<>();
             al.addAll(imageList);
             entity = new OCRImageEntity(al, selectedFile.getName(), imageIndex, null, false, "eng");
             menuBar.setUserData(entity);
